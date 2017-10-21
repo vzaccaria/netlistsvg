@@ -6,11 +6,14 @@
   "author": "Neil Turley",
   "license": "MIT",
   "dependencies": {
+    "caporal": "0.8.0",
     "clone": "^2.1.0",
     "eslint": "^3.11.1",
     "fs-extra": "^1.0.0",
+    "get-stdin": "5.0.1",
     "klayjs": "^0.4.1",
     "lodash": "^4.17.2",
+    "mz": "2.7.0",
     "onml": "^0.3.1",
     "yargs": "^6.5.0"
   },
