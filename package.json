@@ -12,9 +12,10 @@
     "fs-extra": "^1.0.0",
     "get-stdin": "5.0.1",
     "klayjs": "^0.4.1",
-    "lodash": "^4.17.2",
+    "lodash": "4.17.4",
     "mz": "2.7.0",
     "onml": "^0.3.1",
+    "tmp-promise": "1.0.3",
     "yargs": "^6.5.0"
   },
   "repository": {
