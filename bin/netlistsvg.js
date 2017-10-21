@@ -17,10 +17,6 @@ let main = () => {
       prog.STRING,
       `${__dirname}/../lib/default.svg`
     )
-    .option(
-      "--output <file>",
-      "optional PDF filename, otherwise print to stdout"
-    )
     .action((args, options) => {
       let skin_data = $fs.readFile(options.skin, "utf-8");
       let netlist_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
