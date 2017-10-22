@@ -84,7 +84,10 @@ let main = () => {
         });
     })
     .command("wave", "produce a wave diagram")
-    .argument("[file]", "JSON file")
+    .argument(
+      "[file]",
+      "JS file (see http://wavedrom.com/tutorial.html for syntax)"
+    )
     .action((args, options) => {
       let wave_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
       wave_data.then(file => {
