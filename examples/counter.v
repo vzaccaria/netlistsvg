@@ -1,6 +1,6 @@
-module and_gate(a, b, q);
-   input  a, b;
+module counter(a, b, c, d, q);
+   input  a, b, c, d;
    output q;
+   assign q = !(a|d) | b&c;
+endmodule 
 
-   assign q = (a & !b);
-endmodule

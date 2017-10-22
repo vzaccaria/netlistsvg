@@ -26,7 +26,7 @@ let execWithString = (cmd, string) => {
 let main = () => {
   prog
     .description("Produce a postscript file from a yosys netlist")
-    .argument("[file]", "optional JSON file, otherwise read from stdin")
+    .argument("[file]", "source file (or stdin). Can be verilog or JSON")
     .option(
       "--verilog",
       "interpret [file] as a verilog file to be synth. into GTECH"
@@ -37,6 +37,7 @@ let main = () => {
       prog.STRING,
       `${__dirname}/../lib/default.svg`
     )
+    .option("--svgonly", "Just generate svg")
     .action((args, options) => {
       let skin_data = $fs.readFile(options.skin, "utf-8");
       let netlist_data;
@@ -61,7 +62,11 @@ let main = () => {
           return lib.render(sd, nd);
         })
         .then(svg => {
-          return execWithString(path => `cairosvg ${path} -f ps`, svg);
+          if (!options.svgonly) {
+            return execWithString(path => `cairosvg ${path} -f ps`, svg);
+          } else {
+            return svg;
+          }
         })
         .then(a => {
           console.log(a);
