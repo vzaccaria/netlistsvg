@@ -17,17 +17,20 @@
     "mz": "2.7.0",
     "onml": "0.3.1",
     "tmp-promise": "1.0.3",
-    "wavedrom-cli": "0.5.0"
+    "wavedrom-cli": "0.5.0",
+    "json5": "0.5.1",
+    "elkjs": "0.3.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nturley/netlistsvg.git"
   },
   "bin": {
-    "netlistsvg": "./bin/netlistsvg.js"
+    "netlistsvg": "./bin/vz-netlist.js"
   },
   "scripts": {
-    "test": "eslint **/*.js && node test/test-all.js"
+    "test": "eslint lib/**/*.js bin/**/*.js && eslint --global=document demo/**/*.js && node test/test-all.js",
+    "build-demo": "cp demo/index.html . && cp node_modules/elkjs/lib/elk.bundled.js . && browserify demo/demo.js > bundle.js"
   },
   "keywords": [
     "svg",
@@ -36,5 +39,18 @@
   "bugs": {
     "url": "https://github.com/nturley/netlistsvg/issues"
   },
-  "homepage": "https://github.com/nturley/netlistsvg#readme"
+  "homepage": "https://github.com/nturley/netlistsvg#readme",
+  "devDependencies": {
+    "browserify": "^14.5.0",
+    "superagent": "^3.8.2",
+    "browserify-shim": "^3.8.14"
+  },
+  "browserify-shim": {
+    "elkjs": "global:ELK"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  }
 }
