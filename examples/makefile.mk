@@ -3,7 +3,7 @@
 edit:
 	watchman counter.v 'make counter.pdf'
 
-counter.pdf: counter.v
+%.pdf: %.v
 	../bin/vz-netlist.js netlist $< --verilog | ps2pdf - > $@
 
 clean:

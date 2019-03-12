@@ -9,6 +9,7 @@ let $fs = require("mz/fs");
 let { exec } = require("mz/child_process");
 let $gstd = require("get-stdin");
 let debug = require("debug")("netsvg");
+let path = require("path");
 
 let tmp = require("tmp-promise");
 
@@ -42,27 +43,39 @@ let main = () => {
       "interpret [file] as a verilog file to be synth. into GTECH"
     )
     .option(
+      "--script",
+      "Yosys processing commands",
+      prog.STRING,
+      "prep -flatten; simplemap"
+    )
+    .option(
       "--skin <filename>",
       "Use skin <filename>",
       prog.STRING,
       `${__dirname}/../lib/default.svg`
     )
     .option("--svgonly", "Just generate svg")
-    .action((args, options) => {
+    .action((args, options, logger) => {
       let skin_data = $fs.readFile(options.skin, "utf-8");
       let netlist_data;
       if (options.verilog) {
         if (!args.file) {
           netlist_data = $gstd().then(filed =>
             execWithString(
-              path => `yosys -q -o /dev/stdout -b json -f verilog -S ${path}`,
+              path =>
+                `yosys -p "prep" -q -o /dev/stdout -b json -f verilog -S ${path}`,
               filed
             )
           );
         } else {
+          let basename = path.basename(args.file, ".v");
           netlist_data = exec(
-            `yosys -q -o /dev/stdout -b json -S ${args.file}`
-          ).then(a => a[0]);
+            `yosys -p "${options.script}; write_json ${basename}.json" -S ${
+              args.file
+            }`
+          ).then(() => {
+            return $fs.readFile(`${basename}.json`, "utf-8");
+          });
         }
       } else {
         netlist_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
