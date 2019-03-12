@@ -8,8 +8,9 @@ let _ = require("lodash");
 let $fs = require("mz/fs");
 let { exec } = require("mz/child_process");
 let $gstd = require("get-stdin");
-let debug = require("debug")("netsvg");
 let path = require("path");
+let open = require("open");
+let gaze = require("gaze");
 
 let tmp = require("tmp-promise");
 
@@ -21,7 +22,7 @@ let execWithString = (cmd, string, options) => {
       .writeFile(o.path, string, "utf8")
       .then(() => {
         let cc = cmd(o.path);
-        debug(cc);
+        options.logger.debug(cc);
         return exec(cc);
       })
       .then(a => {
@@ -33,15 +34,50 @@ let execWithString = (cmd, string, options) => {
   });
 };
 
+let verilog2svg = (args, options) => {
+  let skin_data = $fs.readFile(options.skin, "utf-8");
+  let basename = args.file
+    ? path.basename(args.file, ".v")
+    : options.output
+      ? options.output
+      : "output";
+  let outputfile = `${basename}.pdf`;
+  let command = `yosys -p "${
+    options.script
+  }; write_json ${basename}.json" -f verilog`;
+  let filed = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
+  let jsonfile = filed
+    .then(data => {
+      return execWithString(tmpfile => `${command} -S ${tmpfile}`, data, {
+        cleanup: !options.keep,
+        logger: options.logger
+      });
+    })
+    .then(() => $fs.readFile(`${basename}.json`, "utf-8"));
+  return Promise.all([skin_data, jsonfile])
+    .then(([sd, nd]) => {
+      nd = JSON.parse(nd);
+      return lib.render(sd, nd);
+    })
+    .then(svg =>
+      execWithString(
+        tmpfile => `cairosvg ${tmpfile} -f pdf -o ${outputfile}`,
+        svg,
+        {
+          cleanup: !options.keep,
+          logger: options.logger
+        }
+      )
+    )
+    .then(() => outputfile);
+};
+
 let main = () => {
   prog
     .description("Produce either a netlist diagram or a wave diagram")
     .command("netlist", "produce a netlist diagram")
     .argument("[file]", "source file (or stdin). Can be verilog or JSON")
-    .option(
-      "--verilog",
-      "interpret [file] as a verilog file to be synth. into GTECH"
-    )
+    .option("-o, --output <filename>", "Output filename")
     .option(
       "--script",
       "Yosys processing commands",
@@ -54,54 +90,31 @@ let main = () => {
       prog.STRING,
       `${__dirname}/../lib/default.svg`
     )
-    .option("--svgonly", "Just generate svg")
+    .option("-w, --watch", "Watch for input file to change")
+    .option("-k, --keep", "Dont cleanup")
+    .option("-p, --open", "Open file")
     .action((args, options, logger) => {
-      let skin_data = $fs.readFile(options.skin, "utf-8");
-      let netlist_data;
-      if (options.verilog) {
-        if (!args.file) {
-          netlist_data = $gstd().then(filed =>
-            execWithString(
-              path =>
-                `yosys -p "prep" -q -o /dev/stdout -b json -f verilog -S ${path}`,
-              filed
-            )
-          );
-        } else {
-          let basename = path.basename(args.file, ".v");
-          netlist_data = exec(
-            `yosys -p "${options.script}; write_json ${basename}.json" -S ${
-              args.file
-            }`
-          ).then(() => {
-            return $fs.readFile(`${basename}.json`, "utf-8");
+      options.logger = logger;
+      verilog2svg(args, options).then(output => {
+        open(output);
+        if (options.watch) {
+          let towatch = _.concat([], [args.file]);
+          console.log("Watching " + towatch);
+          gaze(towatch, function() {
+            this.on("error", e => {
+              logger.debug(`Suppressing error ${e}`);
+            });
+            this.on("changed", () => verilog2svg(args, options));
           });
         }
-      } else {
-        netlist_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
-      }
-      Promise.all([skin_data, netlist_data])
-        .then(([sd, nd]) => {
-          nd = JSON.parse(nd);
-          return lib.render(sd, nd);
-        })
-        .then(svg => {
-          if (!options.svgonly) {
-            return execWithString(path => `cairosvg ${path} -f ps`, svg);
-          } else {
-            return svg;
-          }
-        })
-        .then(a => {
-          console.log(a);
-        });
+      });
     })
     .command("wave", "produce a wave diagram")
     .argument(
       "[file]",
       "JS file (see http://wavedrom.com/tutorial.html for syntax)"
     )
-    .action((args, options) => {
+    .action((args, options, logger) => {
       let wave_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
       wave_data.then(file => {
         return execWithString(
@@ -111,7 +124,9 @@ let main = () => {
           { postfix: ".js", cleanup: false }
         )
           .then(svg => {
-            return execWithString(path => `cairosvg ${path} -f ps`, svg);
+            return execWithString(path => `cairosvg ${path} -f ps`, svg, {
+              logger: options.logger
+            });
           })
           .then(a => {
             console.log(a);
