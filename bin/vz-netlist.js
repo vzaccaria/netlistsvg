@@ -36,12 +36,12 @@ let execWithString = (cmd, string, options) => {
 
 let verilog2svg = (args, options) => {
   let skin_data = $fs.readFile(options.skin, "utf-8");
-  let basename = args.file
-    ? path.basename(args.file, ".v")
+  let outputfile = args.file
+    ? path.basename(args.file, ".v") + ".pdf"
     : options.output
       ? options.output
-      : "output";
-  let outputfile = `${basename}.pdf`;
+      : "output.pdf";
+  let basename = outputfile;
   let command = `yosys -p "${
     options.script
   }; write_json ${basename}.json" -f verilog`;
@@ -84,6 +84,7 @@ let main = () => {
       prog.STRING,
       "prep -flatten; simplemap"
     )
+    .option("--aig", "AIG map")
     .option(
       "--skin <filename>",
       "Use skin <filename>",
@@ -95,8 +96,9 @@ let main = () => {
     .option("-p, --open", "Open file")
     .action((args, options, logger) => {
       options.logger = logger;
+      if (options.aig) options.script = "prep -flatten; aigmap";
       verilog2svg(args, options).then(output => {
-        open(output);
+        if (options.open) open(output);
         if (options.watch) {
           let towatch = _.concat([], [args.file]);
           console.log("Watching " + towatch);
@@ -114,6 +116,12 @@ let main = () => {
       "[file]",
       "JS file (see http://wavedrom.com/tutorial.html for syntax)"
     )
+    .option(
+      "-o, --output <filename>",
+      "Output filename",
+      prog.STRING,
+      "output.pdf"
+    )
     .action((args, options, logger) => {
       let wave_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
       wave_data.then(file => {
@@ -121,12 +129,14 @@ let main = () => {
           path =>
             `phantomjs ${__dirname}/../node_modules/wavedrom-cli/bin/wavedrom-cli.js -i ${path} -s /dev/stdout`,
           file,
-          { postfix: ".js", cleanup: false }
+          { postfix: ".js", cleanup: false, logger: logger }
         )
           .then(svg => {
-            return execWithString(path => `cairosvg ${path} -f ps`, svg, {
-              logger: options.logger
-            });
+            return execWithString(
+              path => `cairosvg ${path} -f pdf -o ${options.output}`,
+              svg,
+              { logger }
+            );
           })
           .then(a => {
             console.log(a);
