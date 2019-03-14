@@ -78,12 +78,8 @@ let main = () => {
     .command("netlist", "produce a netlist diagram")
     .argument("[file]", "source file (or stdin). Can be verilog or JSON")
     .option("-o, --output <filename>", "Output filename")
-    .option(
-      "--script",
-      "Yosys processing commands",
-      prog.STRING,
-      "prep -flatten; simplemap"
-    )
+    .option("--script", "Yosys processing commands", prog.STRING, "prep")
+    .option("--simple", "Simple map")
     .option("--aig", "AIG map")
     .option(
       "--skin <filename>",
@@ -97,6 +93,7 @@ let main = () => {
     .action((args, options, logger) => {
       options.logger = logger;
       if (options.aig) options.script = "prep -flatten; aigmap";
+      if (options.simple) options.script = "prep -flatten; simplemap";
       verilog2svg(args, options).then(output => {
         if (options.open) open(output);
         if (options.watch) {
