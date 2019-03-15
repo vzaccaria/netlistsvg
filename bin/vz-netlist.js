@@ -35,61 +35,88 @@ let execWithString = (cmd, string, options) => {
   });
 };
 
+let svg2pdf = (options, outputpdf, svgdata) => {
+  return execWithString(
+    tmpfile => `cairosvg ${tmpfile} -f pdf -o ${outputpdf}`,
+    svgdata,
+    {
+      cleanup: !options.keep,
+      logger: options.logger
+    }
+  );
+};
+
 let verilog2svg = (args, options) => {
-  let skin_data = $fs.readFile(options.skin, "utf-8");
+  let json2svg = jsonfile => {
+    let skin_data = $fs.readFile(options.skin, "utf-8");
+    let jsondata = $fs.readFile(jsonfile, "utf-8");
+    options.logger.info("Rendering json");
+    return Promise.all([skin_data, jsondata])
+      .then(([sd, nd]) => {
+        nd = JSON.parse(nd);
+        return lib.render(sd, nd);
+      })
+      .catch(e => {
+        console.log(
+          `"${e}" detected while rendering the following json to svg`
+        );
+        console.log(JSON.stringify(jsondata));
+        throw "Bailing out because cant render svg";
+      });
+  };
+
+  let verilog2json = (jsonfile, verilogdata) => {
+    let command = `yosys -q -p "${
+      options.script
+    }; write_json ${jsonfile}" -f verilog`;
+    return execWithString(tmpfile => `${command} -S ${tmpfile}`, verilogdata, {
+      cleanup: !options.keep,
+      logger: options.logger
+    })
+      .then(() => jsonfile)
+      .catch(e => {
+        options.logger.info(`ignoring error ${e}`);
+        return jsonfile;
+      });
+  };
+
   let outputfile = options.output
     ? options.output
     : args.file
-      ? path.basename(args.file, ".v") + ".pdf"
-      : "output.pdf";
-  let basename = outputfile;
-  let command = `yosys -p "${
-    options.script
-  }; write_json ${basename}.json" -f verilog`;
-  let filed = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
-  let jsonfile = filed
-    .then(data => {
-      return execWithString(tmpfile => `${command} -S ${tmpfile}`, data, {
-        cleanup: !options.keep,
-        logger: options.logger
-      });
-    })
-    .then(() => $fs.readFile(`${basename}.json`, "utf-8"));
-  return Promise.all([skin_data, jsonfile])
-    .then(([sd, nd]) => {
-      nd = JSON.parse(nd);
-      return lib.render(sd, nd);
-    })
-    .then(svg =>
-      execWithString(
-        tmpfile => `cairosvg ${tmpfile} -f pdf -o ${outputfile}`,
-        svg,
-        {
-          cleanup: !options.keep,
-          logger: options.logger
-        }
-      )
-    )
-    .then(() => outputfile);
+    ? path.basename(args.file, ".v") + ".pdf"
+    : "output.pdf";
+  return tmp
+    .file({ postfix: ".json", keep: options.keep })
+    .then(jsonfilename => {
+      let verilogdata_p = args.file
+        ? $fs.readFile(args.file, "utf-8")
+        : $gstd();
+      return verilogdata_p
+        .then(_.curry(verilog2json)(jsonfilename.path))
+        .then(json2svg)
+        .then(_.curry(svg2pdf)(options)(outputfile))
+        .then(() => (options.keep ? 0 : jsonfilename.cleanup()))
+        .then(() => outputfile);
+    });
 };
 
-let wave2pdf = (options, file) => {
-  return execWithString(
-    path =>
-      `phantomjs ${__dirname}/../node_modules/wavedrom-cli/bin/wavedrom-cli.js -i ${path} -s /dev/stdout`,
-    file,
-    { postfix: ".js", cleanup: false, logger: options.logger }
-  )
-    .then(svg => {
-      return execWithString(
-        path => `cairosvg ${path} -f pdf -o ${options.output}`,
-        svg,
-        { logger: options.logger }
-      );
-    })
-    .then(a => {
-      console.log(a);
-    });
+let wave2pdf = (options, wavedata) => {
+  return tmp.file({ postfix: ".svg" }).then(tmpsvg => {
+    return execWithString(
+      path =>
+        `phantomjs ${__dirname}/../node_modules/wavedrom-cli/bin/wavedrom-cli.js -i ${path} -s ${
+          tmpsvg.path
+        }`,
+      wavedata,
+      { postfix: ".js", cleanup: false, logger: options.logger }
+    )
+      .then(() => {
+        return exec(`cairosvg ${tmpsvg.path} -f pdf -o ${options.output}`);
+      })
+      .then(() => {
+        if (!options.keep) tmpsvg.cleanup();
+      });
+  });
 };
 
 let parseSignal = (end, sig) => {
@@ -137,7 +164,7 @@ let main = () => {
       "--skin <filename>",
       "Use skin <filename>",
       prog.STRING,
-      `${__dirname}/../lib/default.svg`
+      `${__dirname}/../lib/vz-default.svg`
     )
     .option("-w, --watch", "Watch for input file to change")
     .option("-k, --keep", "Dont cleanup")
@@ -146,19 +173,23 @@ let main = () => {
       options.logger = logger;
       if (options.aig) options.script = "prep -flatten -auto-top; aigmap";
       if (options.simple) options.script = "prep -flatten -auto-top; simplemap";
-      verilog2svg(args, options).then(output => {
-        if (options.open) open(output);
-        if (options.watch) {
-          let towatch = _.concat([], [args.file]);
-          console.log("Watching " + towatch);
-          gaze(towatch, function() {
-            this.on("error", e => {
-              logger.debug(`Suppressing error ${e}`);
+      verilog2svg(args, options)
+        .then(output => {
+          if (options.open) open(output);
+          if (options.watch) {
+            let towatch = _.concat([], [args.file]);
+            console.log("Watching " + towatch);
+            gaze(towatch, function() {
+              this.on("error", e => {
+                logger.debug(`Suppressing error ${e}`);
+              });
+              this.on("changed", () => verilog2svg(args, options));
             });
-            this.on("changed", () => verilog2svg(args, options));
-          });
-        }
-      });
+          }
+        })
+        .catch(e => {
+          logger.error(e);
+        });
     })
     .command("wave", "produce a wave diagram")
     .argument(
@@ -174,10 +205,14 @@ let main = () => {
     .action((args, options, logger) => {
       options.logger = logger;
       let wave_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
-      wave_data.then(data => wave2pdf(options, data));
+      wave_data
+        .then(data => wave2pdf(options, data))
+        .catch(e => {
+          logger.error(e);
+        });
     })
     .command("vcdparse", "read vcd")
-    .argument("file", "source VCD file")
+    .argument("<file>", "source VCD file")
     .option("--end <integer>", "time ends at", prog.INTEGER, 10)
     .option("-s, --signals <string>", "comma separated list of signals")
     .action((args, options, logger) => {
@@ -190,6 +225,9 @@ let main = () => {
           options.output = args.file + ".pdf";
           options.logger = logger;
           return wave2pdf(options, JSON.stringify(data));
+        })
+        .catch(e => {
+          logger.error(e);
         });
     });
   prog.parse(process.argv);
