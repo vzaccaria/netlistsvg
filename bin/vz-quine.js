@@ -15,12 +15,22 @@ let tt2qm = (n, tt) => {
 
   let getImplicantGroup = g => {
     return _.map(g.group, i => {
-      return { values: _.map(i.imp), essential: i.used, prime: i.isPrim };
+      return {
+        values: _.map(i.imp),
+        essential: i.used,
+        prime: i.isPrim,
+        mask: i.bitMask
+      };
     });
   };
 
   returned.primeImplicants = _.map(data.primTerms, i => {
-    return { values: _.map(i.implicant.imp), essential: i.used };
+    return {
+      values: _.map(i.implicant.imp),
+      essential: i.used,
+      prime: i.isPrim,
+      mask: i.bitMask
+    };
   });
   returned.implicantsTables = _.map(data.implicantGroups, getImplicantGroup);
 

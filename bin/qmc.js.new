@@ -555,7 +555,7 @@ function QuineMcCluskeyDataCtrl() {
 
     this.primTermTables.length = 0;
     var primTableLoop = 0;
-    var primTableFound = this.primTerms.length > 0;
+    var primTablFound = this.primTerms.length > 0;
     var cyclicCoveringFound = false;
     var primTermTable;
     while (primTableFound) {
