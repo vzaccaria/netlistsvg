@@ -191,7 +191,7 @@ let main = () => {
           logger.error(e);
         });
     })
-    .command("wave", "produce a wave diagram")
+    .command("wave2pdf", "produce a wave diagram")
     .argument(
       "[file]",
       "JS file (see http://wavedrom.com/tutorial.html for syntax)"
@@ -211,7 +211,7 @@ let main = () => {
           logger.error(e);
         });
     })
-    .command("vcdparse", "read vcd")
+    .command("vcd2pdf", "produce a wave diagram from a vcd")
     .argument("<file>", "source VCD file")
     .option("--end <integer>", "time ends at", prog.INTEGER, 10)
     .option("-s, --signals <string>", "comma separated list of signals")
