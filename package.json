@@ -29,7 +29,8 @@
     "url": "git+https://github.com/nturley/netlistsvg.git"
   },
   "bin": {
-    "netlistsvg": "./bin/vz-netlist.js"
+    "netlistsvg": "./bin/vz-netlist.js",
+    "vz-quine": "./bin/vz-quine.js"
   },
   "scripts": {
     "test": "eslint lib/**/*.js bin/**/*.js && eslint --global=document demo/**/*.js && node test/test-all.js",

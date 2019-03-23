@@ -14,26 +14,7 @@ let gaze = require("gaze");
 let vcdParser = require("vcd-parser");
 
 let tmp = require("tmp-promise");
-
-let execWithString = (cmd, string, options) => {
-  let keep = !_.get(options, "cleanup", true);
-  let postfix = _.get(options, "postfix", ".tmp");
-  return tmp.file({ postfix, keep }).then(o => {
-    return $fs
-      .writeFile(o.path, string, "utf8")
-      .then(() => {
-        let cc = cmd(o.path);
-        options.logger.debug(cc);
-        return exec(cc);
-      })
-      .then(a => {
-        if (!keep) {
-          o.cleanup();
-        }
-        return a[0];
-      });
-  });
-};
+let { execWithString } = require("./common");
 
 let svg2pdf = (options, outputpdf, svgdata) => {
   return execWithString(
