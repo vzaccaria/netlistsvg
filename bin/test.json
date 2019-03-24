@@ -1,1080 +1,684 @@
 {
-  "noOfVars": 4,
-  "funcdata": [
-    1,
-    0,
-    1,
-    1,
-    1,
-    1,
-    0,
-    1,
-    1,
-    1,
-    1,
-    0,
-    1,
-    0,
-    1,
-    0
-  ],
-  "primTerms": [
+  "primeImplicants": [
     {
-      "implicant": {
-        "imp": {
-          "0": 0,
-          "2": 2,
-          "8": 8,
-          "10": 10
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 10
-      },
-      "termString": "(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-      "color": [
-        127,
-        0,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "0": 0,
-          "4": 4,
-          "8": 8,
-          "12": 12
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 12
-      },
-      "termString": "(<i>x&#772;</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-      "color": [
-        86,
-        127,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(86,127,0)'>(<i>x&#772;</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "8": 8,
-          "10": 10,
-          "12": 12,
-          "14": 14
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 6
-      },
-      "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-      "color": [
-        0,
-        127,
-        81
-      ],
-      "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-      "used": true,
-      "neededByVar": {
-        "14": 0
-      }
-    },
-    {
-      "implicant": {
-        "imp": {
-          "2": 2,
-          "3": 3
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 1
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)",
-      "color": [
-        0,
-        5,
-        127
-      ],
-      "coloredTermString": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "3": 3,
-          "7": 7
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 4
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
-      "color": [
-        127,
-        0,
-        91
-      ],
-      "coloredTermString": "<span style='color:rgb(127,0,91)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "4": 4,
-          "5": 5
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 1
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-      "color": [
-        127,
-        76,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(127,76,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "5": 5,
-          "7": 7
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 2
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)",
-      "color": [
-        10,
-        127,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(10,127,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "8": 8,
-          "9": 9
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 1
-      },
-      "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-      "color": [
-        0,
-        96,
-        127
-      ],
-      "coloredTermString": "<span style='color:rgb(0,96,127)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-      "used": true,
-      "neededByVar": {
-        "9": 0
-      }
-    }
-  ],
-  "implicantGroups": [
-    {
-      "group": [
-        {
-          "imp": {
-            "0": 0
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "2": 2
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "3": 3
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "4": 4
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "5": 5
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "7": 7
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "8": 8
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "9": 9
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "10": 10
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "12": 12
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        },
-        {
-          "imp": {
-            "14": 14
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 0
-        }
-      ],
-      "order": -1
-    },
-    {
-      "group": [
-        {
-          "imp": {
-            "0": 0,
-            "2": 2
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 2
-        },
-        {
-          "imp": {
-            "0": 0,
-            "4": 4
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 4
-        },
-        {
-          "imp": {
-            "0": 0,
-            "8": 8
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 8
-        },
-        {
-          "imp": {
-            "2": 2,
-            "3": 3
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 1
-        },
-        {
-          "imp": {
-            "2": 2,
-            "10": 10
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 8
-        },
-        {
-          "imp": {
-            "3": 3,
-            "7": 7
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 4
-        },
-        {
-          "imp": {
-            "4": 4,
-            "5": 5
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 1
-        },
-        {
-          "imp": {
-            "4": 4,
-            "12": 12
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 8
-        },
-        {
-          "imp": {
-            "5": 5,
-            "7": 7
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 2
-        },
-        {
-          "imp": {
-            "8": 8,
-            "9": 9
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 1
-        },
-        {
-          "imp": {
-            "8": 8,
-            "10": 10
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 2
-        },
-        {
-          "imp": {
-            "8": 8,
-            "12": 12
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 4
-        },
-        {
-          "imp": {
-            "10": 10,
-            "14": 14
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 4
-        },
-        {
-          "imp": {
-            "12": 12,
-            "14": 14
-          },
-          "isPrim": false,
-          "isOnlyDontCare": false,
-          "bitMask": 2
-        }
-      ],
-      "order": -1
-    },
-    {
-      "group": [
-        {
-          "imp": {
-            "0": 0,
-            "2": 2,
-            "8": 8,
-            "10": 10
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 10
-        },
-        {
-          "imp": {
-            "0": 0,
-            "4": 4,
-            "8": 8,
-            "12": 12
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 12
-        },
-        {
-          "imp": {
-            "8": 8,
-            "10": 10,
-            "12": 12,
-            "14": 14
-          },
-          "isPrim": true,
-          "isOnlyDontCare": false,
-          "bitMask": 6
-        }
-      ],
-      "order": -1
-    }
-  ],
-  "minimalTerm": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>) &or; (<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>) &or; (<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>) &or; (<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>) &or; (<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-  "coloredMinimalTerm": "<span style='color:rgb(0,96,127)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span> &or; <span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span> &or; <span style='color:rgb(127,0,0)'>(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span> &or; <span style='color:rgb(127,0,91)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span> &or; <span style='color:rgb(127,76,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-  "minimalTermPrims": [
-    {
-      "implicant": {
-        "imp": {
-          "8": 8,
-          "9": 9
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 1
-      },
-      "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-      "color": [
-        0,
-        96,
-        127
-      ],
-      "coloredTermString": "<span style='color:rgb(0,96,127)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-      "used": true,
-      "neededByVar": {
-        "9": 0
-      }
-    },
-    {
-      "implicant": {
-        "imp": {
-          "8": 8,
-          "10": 10,
-          "12": 12,
-          "14": 14
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 6
-      },
-      "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-      "color": [
-        0,
-        127,
-        81
-      ],
-      "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-      "used": true,
-      "neededByVar": {
-        "14": 0
-      }
-    },
-    {
-      "implicant": {
-        "imp": {
-          "0": 0,
-          "2": 2,
-          "8": 8,
-          "10": 10
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 10
-      },
-      "termString": "(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-      "color": [
-        127,
-        0,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "3": 3,
-          "7": 7
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 4
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
-      "color": [
-        127,
-        0,
-        91
-      ],
-      "coloredTermString": "<span style='color:rgb(127,0,91)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "4": 4,
-          "5": 5
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 1
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-      "color": [
-        127,
-        76,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(127,76,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    }
-  ],
-  "primTermTables": [
-    {
-      "essentialPrimTerms": [
-        {
-          "implicant": {
-            "imp": {
-              "8": 8,
-              "9": 9
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 1
-          },
-          "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-          "color": [
-            0,
-            96,
-            127
-          ],
-          "coloredTermString": "<span style='color:rgb(0,96,127)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-          "used": true,
-          "neededByVar": {
-            "9": 0
-          }
-        },
-        {
-          "implicant": {
-            "imp": {
-              "8": 8,
-              "10": 10,
-              "12": 12,
-              "14": 14
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 6
-          },
-          "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-          "color": [
-            0,
-            127,
-            81
-          ],
-          "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-          "used": true,
-          "neededByVar": {
-            "14": 0
-          }
-        }
-      ],
-      "order": 0,
-      "remainingVars": [
-        0,
-        2,
-        3,
-        4,
-        5,
-        7,
-        8,
+      "values": [
         9,
-        10,
-        12,
-        14
+        13
       ],
-      "remainingPrimTerms": [
-        {
-          "implicant": {
+      "essential": true,
+      "string": [
+        "1",
+        "1",
+        "0",
+        "1"
+      ],
+      "ones": 3
+    },
+    {
+      "values": [
+        13,
+        15
+      ],
+      "essential": false,
+      "string": [
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "ones": 4
+    },
+    {
+      "values": [
+        14,
+        15
+      ],
+      "essential": true,
+      "string": [
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "ones": 4
+    },
+    {
+      "values": [
+        2
+      ],
+      "essential": true,
+      "string": [
+        "0",
+        "0",
+        "1",
+        "0"
+      ],
+      "ones": 1
+    }
+  ],
+  "funcdata": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1
+  ],
+  "implicantsTables": [
+    [
+      {
+        "values": [
+          2
+        ],
+        "prime": true,
+        "mask": 0,
+        "string": [
+          "0",
+          "0",
+          "1",
+          "0"
+        ],
+        "ones": 1
+      },
+      {
+        "values": [
+          9
+        ],
+        "prime": false,
+        "mask": 0,
+        "string": [
+          "1",
+          "0",
+          "0",
+          "1"
+        ],
+        "ones": 2
+      },
+      {
+        "values": [
+          13
+        ],
+        "prime": false,
+        "mask": 0,
+        "string": [
+          "1",
+          "1",
+          "0",
+          "1"
+        ],
+        "ones": 3
+      },
+      {
+        "values": [
+          14
+        ],
+        "prime": false,
+        "mask": 0,
+        "string": [
+          "1",
+          "1",
+          "1",
+          "0"
+        ],
+        "ones": 3
+      },
+      {
+        "values": [
+          15
+        ],
+        "prime": false,
+        "mask": 0,
+        "string": [
+          "1",
+          "1",
+          "1",
+          "1"
+        ],
+        "ones": 4
+      }
+    ],
+    [
+      {
+        "values": [
+          9,
+          13
+        ],
+        "prime": true,
+        "mask": 4,
+        "string": [
+          "1",
+          "-",
+          "0",
+          "1"
+        ],
+        "ones": 2
+      },
+      {
+        "values": [
+          13,
+          15
+        ],
+        "prime": true,
+        "mask": 2,
+        "string": [
+          "1",
+          "1",
+          "-",
+          "1"
+        ],
+        "ones": 3
+      },
+      {
+        "values": [
+          14,
+          15
+        ],
+        "prime": true,
+        "mask": 1,
+        "string": [
+          "1",
+          "1",
+          "1",
+          "-"
+        ],
+        "ones": 3
+      }
+    ]
+  ],
+  "original": {
+    "noOfVars": 4,
+    "funcdata": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "primTerms": [
+      {
+        "implicant": {
+          "imp": {
+            "9": 9,
+            "13": 13
+          },
+          "isPrim": true,
+          "isOnlyDontCare": false,
+          "bitMask": 4
+        },
+        "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
+        "color": [
+          127,
+          0,
+          0
+        ],
+        "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+        "used": true,
+        "neededByVar": {
+          "13": 1
+        }
+      },
+      {
+        "implicant": {
+          "imp": {
+            "13": 13,
+            "15": 15
+          },
+          "isPrim": true,
+          "isOnlyDontCare": false,
+          "bitMask": 2
+        },
+        "termString": "(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)",
+        "color": [
+          86,
+          127,
+          0
+        ],
+        "coloredTermString": "<span style='color:rgb(86,127,0)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+        "used": false,
+        "neededByVar": {}
+      },
+      {
+        "implicant": {
+          "imp": {
+            "14": 14,
+            "15": 15
+          },
+          "isPrim": true,
+          "isOnlyDontCare": false,
+          "bitMask": 1
+        },
+        "termString": "(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)",
+        "color": [
+          0,
+          127,
+          81
+        ],
+        "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span>",
+        "used": true,
+        "neededByVar": {
+          "14": 0
+        }
+      },
+      {
+        "implicant": {
+          "imp": {
+            "2": 2
+          },
+          "isPrim": true,
+          "isOnlyDontCare": false,
+          "bitMask": 0
+        },
+        "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
+        "color": [
+          0,
+          5,
+          127
+        ],
+        "coloredTermString": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
+        "used": true,
+        "neededByVar": {
+          "2": 0
+        }
+      }
+    ],
+    "implicantGroups": [
+      {
+        "group": [
+          {
             "imp": {
-              "0": 0,
-              "2": 2,
-              "8": 8,
-              "10": 10
+              "2": 2
             },
             "isPrim": true,
             "isOnlyDontCare": false,
-            "bitMask": 10
+            "bitMask": 0
           },
-          "termString": "(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-          "color": [
-            127,
-            0,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
+          {
             "imp": {
-              "0": 0,
-              "4": 4,
-              "8": 8,
-              "12": 12
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 12
-          },
-          "termString": "(<i>x&#772;</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-          "color": [
-            86,
-            127,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(86,127,0)'>(<i>x&#772;</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "8": 8,
-              "10": 10,
-              "12": 12,
-              "14": 14
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 6
-          },
-          "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-          "color": [
-            0,
-            127,
-            81
-          ],
-          "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-          "used": true,
-          "neededByVar": {
-            "14": 0
-          }
-        },
-        {
-          "implicant": {
-            "imp": {
-              "2": 2,
-              "3": 3
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 1
-          },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)",
-          "color": [
-            0,
-            5,
-            127
-          ],
-          "coloredTermString": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "3": 3,
-              "7": 7
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 4
-          },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
-          "color": [
-            127,
-            0,
-            91
-          ],
-          "coloredTermString": "<span style='color:rgb(127,0,91)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "4": 4,
-              "5": 5
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 1
-          },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-          "color": [
-            127,
-            76,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(127,76,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "5": 5,
-              "7": 7
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 2
-          },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)",
-          "color": [
-            10,
-            127,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(10,127,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "8": 8,
               "9": 9
             },
-            "isPrim": true,
+            "isPrim": false,
             "isOnlyDontCare": false,
-            "bitMask": 1
+            "bitMask": 0
           },
-          "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-          "color": [
-            0,
-            96,
-            127
-          ],
-          "coloredTermString": "<span style='color:rgb(0,96,127)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-          "used": true,
-          "neededByVar": {
-            "9": 0
+          {
+            "imp": {
+              "13": 13
+            },
+            "isPrim": false,
+            "isOnlyDontCare": false,
+            "bitMask": 0
+          },
+          {
+            "imp": {
+              "14": 14
+            },
+            "isPrim": false,
+            "isOnlyDontCare": false,
+            "bitMask": 0
+          },
+          {
+            "imp": {
+              "15": 15
+            },
+            "isPrim": false,
+            "isOnlyDontCare": false,
+            "bitMask": 0
           }
-        }
-      ],
-      "supersededPrimTerms": []
-    },
-    {
-      "essentialPrimTerms": [],
-      "order": 1,
-      "remainingVars": [
-        0,
-        2,
-        3,
-        4,
-        5,
-        7
-      ],
-      "remainingPrimTerms": [
-        {
-          "implicant": {
+        ],
+        "order": -1
+      },
+      {
+        "group": [
+          {
             "imp": {
-              "0": 0,
-              "2": 2,
-              "8": 8,
-              "10": 10
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 10
-          },
-          "termString": "(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-          "color": [
-            127,
-            0,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "0": 0,
-              "4": 4,
-              "8": 8,
-              "12": 12
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 12
-          },
-          "termString": "(<i>x&#772;</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-          "color": [
-            86,
-            127,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(86,127,0)'>(<i>x&#772;</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "2": 2,
-              "3": 3
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 1
-          },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)",
-          "color": [
-            0,
-            5,
-            127
-          ],
-          "coloredTermString": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "3": 3,
-              "7": 7
+              "9": 9,
+              "13": 13
             },
             "isPrim": true,
             "isOnlyDontCare": false,
             "bitMask": 4
           },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
-          "color": [
-            127,
-            0,
-            91
-          ],
-          "coloredTermString": "<span style='color:rgb(127,0,91)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
+          {
             "imp": {
-              "4": 4,
-              "5": 5
-            },
-            "isPrim": true,
-            "isOnlyDontCare": false,
-            "bitMask": 1
-          },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-          "color": [
-            127,
-            76,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(127,76,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        },
-        {
-          "implicant": {
-            "imp": {
-              "5": 5,
-              "7": 7
+              "13": 13,
+              "15": 15
             },
             "isPrim": true,
             "isOnlyDontCare": false,
             "bitMask": 2
           },
-          "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)",
-          "color": [
-            10,
-            127,
-            0
-          ],
-          "coloredTermString": "<span style='color:rgb(10,127,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-          "used": false,
-          "neededByVar": {}
-        }
-      ],
-      "supersededPrimTerms": []
-    }
-  ],
-  "petrickSolver": {
-    "maxProblemSize": 100,
-    "log": "<p>(<i>p</i><sub><small>0</small></sub> &or; <i>p</i><sub><small>1</small></sub>)(<i>p</i><sub><small>0</small></sub> &or; <i>p</i><sub><small>2</small></sub>)(<i>p</i><sub><small>2</small></sub> &or; <i>p</i><sub><small>3</small></sub>)(<i>p</i><sub><small>1</small></sub> &or; <i>p</i><sub><small>4</small></sub>)(<i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>5</small></sub>)(<i>p</i><sub><small>3</small></sub> &or; <i>p</i><sub><small>5</small></sub>)</p><p>&hArr;&nbsp;(<i>p</i><sub><small>0</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>2</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>1</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub>)(<i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub> &or; <i>p</i><sub><small>2</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>3</small></sub> &or; <i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub>)(<i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>4</small></sub><i>p</i><sub><small>5</small></sub> &or; <i>p</i><sub><small>3</small></sub><i>p</i><sub><small>5</small></sub> &or; <i>p</i><sub><small>5</small></sub>)</p><p>&hArr;&nbsp;(<i>p</i><sub><small>0</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub>)(<i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub> &or; <i>p</i><sub><small>2</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>3</small></sub> &or; <i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub>)(<i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>5</small></sub>)</p><p>&hArr;&nbsp;(<i>p</i><sub><small>0</small></sub><i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>1</small></sub><i>p</i><sub><small>3</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>3</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub>)(<i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>5</small></sub>)</p><p>&hArr;&nbsp;(<i>p</i><sub><small>0</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>1</small></sub><i>p</i><sub><small>3</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub>)(<i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>5</small></sub>)</p><p>&hArr;&nbsp;(<i>p</i><sub><small>0</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>4</small></sub><i>p</i><sub><small>5</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>1</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>1</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>5</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub><i>p</i><sub><small>5</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>5</small></sub>)</p><p>&hArr;&nbsp;(<i>p</i><sub><small>0</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>4</small></sub><i>p</i><sub><small>5</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>1</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>5</small></sub> &or; <i>p</i><sub><small>0</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>3</small></sub><i>p</i><sub><small>4</small></sub> &or; <i>p</i><sub><small>1</small></sub><i>p</i><sub><small>2</small></sub><i>p</i><sub><small>5</small></sub>)</p>",
-    "problem": [
-      [
-        {
-          "0": 0,
-          "2": 2,
-          "4": 4,
-          "5": 5
-        },
-        {
-          "0": 0,
-          "1": 1,
-          "3": 3,
-          "5": 5
-        },
-        {
-          "0": 0,
-          "3": 3,
-          "4": 4
-        },
-        {
-          "1": 1,
-          "2": 2,
-          "3": 3,
-          "4": 4
-        },
-        {
-          "1": 1,
-          "2": 2,
-          "5": 5
-        }
-      ]
+          {
+            "imp": {
+              "14": 14,
+              "15": 15
+            },
+            "isPrim": true,
+            "isOnlyDontCare": false,
+            "bitMask": 1
+          }
+        ],
+        "order": -1
+      }
     ],
-    "solution": [
-      [
-        {
-          "0": 0,
-          "2": 2,
-          "4": 4,
-          "5": 5
+    "minimalTerm": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>) &or; (<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>) &or; (<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
+    "coloredMinimalTerm": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span> &or; <span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span> &or; <span style='color:rgb(127,0,0)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+    "minimalTermPrims": [
+      {
+        "implicant": {
+          "imp": {
+            "2": 2
+          },
+          "isPrim": true,
+          "isOnlyDontCare": false,
+          "bitMask": 0
         },
-        {
-          "0": 0,
-          "1": 1,
-          "3": 3,
-          "5": 5
-        },
-        {
-          "0": 0,
-          "3": 3,
-          "4": 4
-        },
-        {
-          "1": 1,
-          "2": 2,
-          "3": 3,
-          "4": 4
-        },
-        {
-          "1": 1,
-          "2": 2,
-          "5": 5
+        "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
+        "color": [
+          0,
+          5,
+          127
+        ],
+        "coloredTermString": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
+        "used": true,
+        "neededByVar": {
+          "2": 0
         }
-      ]
-    ]
+      },
+      {
+        "implicant": {
+          "imp": {
+            "14": 14,
+            "15": 15
+          },
+          "isPrim": true,
+          "isOnlyDontCare": false,
+          "bitMask": 1
+        },
+        "termString": "(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)",
+        "color": [
+          0,
+          127,
+          81
+        ],
+        "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span>",
+        "used": true,
+        "neededByVar": {
+          "14": 0
+        }
+      },
+      {
+        "implicant": {
+          "imp": {
+            "9": 9,
+            "13": 13
+          },
+          "isPrim": true,
+          "isOnlyDontCare": false,
+          "bitMask": 4
+        },
+        "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
+        "color": [
+          127,
+          0,
+          0
+        ],
+        "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+        "used": true,
+        "neededByVar": {
+          "13": 1
+        }
+      }
+    ],
+    "primTermTables": [
+      {
+        "essentialPrimTerms": [
+          {
+            "implicant": {
+              "imp": {
+                "2": 2
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 0
+            },
+            "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
+            "color": [
+              0,
+              5,
+              127
+            ],
+            "coloredTermString": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
+            "used": true,
+            "neededByVar": {
+              "2": 0
+            }
+          },
+          {
+            "implicant": {
+              "imp": {
+                "14": 14,
+                "15": 15
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 1
+            },
+            "termString": "(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)",
+            "color": [
+              0,
+              127,
+              81
+            ],
+            "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span>",
+            "used": true,
+            "neededByVar": {
+              "14": 0
+            }
+          }
+        ],
+        "order": 0,
+        "remainingVars": [
+          2,
+          13,
+          14,
+          15
+        ],
+        "remainingPrimTerms": [
+          {
+            "implicant": {
+              "imp": {
+                "9": 9,
+                "13": 13
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 4
+            },
+            "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
+            "color": [
+              127,
+              0,
+              0
+            ],
+            "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+            "used": true,
+            "neededByVar": {
+              "13": 1
+            }
+          },
+          {
+            "implicant": {
+              "imp": {
+                "13": 13,
+                "15": 15
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 2
+            },
+            "termString": "(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)",
+            "color": [
+              86,
+              127,
+              0
+            ],
+            "coloredTermString": "<span style='color:rgb(86,127,0)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+            "used": false,
+            "neededByVar": {}
+          },
+          {
+            "implicant": {
+              "imp": {
+                "14": 14,
+                "15": 15
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 1
+            },
+            "termString": "(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)",
+            "color": [
+              0,
+              127,
+              81
+            ],
+            "coloredTermString": "<span style='color:rgb(0,127,81)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub>)</span>",
+            "used": true,
+            "neededByVar": {
+              "14": 0
+            }
+          },
+          {
+            "implicant": {
+              "imp": {
+                "2": 2
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 0
+            },
+            "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
+            "color": [
+              0,
+              5,
+              127
+            ],
+            "coloredTermString": "<span style='color:rgb(0,5,127)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>2</small></sub><i>x</i><sub><small>1</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
+            "used": true,
+            "neededByVar": {
+              "2": 0
+            }
+          }
+        ],
+        "supersededPrimTerms": [
+          {
+            "implicant": {
+              "imp": {
+                "13": 13,
+                "15": 15
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 2
+            },
+            "termString": "(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)",
+            "color": [
+              86,
+              127,
+              0
+            ],
+            "coloredTermString": "<span style='color:rgb(86,127,0)'>(<i>x</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+            "used": false,
+            "neededByVar": {}
+          }
+        ]
+      },
+      {
+        "essentialPrimTerms": [
+          {
+            "implicant": {
+              "imp": {
+                "9": 9,
+                "13": 13
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 4
+            },
+            "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
+            "color": [
+              127,
+              0,
+              0
+            ],
+            "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+            "used": true,
+            "neededByVar": {
+              "13": 1
+            }
+          }
+        ],
+        "order": 1,
+        "remainingVars": [
+          13
+        ],
+        "remainingPrimTerms": [
+          {
+            "implicant": {
+              "imp": {
+                "9": 9,
+                "13": 13
+              },
+              "isPrim": true,
+              "isOnlyDontCare": false,
+              "bitMask": 4
+            },
+            "termString": "(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
+            "color": [
+              127,
+              0,
+              0
+            ],
+            "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x</i><sub><small>3</small></sub><i>x&#772;</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
+            "used": true,
+            "neededByVar": {
+              "13": 1
+            }
+          }
+        ],
+        "supersededPrimTerms": []
+      }
+    ],
+    "petrickSolver": {
+      "maxProblemSize": 100,
+      "log": ""
+    },
+    "petrickTermPrims": [],
+    "allowDontCare": false
   },
-  "petrickTermPrims": [
-    {
-      "implicant": {
-        "imp": {
-          "0": 0,
-          "2": 2,
-          "8": 8,
-          "10": 10
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 10
-      },
-      "termString": "(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)",
-      "color": [
-        127,
-        0,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(127,0,0)'>(<i>x&#772;</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "3": 3,
-          "7": 7
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 4
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)",
-      "color": [
-        127,
-        0,
-        91
-      ],
-      "coloredTermString": "<span style='color:rgb(127,0,91)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>1</small></sub><i>x</i><sub><small>0</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    },
-    {
-      "implicant": {
-        "imp": {
-          "4": 4,
-          "5": 5
-        },
-        "isPrim": true,
-        "isOnlyDontCare": false,
-        "bitMask": 1
-      },
-      "termString": "(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)",
-      "color": [
-        127,
-        76,
-        0
-      ],
-      "coloredTermString": "<span style='color:rgb(127,76,0)'>(<i>x&#772;</i><sub><small>3</small></sub><i>x</i><sub><small>2</small></sub><i>x&#772;</i><sub><small>1</small></sub>)</span>",
-      "used": false,
-      "neededByVar": {}
-    }
-  ],
-  "allowDontCare": false
+  "latex": {
+    "implicantsTables": "\n\\begin{table}[H]\n\t\\sffamily\n\t\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}\t\t\n\t\\begin{center}\n\t\t% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray\n                \\begin{tabular}{rr}\n\\rowcolor{black!75}\\head{order 0} & \\head{order 1} \\\\\n\\bullet \\texttt{(2) 0010}  & \\bullet \\texttt{(9,13) 1-01} \\\\ \n \\texttt{(9) 1001}  & \\bullet \\texttt{(13,15) 11-1} \\\\ \n \\texttt{(13) 1101}  & \\bullet \\texttt{(14,15) 111-} \\\\ \n \\texttt{(14) 1110}  & \\\\ \n \\texttt{(15) 1111}  & \n        \\end{tabular}\n\t\\end{center}\n\\end{table}\n",
+    "sopForm": "\\begin{equation}\\mathrm{on} = \\sum (2, 13, 14, 15), \\mathrm{dc} = \\sum (9) \\end{equation}"
+  }
 }

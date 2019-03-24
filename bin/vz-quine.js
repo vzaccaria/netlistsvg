@@ -134,7 +134,7 @@ let tt2qm = (n, tt) => {
 
   returned.funcdata = data.funcdata;
   returned.implicantsTables = _.map(data.implicantGroups, getImplicantGroup);
-
+  returned.original = data;
   return returned;
 };
 
