@@ -27,6 +27,12 @@ let produceTables = tables => {
   return _.map(tables, toLatexTable);
 };
 
+// invoked with any of .original.primTermTables[i]
+
+let implicantChart = res => {
+  let rows = _.map(res.remainingPrimTerms, "implicant");
+};
+
 let sopForm = res => {
   let on = _.filter(_.map(res.funcdata, (v, i) => (v === 1 ? i : undefined)));
   let ons = _.join(on, ", ");
