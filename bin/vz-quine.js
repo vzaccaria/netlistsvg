@@ -30,13 +30,26 @@ let produceTables = tables => {
 // invoked with any of .original.primTermTables[i]
 
 let implicantChart = res => {
-  let rows = _.map(res.remainingPrimTerms, "implicant");
+  let rows = _.map(res.remainingPrimTerms, i => _.map(i.implicant.imp));
+  let cols = res.remainingVars;
+  let highlight = _.map(res.essentialPrimTerms, i => {
+    let row = _.map(i.implicant.imp);
+    let col = _.keys(i.neededByVar);
+    return { row, col };
+  });
+  return { rows, cols, highlight };
 };
 
 let sopForm = res => {
-  let on = _.filter(_.map(res.funcdata, (v, i) => (v === 1 ? i : undefined)));
+  let on = _.filter(
+    _.map(res.funcdata, (v, i) => (v === 1 ? i : undefined)),
+    x => x !== undefined
+  );
   let ons = _.join(on, ", ");
-  let dc = _.filter(_.map(res.funcdata, (v, i) => (v === 2 ? i : undefined)));
+  let dc = _.filter(
+    _.map(res.funcdata, (v, i) => (v === 2 ? i : undefined)),
+    x => x !== undefined
+  );
   let dcs = _.join(dc, ", ");
   return `\\begin{equation}\\mathrm{on} = \\sum (${ons}), \\mathrm{dc} = \\sum (${dcs}) \\end{equation}`;
 };
@@ -45,12 +58,52 @@ let table = c => `
 \\begin{table}[H]
 	\\sffamily
 	\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}		
-	\\begin{center}
 		% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray
                 ${c}
-	\\end{center}
 \\end{table}
 `;
+
+let reduceToChartTable = chart => {
+  let ncols = chart.cols.length;
+  let head = `\\begin{tabular}{${_.repeat("c", ncols + 1)}}
+\\rowcolor{black!75} & ${_.join(
+    _.map(chart.cols, t => "\\head{" + t + "}"),
+    " & "
+  )} \\\\
+`;
+  let shouldHighlight = (i, j) => {
+    return (
+      _.sum(
+        _.map(chart.highlight, ({ row, col }) => {
+          col = _.map(col, parseInt);
+          if (_.isEqual(row, i) && _.includes(col, j)) return 1;
+          else return 0;
+        })
+      ) !== 0
+    );
+  };
+  let rows = _.join(
+    _.map(chart.rows, i => {
+      let sr = `(${_.join(i, ",")})`;
+      return (
+        sr +
+        " & " +
+        _.join(
+          _.map(chart.cols, j => {
+            if (shouldHighlight(i, j)) return "\\bullet";
+            else if (_.includes(i, j)) return "\\circ";
+            else return "";
+          }),
+          " & "
+        )
+      );
+    }),
+    "\\\\ \n"
+  );
+  let tail = `
+        \\end{tabular}`;
+  return table(head + rows + tail);
+};
 
 let reduceToTable = columns => {
   let cols = _.map(columns, "data");
@@ -140,8 +193,35 @@ let tt2qm = (n, tt) => {
 
   returned.funcdata = data.funcdata;
   returned.implicantsTables = _.map(data.implicantGroups, getImplicantGroup);
-  returned.original = data;
+  returned.implicantsCharts = _.map(data.primTermTables, implicantChart);
+  returned.cover = _.map(data.minimalTermPrims, i => {
+    return _.map(i.implicant.imp);
+  });
+  returned.coverSymbolic = _.map(data.minimalTermPrims, i => {
+    let k = _.map(i.implicant.imp);
+    let kk = _.find(_.flatten(returned.implicantsTables), j => {
+      return _.isEqual(j.values, k);
+    });
+    return { implicantValue: k, implicantSymbol: kk.string };
+  });
+  // returned.original = data;
   return returned;
+};
+
+let getSolutionTable = res => {
+  return (
+    `\\begin{itemize}` +
+    _.join(
+      _.map(res.coverSymbolic, i => {
+        return `\\item \\texttt{${_.join(i.implicantSymbol)}} - (${_.join(
+          i.implicantValue,
+          ","
+        )})`;
+      }),
+      "\n"
+    ) +
+    `\\end{itemize}`
+  );
 };
 
 let main = () => {
@@ -154,7 +234,11 @@ let main = () => {
       let s = tt2qm(nvars, args.table);
       s.latex = {
         implicantsTables: reduceToTable(produceTables(s.implicantsTables)),
-        sopForm: sopForm(s)
+        sopForm: sopForm(s),
+        implicantsCharts: _.map(s.implicantsCharts, reduceToChartTable),
+        soluzione: `soluzione ricavata con ${
+          s.implicantsCharts.length
+        } passaggi: ${getSolutionTable(s)}`
       };
       console.log(JSON.stringify(s, 0, 4));
     });
