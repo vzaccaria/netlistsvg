@@ -13,7 +13,7 @@ let produceTables = tables => {
   tables = _.map(tables, reorderTable);
   let toLatexTable = (t, i) => {
     return {
-      title: `order ${i}`,
+      title: `Imp. Ord. ${i}`,
       data: _.map(
         t,
         m =>
@@ -65,7 +65,7 @@ let table = c => `
 let reduceToChartTable = chart => {
   let ncols = chart.cols.length;
   let head = `\\begin{tabular}{${_.repeat("c", ncols + 1)}}
-\\rowcolor{black!75} & ${_.join(
+\\rowcolor{black!75} \\head{Impl.} & ${_.join(
     _.map(chart.cols, t => "\\head{" + t + "}"),
     " & "
   )} \\\\
@@ -212,10 +212,10 @@ let getSolutionTable = res => {
     `\\begin{itemize}` +
     _.join(
       _.map(res.coverSymbolic, i => {
-        return `\\item \\texttt{${_.join(i.implicantSymbol)}} - (${_.join(
-          i.implicantValue,
-          ","
-        )})`;
+        return `\\item \\texttt{${_.join(
+          i.implicantSymbol,
+          ""
+        )}} prodotta dall'implicante (${_.join(i.implicantValue, ",")})`;
       }),
       "\n"
     ) +
@@ -235,9 +235,15 @@ let main = () => {
         implicantsTables: reduceToTable(produceTables(s.implicantsTables)),
         sopForm: sopForm(s),
         implicantsCharts: _.map(s.implicantsCharts, reduceToChartTable),
-        soluzione: `soluzione ricavata con ${
+        implicantsChartsAll: _.join(
+          _.map(s.implicantsCharts, (i, x) => {
+            return `\\noindent Iterazione ${x}: \\ ${reduceToChartTable(i)}`;
+          }),
+          "\n"
+        ),
+        soluzione: `\\noindent La soluzione ricavata con ${
           s.implicantsCharts.length
-        } passaggi: ${getSolutionTable(s)}`
+        } passaggi è la seguente: ${getSolutionTable(s)}`
       };
       console.log(JSON.stringify(s, 0, 4));
     });
