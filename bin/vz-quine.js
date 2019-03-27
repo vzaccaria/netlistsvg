@@ -56,7 +56,6 @@ let sopForm = res => {
 
 let table = c => `
 \\begin{table}[H]
-	\\sffamily
 	\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}		
 		% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray
                 ${c}
