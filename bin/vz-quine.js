@@ -207,6 +207,80 @@ let tt2qm = (n, tt) => {
   return returned;
 };
 
+let isCornerH = implicantSymbol =>
+  !_.isNull(_.join(implicantSymbol, "").match(/..-0/));
+let isCornerV = implicantSymbol =>
+  !_.isNull(_.join(implicantSymbol, "").match(/-0../));
+// 0 1 3 2
+// 4 5 7 6
+// 12 13 15 14
+// 8 9 11 10
+//
+let vedge = is => {
+  let t = {
+    "-000": [0, 0, 8, 8],
+    "-001": [1, 1, 9, 9],
+    "-00-": [0, 1, 8, 9],
+    "-010": [2, 2, 10, 10],
+    "-011": [3, 3, 11, 11],
+    "-01-": [3, 2, 11, 10],
+    "-0-1": [1, 3, 9, 11],
+    "-0--": [0, 2, 8, 10]
+  };
+  is = _.join(is, "");
+  let vv = t[is];
+  return `{${vv[0]}}{${vv[1]}}{${vv[2]}}{${vv[3]}}`;
+};
+let hedge = is => {
+  let t = {
+    "00-0": [0, 0, 2, 2],
+    "01-0": [4, 4, 6, 6],
+    "0--0": [0, 4, 2, 6],
+    "10-0": [8, 8, 10, 10],
+    "11-0": [12, 12, 14, 14],
+    "1--0": [12, 8, 14, 10],
+    "-1-0": [4, 12, 6, 14],
+    "---0": [0, 8, 2, 10]
+  };
+  is = _.join(is, "");
+  let vv = t[is];
+  return `{${vv[0]}}{${vv[1]}}{${vv[2]}}{${vv[3]}}`;
+};
+
+let zigzag = [0, 4, 1, 12, 5, 3, 8, 13, 7, 2, 9, 15, 6, 11, 14, 10];
+
+let _getTopLeft = implicantValue =>
+  _.find(zigzag, i => _.includes(implicantValue, i));
+
+let _getBottomRight = implicantValue =>
+  _.findLast(zigzag, i => _.includes(implicantValue, i));
+
+let karnaughImp = ({ implicantSymbol, implicantValue }) => {
+  let tl = _getTopLeft(implicantValue);
+  let br = _getBottomRight(implicantValue);
+
+  if (isCornerH(implicantSymbol) && isCornerV(implicantSymbol))
+    return "\\implicantcorner";
+  if (isCornerH(implicantSymbol)) {
+    return `\\implicantedge${hedge(implicantSymbol)}`;
+  }
+  if (isCornerV(implicantSymbol)) {
+    return `\\implicantedge${vedge(implicantSymbol)}`;
+  }
+  return `\\implicant{${tl}}{${br}}`;
+};
+
+let karnaugh = ({ funcdata, coverSymbolic }) => {
+  return `
+ \\begin{center}
+    \\begin{karnaugh-map}[4][4][1][$cd$][$ab$]
+    \\manualterms{${_.join(_.map(funcdata, f => (f === 2 ? "x" : f)), ",")}}
+    ${_.join(_.map(coverSymbolic, karnaughImp), "\n")}
+    \\end{karnaugh-map}
+\\end{center}
+`;
+};
+
 let getSolutionTable = res => {
   return (
     `\\begin{itemize}` +
@@ -243,7 +317,8 @@ let main = () => {
         ),
         soluzione: `\\noindent La soluzione ricavata con ${
           s.implicantsCharts.length
-        } passaggi è la seguente: ${getSolutionTable(s)}`
+        } passaggi è la seguente: ${getSolutionTable(s)}`,
+        karnaugh: karnaugh(s)
       };
       console.log(JSON.stringify(s, 0, 4));
     });
