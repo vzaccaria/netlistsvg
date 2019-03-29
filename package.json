@@ -30,7 +30,8 @@
   },
   "bin": {
     "netlistsvg": "./bin/vz-netlist.js",
-    "vz-quine": "./bin/vz-quine.js"
+    "vz-quine": "./bin/vz-quine.js",
+    "vz-pipe": "./bin/vz-pipe.js"
   },
   "scripts": {
     "test": "eslint lib/**/*.js bin/**/*.js && eslint --global=document demo/**/*.js && node test/test-all.js",
