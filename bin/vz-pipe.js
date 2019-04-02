@@ -9,12 +9,6 @@ let pipe = (ft, dc) => {
   return _.repeat("-", ft) + "F" + _.repeat("*", dc - ft - 1) + "DEMW";
 };
 
-// & 0 & 1 & 2 & 3 & 4  & 5 & 6\\\\
-// |[text width=25mm]|{\\texttt{lw r0, r1}}      &  |[draw]| & |[draw]| F & |[draw]| D &
-// |[draw]| E & |[draw]| M  & |[draw]| W & |[draw]| $\bullet$ \\
-// |[text width=25mm]|{\texttt{add r2, r0, r1}} &  |[draw]| & |[draw,fill=gray!20]|   &
-// |[draw]| F & |[draw]| D & |[draw]| E  & |[draw]| M & |[draw]| W \\
-
 let wrapper = c => `
 \\begin{tikzpicture}
    \\matrix (m) [matrix of nodes,
@@ -23,6 +17,54 @@ let wrapper = c => `
            nodes={minimum width=6mm, minimum height=6mm, anchor=center}]{${c}};
 \\end{tikzpicture}
 `;
+
+let wrapperc = c => `
+\\begin{tikzpicture}
+   \\matrix (m) [matrix of nodes,
+           row sep=.5mm, 
+           column sep=2mm,
+           nodes={minimum width=6mm, minimum height=6mm, anchor=center}]{${c}};
+\\end{tikzpicture}
+`;
+
+let conflictsToTikz = (sim, options) => {
+  let maxClocks = _.max(_.map(sim, i => i.pipe.length));
+  if (options.maxCycles)
+    maxClocks = maxClocks > options.maxCycles ? maxClocks : options.maxCycles;
+  let head = [
+    `|[align=right, text width=25mm]|  {\\tiny clock cycle $\\rightarrow$}`
+  ];
+  head = _.concat(head, _.range(0, maxClocks));
+  head = _.join(head, " & ") + "\\\\\n";
+  let fixLength = i => {
+    i.pipe = _.padEnd(i.pipe, maxClocks, "-");
+    return i;
+  };
+  sim = _.map(sim, fixLength);
+  let insttikz = i => {
+    let ii = [`|[text width=25mm]|{\\texttt{${i.ins}}}`];
+    let remaining = _.map(i.pipe, c => {
+      if (!options.blank) {
+        if (c === "-") return ``;
+        else if (c === "*") return `|[draw]| $\\bullet$`;
+        else {
+          if (c === "F") return `|[draw]| IM`;
+          else if (c === "D" || c === "W") return `|[draw]| REG`;
+          else if (c === "E") return `|[draw]| ALU`;
+          else return `|[draw]| DM`;
+        }
+      } else {
+        return `|[draw]|`;
+      }
+    });
+    return _.join(_.concat(ii, remaining), " & ") + "\\\\\n";
+  };
+  let result = {
+    code: wrapperc(head + _.join(_.map(sim, insttikz), "")),
+    maxClocks
+  };
+  return result;
+};
 
 let hazardToTikz = (sim, options) => {
   let maxClocks = _.max(_.map(sim, i => i.pipe.length));
@@ -176,7 +218,7 @@ let main = () => {
     .description("Pipeline visualization generator")
     .argument(
       "<program>",
-      `The instructions separated by commas e.g.: 'load("load", 2, 1),alu("and", 4, 2, 5)'`
+      `The instructions separated by commas e.g.: 'lw(2, 1),add(4, 2, 5)'`
     )
     .option("-a, --alufw", "Use ALU forwarding")
     .option("-m, --memfw", "Use Mem forwarding")
@@ -194,7 +236,10 @@ let main = () => {
       let results = {
         state: sim,
         table: _.join(_.map(sim.table, "pipe"), "\n"),
-        latex: { hazard: hazardToTikz(sim.table, options) }
+        latex: {
+          hazard: hazardToTikz(sim.table, options),
+          conflicts: conflictsToTikz(sim.table, options)
+        }
       };
       console.log(JSON.stringify(results, 0, 4));
     });
