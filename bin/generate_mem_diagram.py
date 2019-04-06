@@ -247,7 +247,7 @@ class MemoryMapNodeTemplate():
                     formatted = ('0x{0:0%dX}' % (addresswidth*2)).format(top) if not noaddr else ''
                     topbot += ("\n\tnode [align=left, anchor=mid west, yshift=%s, "
                                "outer ysep=0, inner ysep=0, "
-                               "font=\\fontsize{.15cm}{.1cm}\\selectfont\\tt] "
+                               "font=\\fontsize{.15cm}{.1cm}\\selectfont\\ttfamily] "
                                "at (\\mainnode.north east) {%s}" % (yshift, formatted))
                 if bottomlabel:
                     yshift = "0.5em" if nodecount > 1 and (nodeindex + 1) == nodecount else "0"
@@ -255,7 +255,7 @@ class MemoryMapNodeTemplate():
                                  (addresswidth * 2)).format(bottom) if not noaddr else ''
                     topbot += ("\n\tnode [align=left, anchor=mid west, yshift=%s,"
                                "outer ysep=0, inner ysep=0, "
-                               "font=\\fontsize{.15cm}{.1cm}\\selectfont\\tt] "
+                               "font=\\fontsize{.15cm}{.1cm}\\selectfont\\ttfamily] "
                                "at (\\mainnode.south east) {%s}" % (yshift, formatted))
                 labels = labels % topbot
             else:
