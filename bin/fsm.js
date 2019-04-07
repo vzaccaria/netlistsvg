@@ -2,8 +2,6 @@ let _ = require("lodash");
 let $fs = require("mz/fs");
 
 let wrap = c => `
-\\usegdlibrary{force}
-\\tikzstyle{branch}=[fill,shape=circle,minimum size=2pt,inner sep=0pt]
 \\begin{tikzpicture}[>=stealth', initial text=$ $]
 \\graph[spring layout,
        random seed=1,

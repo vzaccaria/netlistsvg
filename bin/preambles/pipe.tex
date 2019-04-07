@@ -1,0 +1,232 @@
+\makeatletter
+
+% Inherits everything from rectangle except the behind background path.
+%
+
+
+
+\def\anchorsfromrectangle{%
+  \inheritsavedanchors[from=rectangle]
+  \inheritanchor[from=rectangle]{center}
+  \inheritanchorborder[from=rectangle]
+  \foreach \anchor in {north,north west,north east,center,west,east,mid, mid west,mid east,base,base west,base east,south,south west,south east}{ \inheritanchor[from=rectangle]{\anchor}}%
+}
+
+\def\anchorsfromtrapezium{%
+  \inheritsavedanchors[from=trapezium]
+  \inheritanchor[from=trapezium]{center}
+  \inheritanchorborder[from=trapezium]
+  \foreach \anchor in {bottom left corner, bottom right, top left corner, top right corner}
+     { \inheritanchor[from=trapezium]{\anchor}}%
+}
+
+\def\absxfrom#1{\advance\pgf@x by #1}
+\def\absyfrom#1{\advance\pgf@y by #1}
+\def\relyfrom#1{
+        \pgf@ya=#1\pgf@y%
+        \advance\pgf@y by \pgf@ya%
+}
+
+\def\relxfrom#1{
+        \pgf@xa=#1\pgf@x%
+        \advance\pgf@x by \pgf@xa%
+}
+
+\pgfdeclareshape{alu}
+{
+  \anchorsfromtrapezium
+    \inheritbackgroundpath[from=trapezium]
+    \inheritbeforebackgroundpath[from=trapezium]
+    \inheritbehindforegroundpath[from=trapezium]
+    \inheritforegroundpath[from=trapezium]
+    \inheritbeforeforegroundpath[from=trapezium]
+
+    % parent saved macros cant be seen in the children when it is drawn
+    % better create our own
+
+    \savedanchor\myll{ \lowerleftpoint }
+    \savedanchor\mylr{ \lowerrightpoint }
+    \savedanchor\myur{ \upperrightpoint }
+
+    \anchor{piar}{ \myll \relxfrom{-.6} }
+    \anchor{pibr}{ \mylr \relxfrom{-.6}}
+    \anchor{por} { \myur \pgf@x=0pt }
+    \anchor{pia}{ \pgf@anchor@alu@piar\absyfrom{-5pt}}
+    \anchor{pib}{ \pgf@anchor@alu@pibr\absyfrom{-5pt}}
+    \anchor{po} { \pgf@anchor@alu@por \absyfrom{5pt}}
+
+    \backgroundpath{%
+        \def\vz@uc{\pgfpointlineattime{0.5}{\upperleftpoint}{\upperrightpoint}}%
+        \def\vz@lc{\pgfpointlineattime{0.5}{\lowerleftpoint}{\lowerrightpoint}}%
+        \def\vz@ic{\pgfpointlineattime{0.8}{\vz@uc}{\vz@lc}}%
+        \def\vz@ac{\pgfpointlineattime{0.8}{\lowerleftpoint}{\vz@lc}}%
+        \def\vz@bc{\pgfpointlineattime{0.8}{\lowerrightpoint}{\vz@lc}}%
+        \color{black}%
+        \pgfusepath{stroke} 
+
+        % \pgfpathcircle{\pgf@anchor@alu@pia}{-2pt}
+        % \pgfpathcircle{\pgf@anchor@alu@pib}{-2pt}
+        % \pgfpathcircle{\pgf@anchor@alu@po}{2pt}
+        % \pgfpathcircle{\vz@lc}{2pt}
+        % \pgfpathcircle{\vz@ic}{2pt}
+        % \pgfpathcircle{\vz@ac}{2pt}
+        % \pgfpathcircle{\vz@bc}{2pt}
+
+        \pgfpathmoveto{\lowerleftpoint}%
+	\pgfpathlineto{\vz@ac}%
+	\pgfpathlineto{\vz@ic}%
+	\pgfpathlineto{\vz@bc}%
+        \pgfpathlineto{\lowerrightpoint}%
+        \pgfpathlineto{\lowerrightpoint}%
+        \pgfpathlineto{\upperrightpoint}%
+        \pgfpathlineto{\upperleftpoint}%
+        \pgfpathclose
+        
+        \pgf@anchor@alu@center 
+        %\pgftext[at={\pgfpoint{\pgf@x}{\pgf@y}}]{{\small ALU}}
+                
+        \connectanchors{\pgf@anchor@alu@piar}{\pgf@anchor@alu@pia}
+        \connectanchors{\pgf@anchor@alu@pibr}{\pgf@anchor@alu@pib}
+        \connectanchors{\pgf@anchor@alu@por}{\pgf@anchor@alu@po}
+    }
+}
+
+\def\connectanchors#1#2{
+     \pgfpathmoveto{#1}
+     \pgfpathlineto{#2}%
+     \color{black}%
+     \pgfusepath{stroke}
+}
+
+
+
+\pgfdeclareshape{rfile}
+{
+  \anchorsfromrectangle
+    \inheritbackgroundpath[from=rectangle]
+    \inheritbeforebackgroundpath[from=rectangle]
+    \inheritbehindforegroundpath[from=rectangle]
+    \inheritforegroundpath[from=rectangle]
+    \inheritbeforeforegroundpath[from=rectangle]
+
+   \anchor{pir} { \southwest \pgf@y=0pt }
+   \anchor{poar}{ \northeast\relyfrom{-.4}}
+   \anchor{pobr}{ \pgf@anchor@rfile@poar\relyfrom{-2}}
+
+
+   \anchor{pi}  { \pgf@anchor@rfile@pir\absxfrom{-5 pt}}
+   \anchor{poa} { \pgf@anchor@rfile@poar\absxfrom{5 pt}}
+   \anchor{pob} { \pgf@anchor@rfile@pobr\absxfrom{5 pt}}
+   
+
+   % Now do the background filling.
+    \behindbackgroundpath{%
+        \pgfextractx{\pgf@xa}{\southwest}%
+        \pgfextracty{\pgf@ya}{\southwest}%
+        \pgfextractx{\pgf@xb}{\northeast}%
+        \pgfextracty{\pgf@yb}{\northeast}%
+
+        \def\vz@nw{\pgfpoint{\pgf@xa}{\pgf@yb}}%
+        \def\vz@se{\pgfpoint{\pgf@xb}{\pgf@ya}}%
+        % inverting the following these does not work:
+        %                                   ______|____________
+        \def\vz@nc{\pgfpointlineattime{0.5}{\northeast}{\vz@nw}}%
+        \def\vz@sc{\pgfpointlineattime{0.5}{\southwest}{\vz@se}}%
+
+        % fill left part
+
+        \pgfpathmoveto{\southwest}%
+        \pgfpathlineto{\vz@nw}%
+        \pgfpathlineto{\vz@nc}%
+        \pgfpathlineto{\vz@sc}%
+        \pgfpathclose
+        \color{\pgf@left@color}%
+        \pgfusepath{fill}%
+
+        % fill right part
+        \pgfpathmoveto{\northeast}%
+        \pgfpathlineto{\vz@nc}%
+        \pgfpathlineto{\vz@sc}%
+        \pgfpathlineto{\vz@se}%
+        \pgfpathclose
+        \color{\pgf@right@color}%
+        \pgfusepath{fill}%
+
+        % draw from par to pa
+        % dont use x, xa, y, yb .. as they are overwritten
+
+        \ifpgf@rf@dontshowpins
+                \connectanchors{\pgf@anchor@rfile@pi}{\pgf@anchor@rfile@pir}
+                %dontdo anything
+                \color{black}%
+        \else
+                \connectanchors{\pgf@anchor@rfile@poa}{\pgf@anchor@rfile@poar}
+                \connectanchors{\pgf@anchor@rfile@pob}{\pgf@anchor@rfile@pobr}
+                \connectanchors{\pgf@anchor@rfile@pi}{\pgf@anchor@rfile@pir}
+        \fi
+        \pgf@anchor@rfile@center
+        \pgftext[at={\pgfpoint{\pgf@x}{\pgf@y}}]{{Reg}}
+    }
+}
+
+\pgfdeclareshape{mem}
+{
+  \anchorsfromrectangle
+    \inheritbackgroundpath[from=rectangle]
+    \inheritbeforebackgroundpath[from=rectangle]
+    \inheritbehindforegroundpath[from=rectangle]
+    \inheritforegroundpath[from=rectangle]
+    \inheritbeforeforegroundpath[from=rectangle]
+
+   \anchor{pir} { \southwest \pgf@y=0pt }
+   \anchor{por} { \northeast \pgf@y=0pt }
+
+   \anchor{pi}  { \pgf@anchor@mem@pir\absxfrom{-5 pt}}
+   \anchor{po}  { \pgf@anchor@mem@por\absxfrom{5 pt}}
+   
+
+   % Now do the background filling.
+    \behindbackgroundpath{%
+        \connectanchors{\pgf@anchor@mem@po}{\pgf@anchor@mem@por}
+        \connectanchors{\pgf@anchor@mem@pi}{\pgf@anchor@mem@pir}
+        \pgf@anchor@mem@center
+        \pgftext[at={\pgfpoint{\pgf@x}{\pgf@y}}]{{\pgf@mem@label}}
+    }
+}
+
+\newif\ifpgf@rf@dontshowpins
+\def\pgf@right@color{gray!10}
+\def\pgf@left@color{gray!30}
+\def\pgf@mem@label{IM}
+
+% Use these with PGF
+\def\pgfsetleftcolor#1{\def\pgf@left@color{#1}}%
+\def\pgfsetrightcolor#1{\def\pgf@right@color{#1}}%
+\def\pgfsetrfdontshowpins{\pgf@rf@dontshowpinstrue}%
+\def\pgfsetmemlabel#1{\def\pgf@mem@label{#1}}%
+
+% Use these with TikZ
+\tikzoption{mem label}{\pgfsetmemlabel{#1}}
+\tikzoption{left color}{\pgfsetleftcolor{#1}}
+\tikzoption{right color}{\pgfsetrightcolor{#1}}
+\tikzoption{dont show pins}[]{\pgfsetrfdontshowpins}
+
+\makeatother
+
+\tikzset{ pipe/.pic = {
+\node (-i) [shape=mem, draw, minimum width=7mm, minimum height=7mm] at (0,0) {};
+\node (-d) [shape=rfile,draw,minimum width=7mm, minimum height=7mm, left color=gray!30, right color=white] at (1.5,0) {};
+\node (-e) [alu, draw, minimum width=5mm, minimum height=5mm, rotate=-90] at (3,0) {};
+\node (-m) [shape=mem, draw, minimum width=7mm, minimum height=7mm, inner sep=0, mem label=DM] at (4.5,0) {};
+\node (-w) [shape=rfile,draw,minimum width=7mm, minimum height=7mm, left color=white, right color=gray!30, dont show pins] at (6,0) {};
+\draw (-i.po) -- (-d.pi);
+\draw (-d.poa) -- (-e.pia);
+\draw (-d.pob) -- (-e.pib);
+\draw (-e.po) -- (-m.pi);   
+\draw (-m.po) -- (-w.pi);
+\node (-fi) [rectangle, draw, minimum width=1mm, minimum height=8mm, text width=0cm, inner sep=0, fill=gray!20] at (0.75,0) {};
+\node (-fd) [rectangle, draw, minimum width=1mm, minimum height=8mm, text width=0cm, inner sep=0, fill=gray!20] at (2.25,0) {};
+\node (-fe) [rectangle, draw, minimum width=1mm, minimum height=8mm, text width=0cm, inner sep=0, fill=gray!20] at (3.75,0) {};
+\node (-fm) [rectangle, draw, minimum width=1mm, minimum height=8mm, text width=0cm, inner sep=0, fill=gray!20] at (5.25,0) {};
+}}
+

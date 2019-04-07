@@ -374,7 +374,10 @@ let main = () => {
     .description("Swiss Knife tool for boolean function minimization")
     .command("quinett", "produce a quine minimization sheet")
     .argument("<table>", "table")
-    .option("-s, --save <prefix>", "Save data into specified prefix files")
+    .option(
+      "-s, --save <prefix>",
+      "Save data into specified prefix files (otw dump json)"
+    )
     .option("-x, --var <prefix>", "Prefix of variables", prog.STRING, "x")
     .option("-r, --vars <string>", "List of variables (Alternative to -x)")
     .action((args, options) => {
