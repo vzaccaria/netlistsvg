@@ -1,4 +1,5 @@
 let _ = require("lodash");
+let $fs = require("mz/fs");
 
 let wrap = c => `
 \\usegdlibrary{force}
@@ -139,4 +140,8 @@ let produceFsm = fsm => {
   else return produceMoore(fsm);
 };
 
-module.exports = { produceFsm };
+let dumpEx = m => {
+  $fs.readFile(`${__dirname}/examples/${m}.json`, "utf8").then(console.log);
+};
+
+module.exports = { produceFsm, dumpEx };
