@@ -4,6 +4,8 @@
 let { qm } = require("./qmc");
 let _ = require("lodash");
 let $fs = require("mz/fs");
+let $gstd = require("get-stdin");
+let { produceFsm } = require("./fsm");
 
 const prog = require("caporal");
 
@@ -385,6 +387,14 @@ let main = () => {
       } else {
         return saveSynthesisResults(options.save, s);
       }
+    })
+    .command("fsm", "produce data for a mealy state machine")
+    .argument("[json]", "JSON file or stdin")
+    .action(args => {
+      let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
+      datap.then(JSON.parse).then(fsm => {
+        console.log(produceFsm(fsm));
+      });
     });
   prog.parse(process.argv);
 };
