@@ -391,11 +391,23 @@ let main = () => {
         return saveSynthesisResults(options.save, s);
       }
     })
-    .command("fsm", "produce data for a mealy state machine")
+    .command("fsm", "produce data for state machine")
     .argument("[json]", "JSON file or stdin")
     .option(
-      "-t, --template <string>",
-      "dump template for <string> = (moore|mealy)"
+      "-r, --random-seed <value>",
+      "random seed to use for force directed layout",
+      prog.INTEGER,
+      1
+    )
+    .option(
+      "-d, --node-distance <value>",
+      "random seed to use for force directed layout",
+      prog.STRING,
+      "2cm"
+    )
+    .option(
+      "-e, --example <string>",
+      "dump example for <string> = (moore|mealy)"
     )
     .action((args, options) => {
       if (options.template) {
@@ -403,7 +415,7 @@ let main = () => {
       } else {
         let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
         datap.then(JSON.parse).then(fsm => {
-          console.log(produceFsm(fsm));
+          console.log(produceFsm(fsm, options));
         });
       }
     });

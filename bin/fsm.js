@@ -1,11 +1,11 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
 
-let wrap = c => `
+let wrap = (c, options) => `
 \\begin{tikzpicture}[>=stealth', initial text=$ $]
 \\graph[spring layout,
-       random seed=1,
-       node distance=2cm]{
+       random seed=${options.randomSeed},
+       node distance=${options.nodeDistance}]{
        ${c}
 };
 \\end{tikzpicture} 
@@ -125,17 +125,17 @@ let moore = fsm => {
   );
 };
 
-let produceMoore = fsm => {
-  return wrap(_.join(moore(fsm), ",\n"));
+let produceMoore = (fsm, options) => {
+  return wrap(_.join(moore(fsm), ",\n"), options);
 };
 
-let produceMealy = fsm => {
-  return wrap(_.join(mealy(fsm), ",\n"));
+let produceMealy = (fsm, options) => {
+  return wrap(_.join(mealy(fsm), ",\n"), options);
 };
 
-let produceFsm = fsm => {
-  if (fsm.type === "mealy") return produceMealy(fsm);
-  else return produceMoore(fsm);
+let produceFsm = (fsm, options) => {
+  if (fsm.type === "mealy") return produceMealy(fsm, options);
+  else return produceMoore(fsm, options);
 };
 
 let dumpEx = m => {
