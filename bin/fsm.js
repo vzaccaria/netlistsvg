@@ -134,12 +134,29 @@ let produceMealy = (fsm, options) => {
 };
 
 let produceFsm = (fsm, options) => {
+  if (!_.isArray(fsm.inputs)) fsm.inputs = codeWords(fsm.inputs);
   if (fsm.type === "mealy") return produceMealy(fsm, options);
   else return produceMoore(fsm, options);
+};
+
+const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
+
+const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
+
+let codeWords = l => {
+  return _.map(_.range(0, Math.pow(l, 2)), x =>
+    _.map(_.padStart(x.toString(2), l, "0").split(""), y => (y === "1" ? 1 : 0))
+  );
 };
 
 let dumpEx = m => {
   $fs.readFile(`${__dirname}/examples/${m}.json`, "utf8").then(console.log);
 };
 
+let trans = (fsm, s, i) => {
+  let stateName = _.findKey(fsm.encodings, v => v === s);
+};
+
 module.exports = { produceFsm, dumpEx };
+
+//console.log(cartesian(codeWords(2), codeWords(2)));
