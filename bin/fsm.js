@@ -133,7 +133,7 @@ let produceMealy = (fsm, options) => {
   return wrap(_.join(mealy(fsm), ",\n"), options);
 };
 
-let produceFsm = (fsm, options) => {
+let drawFSM = (fsm, options) => {
   if (!_.isArray(fsm.inputs)) fsm.inputs = codeWords(fsm.inputs);
   if (fsm.type === "mealy") return produceMealy(fsm, options);
   else return produceMoore(fsm, options);
@@ -150,13 +150,60 @@ let codeWords = l => {
 };
 
 let dumpEx = m => {
-  $fs.readFile(`${__dirname}/examples/${m}.json`, "utf8").then(console.log);
+  $fs.readFile(`${__dirname}/examples/${m}.json`, "utf7").then(console.log);
+};
+
+let getTransitionTable = fsm => {
+  if (fsm.type === "mealy") {
+    return Object.assign(
+      ..._.map(fsm.transitions, v => {
+        let ls = _.flatten(_.values(v));
+        let state = _.keys(v)[0];
+        let o = {};
+        o[state] = _.map(ls, e => {
+          let { name } = parseName(_.keys(e)[0]);
+          return name;
+        });
+        return o;
+      })
+    );
+  } else {
+    return Object.assign(
+      ..._.map(fsm.transitions, v => {
+        let ls = _.flatten(_.values(v));
+        let state = _.keys(v)[0];
+        let o = {};
+        o[state] = _.map(ls, e => {
+          let { name } = parseName(e);
+          return name;
+        });
+        return o;
+      })
+    );
+  }
 };
 
 let trans = (fsm, s, i) => {
-  let stateName = _.findKey(fsm.encodings, v => v === s);
+  if (_.isUndefined(fsm.encoding)) throw "undefined encoding!";
+  if (i.length !== fsm.inputs) throw "wrong input size!";
+  let stateName = _.findKey(fsm.encoding, v => {
+    return _.isEqual(v, s);
+  });
+  let undef = _.map(_.repeat("x", fsm.encodingSize));
+  if (_.isUndefined(stateName)) return undef;
+  else {
+    let inputEncoding = parseInt(_.join(i, ""), 2);
+    let ttable = getTransitionTable(fsm);
+    console.log({ stateName, inputEncoding, ttable });
+    return fsm.encoding[ttable[stateName][inputEncoding]];
+  }
 };
 
-module.exports = { produceFsm, dumpEx };
+module.exports = { drawFSM, dumpEx };
 
+$fs
+  .readFile("./examples/mooreCoded.json", "utf8")
+  .then(JSON.parse)
+  .then(fsm => trans(fsm, [1, 0, 0], [1, 1]))
+  .then(console.log);
 //console.log(cartesian(codeWords(2), codeWords(2)));
