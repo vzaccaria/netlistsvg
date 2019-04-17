@@ -199,7 +199,7 @@ let tableWrap = c => `
 `;
 
 let tableHead = headings => `\\begin{tabular}{${_.repeat("c", headings.length)}}
-${_.join(_.map(headings, t => "\\head{" + t + "}"), " & ")} \\\\
+${_.join(_.map(headings, t => "\\head{$" + t + "$}"), " & ")} \\\\
 `;
 
 let tail = `
