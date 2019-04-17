@@ -3,6 +3,10 @@ let tmp = require("tmp-promise");
 let $fs = require("mz/fs");
 let { exec } = require("mz/child_process");
 
+let saveArtifact = _.curry((data, pfx, { sfx, objpath }) => {
+  return $fs.writeFile(`${pfx}-${sfx}.tex`, _.get(data, objpath, "", "utf8"));
+});
+
 let execWithString = (cmd, string, options) => {
   let keep = !_.get(options, "cleanup", true);
   let postfix = _.get(options, "postfix", ".tmp");
@@ -23,4 +27,4 @@ let execWithString = (cmd, string, options) => {
   });
 };
 
-module.exports = { execWithString };
+module.exports = { execWithString, saveArtifact };

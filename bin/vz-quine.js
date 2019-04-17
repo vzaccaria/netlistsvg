@@ -4,11 +4,12 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
-let { drawFSM, dumpEx } = require("./fsm");
 let { synthesize } = require("./quine");
+let { saveArtifact } = require("./common.js");
 
 const prog = require("caporal");
 
+// FIXME: use save artifact!
 let saveSynthesisResults = (prefix, data) => {
   Promise.all(
     _.concat(
@@ -38,7 +39,6 @@ let saveSynthesisResults = (prefix, data) => {
 let main = () => {
   prog
     .description("Swiss Knife tool for boolean function minimization")
-    .command("quinett", "produce a quine minimization sheet")
     .argument("<table>", "table")
     .option(
       "-s, --save <prefix>",
@@ -55,38 +55,6 @@ let main = () => {
         console.log(JSON.stringify(s, 0, 4));
       } else {
         return saveSynthesisResults(options.save, s);
-      }
-    })
-    .command("fsm", "produce data for state machine")
-    .argument("[json]", "JSON file or stdin")
-    .option(
-      "-r, --random-seed <value>",
-      "random seed to use for force directed layout",
-      prog.INTEGER,
-      1
-    )
-    .option(
-      "-d, --node-distance <value>",
-      "random seed to use for force directed layout",
-      prog.STRING,
-      "2cm"
-    )
-    .option(
-      "-e, --example <string>",
-      "dump example for <string> = (moore|mealy)"
-    )
-    .option("-w, --draw", "produce only latex code for drawing")
-    .action((args, options) => {
-      if (options.template) {
-        dumpEx(options.template);
-      } else {
-        let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
-        datap.then(JSON.parse).then(fsm => {
-          if (options.draw) {
-            console.log(drawFSM(fsm, options));
-          } else {
-          }
-        });
       }
     });
   prog.parse(process.argv);

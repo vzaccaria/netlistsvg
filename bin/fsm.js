@@ -11,13 +11,6 @@ let wrap = (c, options) => `
 \\end{tikzpicture} 
 `;
 
-// "$s_1$" [state] -> [bend right]               "$s_2$" [state],
-// "$s_1$" [state] -> [bend left, edge label={\\footnotesize $1/0$}] "$s_3$" [state],
-// "$s_3$" [state] -> [bend left, edge label={\\footnotesize $1/1$}] "$s_1$" [state],
-// "$s_4$" [state] -> [loop above] "$s_4$" [state]
-// "$s_4$" [state] -> "$s_1$" [state]
-//
-//
 let parseName = n => {
   let regexp = /(?<name>.*)\/(?<lab>[ud\-]?)(b(?<angle>.*))?/;
   if (!_.isNull(n.match(regexp))) {
@@ -134,7 +127,7 @@ let produceMealy = (fsm, options) => {
 };
 
 let drawFSM = (fsm, options) => {
-  if (!_.isArray(fsm.inputs)) fsm.inputs = codeWords(fsm.inputs);
+  fsm.inputs = codeWords(fsm.inputSize);
   if (fsm.type === "mealy") return produceMealy(fsm, options);
   else return produceMoore(fsm, options);
 };
@@ -144,7 +137,7 @@ const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
 const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
 
 let codeWords = l => {
-  return _.map(_.range(0, Math.pow(l, 2)), x =>
+  return _.map(_.range(0, Math.pow(2, l)), x =>
     _.map(_.padStart(x.toString(2), l, "0").split(""), y => (y === "1" ? 1 : 0))
   );
 };
@@ -185,7 +178,7 @@ let getTransitionTable = fsm => {
 
 let trans = (fsm, s, i) => {
   if (_.isUndefined(fsm.encoding)) throw "undefined encoding!";
-  if (i.length !== fsm.inputs) throw "wrong input size!";
+  if (i.length !== fsm.inputSize) throw "wrong input size!";
   let stateName = _.findKey(fsm.encoding, v => {
     return _.isEqual(v, s);
   });
@@ -194,16 +187,84 @@ let trans = (fsm, s, i) => {
   else {
     let inputEncoding = parseInt(_.join(i, ""), 2);
     let ttable = getTransitionTable(fsm);
-    console.log({ stateName, inputEncoding, ttable });
     return fsm.encoding[ttable[stateName][inputEncoding]];
   }
 };
 
-module.exports = { drawFSM, dumpEx };
+let tableWrap = c => `
+\\begin{table}
+        \\newcommand{\\head}[1]{{\\textbf{#1}}}
+                ${c}
+\\end{table}
+`;
 
-$fs
-  .readFile("./examples/mooreCoded.json", "utf8")
-  .then(JSON.parse)
-  .then(fsm => trans(fsm, [1, 0, 0], [1, 1]))
-  .then(console.log);
-//console.log(cartesian(codeWords(2), codeWords(2)));
+let tableHead = headings => `\\begin{tabular}{${_.repeat("c", headings.length)}}
+${_.join(_.map(headings, t => "\\head{" + t + "}"), " & ")} \\\\
+`;
+
+let tail = `
+        \\end{tabular}`;
+
+let tableRow = row => `${_.join(row, " & ")} \\\\`;
+
+let latexTruth = (table, headings) => {
+  return tableWrap(`
+        ${tableHead(headings)}
+        ${_.join(_.map(table, tableRow), "\n")}
+        ${tail}
+        `);
+};
+let synthesizeD = (fsm, options) => {
+  let latex = {};
+  latex.diagram = drawFSM(fsm, options);
+
+  let inoutcomb = cartesian(
+    codeWords(fsm.encodingSize),
+    codeWords(fsm.inputSize)
+  );
+  let excitationTable = _.map(inoutcomb, vs => {
+    let ss = _.take(vs, fsm.encodingSize);
+    let ii = _.takeRight(vs, fsm.inputSize);
+    return _.concat(ss, ii, trans(fsm, ss, ii));
+  });
+  let headings = _.concat(
+    _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
+    _.map(_.range(0, fsm.inputSize), i => `I_${i}`),
+    _.map(_.range(0, fsm.encodingSize), i => `D_${i}`)
+  );
+  latex.excitationTable = latexTruth(excitationTable, headings);
+  return { latex };
+};
+
+let artifacts = [
+  { sfx: "diagram", objpath: "latex.diagram" },
+  { sfx: "excitation-table", objpath: "latex.excitationTable" }
+];
+
+let saveArtifact = _.curry((data, pfx, { sfx, objpath }) => {
+  return $fs.writeFile(`${pfx}-${sfx}.tex`, _.get(data, objpath, "", "utf8"));
+});
+
+let saveResults = (prefix, data) => {
+  Promise.all(_.map(artifacts, saveArtifact(data, prefix)));
+};
+
+let elaborateFSM = (fsm, options) => {
+  let data = synthesizeD(fsm, options);
+  if (options.save) {
+    saveResults(options.save, data);
+  } else {
+    if (options.draw) console.log(data.latex.diagram);
+    else console.log(JSON.stringify(data));
+  }
+};
+
+module.exports = { elaborateFSM, dumpEx };
+
+//$fs
+//  .readFile("./examples/mooreCoded.json", "utf8")
+//  .then(JSON.parse)
+//  .then(fsm => synthesizeD(fsm, {}))
+//  .then(JSON.stringify)
+//  .then(console.log);
+////console.log(cartesian(codeWords(2), codeWords(2)));
