@@ -4,6 +4,7 @@
 let { qm } = require("./qmc");
 let _ = require("lodash");
 let $fs = require("mz/fs");
+let { latexArtifact } = require("./artifacts");
 
 let produceTables = tables => {
   //console.log(tables.length);
@@ -54,9 +55,8 @@ let sopForm = res => {
 };
 
 let table = c => `
-\\begin{table}[H]
-	\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}		
-		% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray
+\\begin{table}
+	\\newcommand{\\head}[1]{{\\textbf{#1}}}		
                 ${c}
 \\end{table}
 `;
@@ -64,10 +64,10 @@ let table = c => `
 let reduceToChartTable = chart => {
   let ncols = chart.cols.length;
   let head = `\\begin{tabular}{${_.repeat("c", ncols + 1)}}
-\\rowcolor{black!75} \\head{Impl.} & ${_.join(
-    _.map(chart.cols, t => "\\head{" + t + "}"),
-    " & "
-  )} \\\\
+ \\head{Impl.} & ${_.join(
+   _.map(chart.cols, t => "\\head{" + t + "}"),
+   " & "
+ )} \\\\
 `;
   let shouldHighlight = (i, j) => {
     return (
@@ -317,25 +317,60 @@ let symbolicSolution = _.curry((vars, res) =>
 let synthesize = (data, vars) => {
   let nvars = vars.length;
   let s = tt2qm(nvars, data);
-  s.latex = {
-    implicantsTables: reduceToTable(produceTables(s.implicantsTables)),
-    sopForm: sopForm(s),
-    implicantsCharts: _.map(s.implicantsCharts, reduceToChartTable),
-    implicantsChartsAll: _.join(
-      _.map(s.implicantsCharts, (i, x) => {
-        return `\\noindent Iterazione ${x}: \\ ${reduceToChartTable(i)}`;
-      }),
-      "\n"
-    ),
-    soluzione: `\\noindent La soluzione ricavata con ${
-      s.implicantsCharts.length
-    } passaggi è la seguente: ${getSolutionTable(
-      s
-    )} ovvero \\[ ${symbolicSolution(vars, s)} \\]`,
-    karnaugh:
-      nvars === 4 ? karnaugh(s, vars) : "only 4 variables maps are supported",
-    solution: symbolicSolution(vars, s)
-  };
+  let implicantsChartsAll = _.join(
+    _.map(s.implicantsCharts, (i, x) => {
+      return `\\noindent Iterazione ${x}: \\ ${reduceToChartTable(i)}`;
+    }),
+    "\n"
+  );
+  let soluzione = `\\noindent La soluzione ricavata con ${
+    s.implicantsCharts.length
+  } passaggi è la seguente: ${getSolutionTable(
+    s
+  )} ovvero \\[ ${symbolicSolution(vars, s)} \\]`;
+
+  let karnaugh =
+    nvars === 4 ? karnaugh(s, vars) : "only 4 variables maps are supported";
+
+  s.latex = _.concat(
+    [
+      latexArtifact(
+        reduceToTable(produceTables(s.implicantsTables)),
+        "implicants tables",
+        "article",
+        "pdflatex"
+      ),
+      latexArtifact(sopForm(s), "sop form", "article", "pdflatex"),
+      latexArtifact(
+        implicantsChartsAll,
+        "implicant charts complete",
+        "article",
+        "pdflatex"
+      ),
+      latexArtifact(soluzione, "solution detailed", "article", "pdflatex"),
+      latexArtifact(
+        symbolicSolution(vars, s),
+        "solution expression",
+        "article",
+        "pdflatex"
+      ),
+      latexArtifact(
+        karnaugh,
+        "karnaugh maps",
+        "article",
+        "pdflatex",
+        "--usepackage karnaugh-map"
+      )
+    ],
+    _.map(s.implicantsCharts, (c, i) => {
+      return latexArtifact(
+        reduceToChartTable(c),
+        `implicant chart ${i}`,
+        "article",
+        "pdflatex"
+      );
+    })
+  );
   return s;
 };
 

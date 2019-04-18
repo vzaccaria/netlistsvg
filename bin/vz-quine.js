@@ -5,36 +5,9 @@ let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
 let { synthesize } = require("./lib/quine");
-let { saveArtifact } = require("./lib/common.js");
+let { saveArtifacts } = require("./lib/artifacts.js");
 
 const prog = require("caporal");
-
-// FIXME: use save artifact!
-let saveSynthesisResults = (prefix, data) => {
-  Promise.all(
-    _.concat(
-      [
-        $fs.writeFile(
-          `${prefix}-tables-complete.tex`,
-          data.latex.implicantsTables,
-          "utf8"
-        ),
-        $fs.writeFile(`${prefix}-sop.tex`, data.latex.sopForm, "utf8"),
-        $fs.writeFile(`${prefix}-soluzione.tex`, data.latex.soluzione, "utf8"),
-        $fs.writeFile(`${prefix}-solution.tex`, data.latex.solution, "utf8"),
-        $fs.writeFile(`${prefix}-karnaugh.tex`, data.latex.karnaugh, "utf8"),
-        $fs.writeFile(
-          `${prefix}-chart-all.tex`,
-          data.latex.implicantsChartsAll,
-          "utf8"
-        )
-      ],
-      _.map(data.latex.implicantsCharts, (v, i) => {
-        return $fs.writeFile(`${prefix}-chart-${i}.tex`, v, "utf8");
-      })
-    )
-  );
-};
 
 let main = () => {
   prog
@@ -54,7 +27,7 @@ let main = () => {
       if (!options.save) {
         console.log(JSON.stringify(s, 0, 4));
       } else {
-        return saveSynthesisResults(options.save, s);
+        return saveArtifacts(s.latex, options.save);
       }
     });
   prog.parse(process.argv);

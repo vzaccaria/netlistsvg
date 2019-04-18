@@ -10,6 +10,8 @@
 # test-%.pdf: test-%.tex
 # 	tikz2pdf compile $< -p
 
+clean:
+	rm -rf tmp*
 
 
 test: 

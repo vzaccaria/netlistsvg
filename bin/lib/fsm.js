@@ -238,7 +238,7 @@ let synthesizeD = (fsm, options) => {
 
 let formatResults = ({ diagram, excitationTable }) => {
   return [
-    latexArtifact(diagram, "diagram", "standalone", "lualatex"),
+    latexArtifact(diagram, "diagram", "standalone", "lualatex", "-z automata"),
     latexArtifact(excitationTable, "excitation table", "article", "pdflatex")
   ];
 };
