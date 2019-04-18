@@ -2,6 +2,7 @@
 "use strict";
 
 const prog = require("caporal");
+const { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 
 let _ = require("lodash");
 let $fs = require("mz/fs");
@@ -212,17 +213,6 @@ let or = alu("or");
 let lw = load("lw");
 let beq = branch("beq");
 
-let saveSimResults = (prefix, data) => {
-  let _s = (fn, dt) => $fs.writeFile(`${prefix}-${fn}.tex`, dt, "utf8");
-
-  Promise.all([
-    _s("pipe-sim-complete", data.latex.pipesim.complete),
-    _s("pipe-sim-blank", data.latex.pipesim.blank),
-    _s("pipe-hazards-complete", data.latex.hazards.complete),
-    _s("pipe-hazards-blank", data.latex.hazards.blank)
-  ]);
-};
-
 let main = () => {
   prog
     .description("Pipeline visualization generator")
@@ -252,18 +242,46 @@ let main = () => {
         hasBranchPrediction: options.branchpred,
         hasBranchOptimization: options.branchopt
       })(eval(`[${args.program}]`));
+      let ps = pipeSimulatorTikz(sim.table, options);
+      let hz = hazardsToTikz(sim.table, options);
       let results = {
         state: sim,
         table: _.join(_.map(sim.table, "pipe"), "\n"),
-        latex: {
-          pipesim: pipeSimulatorTikz(sim.table, options),
-          hazards: hazardsToTikz(sim.table, options)
-        }
+        latex: [
+          latexArtifact(
+            ps.complete,
+            "pipe sim complete",
+            "standalone",
+            "pdflatex",
+            "-r varwidth"
+          ),
+          latexArtifact(
+            ps.blank,
+            "pipe sim blank",
+            "standalone",
+            "pdflatex",
+            "-r varwidth"
+          ),
+          latexArtifact(
+            hz.complete,
+            "pipe hazards complete",
+            "standalone",
+            "pdflatex",
+            `-r varwidth -i ${__dirname}/preambles/pipe.tex`
+          ),
+          latexArtifact(
+            hz.blank,
+            "pipe hazards blank",
+            "standalone",
+            "pdflatex",
+            `-r varwidth -i ${__dirname}/preambles/pipe.tex`
+          )
+        ]
       };
       if (!options.save) {
         console.log(JSON.stringify(results, 0, 4));
       } else {
-        saveSimResults(options.save, results);
+        saveArtifacts(results.latex, options.save);
       }
     })
     .command("preamble", "Print latex preamble")

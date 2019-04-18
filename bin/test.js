@@ -21,14 +21,12 @@ let fsmTestBatch = {
   fixtures: `${__dirname}/fixtures`,
   tests: [
     {
-      msg: `generate valid json for a moore machine`,
-      cmd: (s, fd) => `${s} ${fd}/moore.json`,
-      expected: fd => `${fd}/fsm-expected-output-moore.json`
+      msg: `three states moore machine`,
+      cmd: (s, fd) => `${s} ${fd}/moore.json`
     },
     {
-      msg: `generate valid json for a mealy machine`,
-      cmd: (s, fd) => `${s} ${fd}/mealy.json`,
-      expected: fd => `${fd}/fsm-expected-output-mealy.json`
+      msg: `three states mealy machine`,
+      cmd: (s, fd) => `${s} ${fd}/mealy.json`
     }
   ]
 };
@@ -40,8 +38,19 @@ let quineTestBatch = {
   tests: [
     {
       msg: `with dont cares`,
-      cmd: (s, fd) => `${s} "101011100x111111"`,
-      expected: fd => `${fd}/quine-expected-output-with-dont-cares.json`
+      cmd: s => `${s} "101011100x111111"`
+    }
+  ]
+};
+
+let pipeTestBatch = {
+  name: "vz-pipe",
+  scriptname: `${__dirname}/vz-pipe.js`,
+  fixtures: `${__dirname}/fixtures`,
+  tests: [
+    {
+      msg: `load and add`,
+      cmd: s => `${s} pipesim 'lw(2)(1),add(4)(2)(5)' -c cw0d1,fe0e1`
     }
   ]
 };
@@ -53,12 +62,13 @@ let testBatch = b => {
     _.map(b.tests, j => {
       let s = b.scriptname;
       let fd = b.fixtures;
+      let expected = `${fd}/ref-${b.name}-${_.kebabCase(j.msg)}.json`;
       let q = j;
-      it(`should ${q.msg} [ rm -f ${q.expected(fd)} && ${q.cmd(
+      it(`should ${q.msg} [ rm -f ${expected} && ${q.cmd(
         s,
         fd
-      )} > ${q.expected(fd)} ] `, () => {
-        let f = $fs.readFileSync(q.expected(fd), "utf8");
+      )} > ${expected} ] `, () => {
+        let f = $fs.readFileSync(expected, "utf8");
         return exec(q.cmd(s, fd))
           .then(a => a[0])
           .then(JSON.parse)
@@ -70,3 +80,4 @@ let testBatch = b => {
 
 testBatch(fsmTestBatch);
 testBatch(quineTestBatch);
+testBatch(pipeTestBatch);
