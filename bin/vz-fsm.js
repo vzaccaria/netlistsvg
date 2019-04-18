@@ -4,7 +4,7 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
-let { elaborateFSM, dumpEx } = require("./fsm");
+let { elaborateFSM, dumpEx } = require("./lib/fsm");
 
 const prog = require("caporal");
 

@@ -4,7 +4,7 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
-let { execWithString } = require("./common");
+let { execWithString } = require("./lib/common");
 let { exec } = require("mz/child_process");
 
 const prog = require("caporal");
@@ -17,7 +17,7 @@ let main = () => {
     .action((args, options, logger) => {
       (args.csvfile ? $fs.readFile(args.csvfile, "utf8") : $gstd()).then(data =>
         execWithString(
-          path => `${__dirname}/generate_mem_diagram.py -i ${path}`,
+          path => `${__dirname}/lib/generate_mem_diagram.py -i ${path}`,
           data,
           { logger }
         ).then(output => {
@@ -27,7 +27,7 @@ let main = () => {
     })
     .command("preamble")
     .action(() => {
-      exec(`${__dirname}/generate_mem_diagram.py -r`).then(output => {
+      exec(`${__dirname}/lib/generate_mem_diagram.py -r`).then(output => {
         console.log(output[0]);
       });
     });

@@ -4,8 +4,8 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
-let { synthesize } = require("./quine");
-let { saveArtifact } = require("./common.js");
+let { synthesize } = require("./lib/quine");
+let { saveArtifact } = require("./lib/common.js");
 
 const prog = require("caporal");
 

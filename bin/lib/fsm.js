@@ -143,7 +143,7 @@ let codeWords = l => {
 };
 
 let dumpEx = m => {
-  $fs.readFile(`${__dirname}/examples/${m}.json`, "utf8").then(console.log);
+  $fs.readFile(`${__dirname}/fixtures/${m}.json`, "utf8").then(console.log);
 };
 
 let getTransitionTable = fsm => {

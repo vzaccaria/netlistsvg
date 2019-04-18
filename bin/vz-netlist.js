@@ -14,7 +14,7 @@ let gaze = require("gaze");
 let vcdParser = require("vcd-parser");
 
 let tmp = require("tmp-promise");
-let { execWithString } = require("./common");
+let { execWithString } = require("./lib/common");
 
 let svg2pdf = (options, outputpdf, svgdata) => {
   return execWithString(
