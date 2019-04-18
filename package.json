@@ -23,6 +23,7 @@
     "mz": "2.7.0",
     "onml": "0.3.1",
     "open": "0.0.5",
+    "replace-ext": "1.0.0",
     "tmp-promise": "1.0.3",
     "vcd-parser": "1.0.0",
     "wavedrom-cli": "0.5.0"
