@@ -330,37 +330,53 @@ let synthesize = (data, vars) => {
       latexArtifact(
         reduceToTable(produceTables(s.implicantsTables)),
         "implicants tables",
-        "article",
-        "pdflatex"
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
       ),
-      latexArtifact(sopForm(s), "sop form", "article", "pdflatex"),
+      latexArtifact(
+        sopForm(s),
+        "sop form",
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
+      ),
       latexArtifact(
         implicantsChartsAll,
         "implicant charts complete",
-        "article",
-        "pdflatex"
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
       ),
-      latexArtifact(soluzione, "solution detailed", "article", "pdflatex"),
+      latexArtifact(
+        soluzione,
+        "solution detailed",
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
+      ),
       latexArtifact(
         `$${symbolicSolution(vars, s)}$`,
         "solution expression",
-        "article",
-        "pdflatex"
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
       ),
       latexArtifact(
         kmap,
         "karnaugh maps",
-        "article",
+        "standalone",
         "pdflatex",
-        "--usepackage karnaugh-map"
+        "--usepackage karnaugh-map -r varwidth"
       )
     ],
     _.map(s.implicantsCharts, (c, i) => {
       return latexArtifact(
         reduceToChartTable(c),
         `implicant chart ${i}`,
-        "article",
-        "pdflatex"
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
       );
     })
   );

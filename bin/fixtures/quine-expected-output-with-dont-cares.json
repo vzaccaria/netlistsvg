@@ -880,60 +880,67 @@
     "latex": [
         {
             "code": "\n\\begin{table}[h]\n                \\begin{tabular}{rrr}\n{Imp. Ord. 0} & {Imp. Ord. 1} & {Imp. Ord. 2} \\\\\n (0) \\texttt{0000}  &  (0,2) \\texttt{00-0}  & $\\bullet$ (0,2,4,6) \\texttt{0--0} \\\\ \n (2) \\texttt{0010}  &  (0,4) \\texttt{0-00}  & $\\bullet$ (2,6,10,14) \\texttt{--10} \\\\ \n (4) \\texttt{0100}  &  (2,6) \\texttt{0-10}  & $\\bullet$ (4,5,12,13) \\texttt{-10-} \\\\ \n (5) \\texttt{0101}  &  (2,10) \\texttt{-010}  & $\\bullet$ (4,6,12,14) \\texttt{-1-0} \\\\ \n (6) \\texttt{0110}  &  (4,5) \\texttt{010-}  & $\\bullet$ (9,11,13,15) \\texttt{1--1} \\\\ \n (9) \\texttt{1001}  &  (4,6) \\texttt{01-0}  & $\\bullet$ (10,11,14,15) \\texttt{1-1-} \\\\ \n (10) \\texttt{1010}  &  (4,12) \\texttt{-100}  & $\\bullet$ (12,13,14,15) \\texttt{11--} \\\\ \n (12) \\texttt{1100}  &  (5,13) \\texttt{-101}  & \\\\ \n (11) \\texttt{1011}  &  (6,14) \\texttt{-110}  & \\\\ \n (13) \\texttt{1101}  &  (9,11) \\texttt{10-1}  & \\\\ \n (14) \\texttt{1110}  &  (9,13) \\texttt{1-01}  & \\\\ \n (15) \\texttt{1111}  &  (10,11) \\texttt{101-}  & \\\\ \n &  (10,14) \\texttt{1-10}  & \\\\ \n &  (12,13) \\texttt{110-}  & \\\\ \n &  (12,14) \\texttt{11-0}  & \\\\ \n &  (11,15) \\texttt{1-11}  & \\\\ \n &  (13,15) \\texttt{11-1}  & \\\\ \n &  (14,15) \\texttt{111-}  & \n        \\end{tabular}\n\\end{table}\n",
-            "clss": "article",
+            "clss": "standalone",
             "name": "implicants tables",
             "sfx": "implicants-tables",
-            "engine": "pdflatex"
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
         },
         {
             "code": "\\begin{equation}\\mathrm{on} = \\sum (0, 2, 4, 5, 6, 10, 11, 12, 13, 14, 15), \\mathrm{dc} = \\sum (9) \\end{equation}",
-            "clss": "article",
+            "clss": "standalone",
             "name": "sop form",
             "sfx": "sop-form",
-            "engine": "pdflatex"
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
         },
         {
             "code": "\\noindent Iterazione 0: \\ \n\\begin{table}[h]\n                \\begin{tabular}{cccccccccccc}\n Impl. & {0} & {2} & {4} & {5} & {6} & {10} & {11} & {12} & {13} & {14} & {15} \\\\\n(0,2,4,6) & $\\bullet$ & $\\circ$ & $\\circ$ &  & $\\circ$ &  &  &  &  &  & \\\\ \n(2,6,10,14) &  & $\\circ$ &  &  & $\\circ$ & $\\circ$ &  &  &  & $\\circ$ & \\\\ \n(4,5,12,13) &  &  & $\\circ$ & $\\bullet$ &  &  &  & $\\circ$ & $\\circ$ &  & \\\\ \n(4,6,12,14) &  &  & $\\circ$ &  & $\\circ$ &  &  & $\\circ$ &  & $\\circ$ & \\\\ \n(9,11,13,15) &  &  &  &  &  &  & $\\circ$ &  & $\\circ$ &  & $\\circ$\\\\ \n(10,11,14,15) &  &  &  &  &  & $\\circ$ & $\\circ$ &  &  & $\\circ$ & $\\circ$\\\\ \n(12,13,14,15) &  &  &  &  &  &  &  & $\\circ$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n\n\\noindent Iterazione 1: \\ \n\\begin{table}[h]\n                \\begin{tabular}{ccccc}\n Impl. & {10} & {11} & {14} & {15} \\\\\n(10,11,14,15) & $\\bullet$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n",
-            "clss": "article",
+            "clss": "standalone",
             "name": "implicant charts complete",
             "sfx": "implicant-charts-complete",
-            "engine": "pdflatex"
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
         },
         {
             "code": "\\noindent La soluzione ricavata con 2 passaggi è la seguente: \\begin{itemize}\\item \\texttt{0--0} prodotta dall'implicante (0,2,4,6)\n\\item \\texttt{-10-} prodotta dall'implicante (4,5,12,13)\n\\item \\texttt{1-1-} prodotta dall'implicante (10,11,14,15)\\end{itemize} ovvero \\[ \\overline{x_0} \\cdot \\overline{x_3}+x_1 \\cdot \\overline{x_2}+x_0 \\cdot x_2 \\]",
-            "clss": "article",
+            "clss": "standalone",
             "name": "solution detailed",
             "sfx": "solution-detailed",
-            "engine": "pdflatex"
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
         },
         {
             "code": "$\\overline{x_0} \\cdot \\overline{x_3}+x_1 \\cdot \\overline{x_2}+x_0 \\cdot x_2$",
-            "clss": "article",
+            "clss": "standalone",
             "name": "solution expression",
             "sfx": "solution-expression",
-            "engine": "pdflatex"
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
         },
         {
             "code": "\n \\begin{center}\n    \\begin{karnaugh-map}[4][4][1][$x_2x_3$][$x_0x_1$]\n    \\manualterms{1,0,1,0,1,1,1,0,0,x,1,1,1,1,1,1}\n    \\implicantedge{0}{4}{2}{6}\n\\implicant{4}{13}\n\\implicant{15}{10}\n    \\end{karnaugh-map}\n\\end{center}\n",
-            "clss": "article",
+            "clss": "standalone",
             "name": "karnaugh maps",
             "sfx": "karnaugh-maps",
             "engine": "pdflatex",
-            "addoptions": "--usepackage karnaugh-map"
+            "addoptions": "--usepackage karnaugh-map -r varwidth"
         },
         {
             "code": "\n\\begin{table}[h]\n                \\begin{tabular}{cccccccccccc}\n Impl. & {0} & {2} & {4} & {5} & {6} & {10} & {11} & {12} & {13} & {14} & {15} \\\\\n(0,2,4,6) & $\\bullet$ & $\\circ$ & $\\circ$ &  & $\\circ$ &  &  &  &  &  & \\\\ \n(2,6,10,14) &  & $\\circ$ &  &  & $\\circ$ & $\\circ$ &  &  &  & $\\circ$ & \\\\ \n(4,5,12,13) &  &  & $\\circ$ & $\\bullet$ &  &  &  & $\\circ$ & $\\circ$ &  & \\\\ \n(4,6,12,14) &  &  & $\\circ$ &  & $\\circ$ &  &  & $\\circ$ &  & $\\circ$ & \\\\ \n(9,11,13,15) &  &  &  &  &  &  & $\\circ$ &  & $\\circ$ &  & $\\circ$\\\\ \n(10,11,14,15) &  &  &  &  &  & $\\circ$ & $\\circ$ &  &  & $\\circ$ & $\\circ$\\\\ \n(12,13,14,15) &  &  &  &  &  &  &  & $\\circ$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n",
-            "clss": "article",
+            "clss": "standalone",
             "name": "implicant chart 0",
             "sfx": "implicant-chart-0",
-            "engine": "pdflatex"
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
         },
         {
             "code": "\n\\begin{table}[h]\n                \\begin{tabular}{ccccc}\n Impl. & {10} & {11} & {14} & {15} \\\\\n(10,11,14,15) & $\\bullet$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n",
-            "clss": "article",
+            "clss": "standalone",
             "name": "implicant chart 1",
             "sfx": "implicant-chart-1",
-            "engine": "pdflatex"
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
         }
     ]
 }
