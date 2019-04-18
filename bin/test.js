@@ -46,8 +46,6 @@ let quineTestBatch = {
   ]
 };
 
-// vz-quine "001000000x000111"
-
 let testBatch = b => {
   describe(b.name, () => {
     // The following line is temporary, remove it!!!
