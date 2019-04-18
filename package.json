@@ -7,6 +7,8 @@
   "license": "MIT",
   "dependencies": {
     "caporal": "0.8.0",
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
     "clone": "2.1.1",
     "debug": "3.1.0",
     "elkjs": "0.3.0",
@@ -17,6 +19,7 @@
     "json5": "0.5.1",
     "klayjs": "0.4.1",
     "lodash": "4.17.4",
+    "mocha": "3.5.2",
     "mz": "2.7.0",
     "onml": "0.3.1",
     "open": "0.0.5",
