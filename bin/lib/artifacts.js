@@ -27,12 +27,17 @@ let compileArtifact = _.curry((pfx, a) => {
 });
 
 let compileArtifacts = (data, pfx) => {
-  Promise.all(_.map(data.latex, compileArtifact(pfx)));
+  Promise.all(_.map(data, compileArtifact(pfx)));
+};
+
+let saveArtifacts = (data, pfx) => {
+  Promise.all(_.map(data, saveArtifact(pfx)));
 };
 
 module.exports = {
   latexArtifact,
   saveArtifact,
+  saveArtifacts,
   compileArtifact,
   compileArtifacts
 };

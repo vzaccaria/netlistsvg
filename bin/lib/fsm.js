@@ -1,5 +1,6 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
+let { latexArtifact, saveArtifacts } = require("./artifacts");
 
 let wrap = (c, options) => `
 \\begin{tikzpicture}[>=stealth', initial text=$ $]
@@ -215,8 +216,7 @@ let latexTruth = (table, headings) => {
         `);
 };
 let synthesizeD = (fsm, options) => {
-  let latex = {};
-  latex.diagram = drawFSM(fsm, options);
+  let diagram = drawFSM(fsm, options);
 
   let inoutcomb = cartesian(
     codeWords(fsm.encodingSize),
@@ -232,21 +232,15 @@ let synthesizeD = (fsm, options) => {
     _.map(_.range(0, fsm.inputSize), i => `I_${i}`),
     _.map(_.range(0, fsm.encodingSize), i => `D_${i}`)
   );
-  latex.excitationTable = latexTruth(excitationTable, headings);
-  return { latex };
+  excitationTable = latexTruth(excitationTable, headings);
+  return { diagram, excitationTable };
 };
 
-let artifacts = [
-  { sfx: "diagram", objpath: "latex.diagram" },
-  { sfx: "excitation-table", objpath: "latex.excitationTable" }
-];
-
-let saveArtifact = _.curry((data, pfx, { sfx, objpath }) => {
-  return $fs.writeFile(`${pfx}-${sfx}.tex`, _.get(data, objpath, "", "utf8"));
-});
-
-let saveResults = (prefix, data) => {
-  Promise.all(_.map(artifacts, saveArtifact(data, prefix)));
+let formatResults = ({ diagram, excitationTable }) => {
+  return [
+    latexArtifact(diagram, "diagram", "standalone", "lualatex"),
+    latexArtifact(excitationTable, "excitation table", "article", "pdflatex")
+  ];
 };
 
 let elaborateFSM = (fsm, options) => {
@@ -254,9 +248,9 @@ let elaborateFSM = (fsm, options) => {
     console.log(drawFSM(fsm, options));
     return;
   } else {
-    let data = synthesizeD(fsm, options);
+    let data = { latex: formatResults(synthesizeD(fsm, options)) };
     if (options.save) {
-      saveResults(options.save, data);
+      return saveArtifacts(data.latex, options.save);
     } else {
       console.log(JSON.stringify(data));
     }
@@ -264,11 +258,3 @@ let elaborateFSM = (fsm, options) => {
 };
 
 module.exports = { elaborateFSM, dumpEx };
-
-//$fs
-//  .readFile("./examples/mooreCoded.json", "utf8")
-//  .then(JSON.parse)
-//  .then(fsm => synthesizeD(fsm, {}))
-//  .then(JSON.stringify)
-//  .then(console.log);
-////console.log(cartesian(codeWords(2), codeWords(2)));
