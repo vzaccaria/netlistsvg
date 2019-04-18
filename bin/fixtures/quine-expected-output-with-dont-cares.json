@@ -2,7 +2,41 @@
     "primeImplicants": [
         {
             "values": [
-                9,
+                0,
+                2,
+                4,
+                6
+            ],
+            "essential": true,
+            "string": [
+                "0",
+                "1",
+                "1",
+                "0"
+            ],
+            "ones": 2
+        },
+        {
+            "values": [
+                2,
+                6,
+                10,
+                14
+            ],
+            "essential": false,
+            "string": [
+                "1",
+                "1",
+                "1",
+                "0"
+            ],
+            "ones": 3
+        },
+        {
+            "values": [
+                4,
+                5,
+                12,
                 13
             ],
             "essential": true,
@@ -16,6 +50,24 @@
         },
         {
             "values": [
+                4,
+                6,
+                12,
+                14
+            ],
+            "essential": false,
+            "string": [
+                "1",
+                "1",
+                "1",
+                "0"
+            ],
+            "ones": 3
+        },
+        {
+            "values": [
+                9,
+                11,
                 13,
                 15
             ],
@@ -30,6 +82,8 @@
         },
         {
             "values": [
+                10,
+                11,
                 14,
                 15
             ],
@@ -44,32 +98,35 @@
         },
         {
             "values": [
-                2
+                12,
+                13,
+                14,
+                15
             ],
-            "essential": true,
+            "essential": false,
             "string": [
-                "0",
-                "0",
                 "1",
-                "0"
+                "1",
+                "1",
+                "1"
             ],
-            "ones": 1
+            "ones": 4
         }
     ],
     "funcdata": [
-        0,
+        1,
         0,
         1,
         0,
-        0,
-        0,
-        0,
+        1,
+        1,
+        1,
         0,
         0,
         2,
-        0,
-        0,
-        0,
+        1,
+        1,
+        1,
         1,
         1,
         1
@@ -78,9 +135,23 @@
         [
             {
                 "values": [
+                    0
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "0",
+                    "0",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
                     2
                 ],
-                "prime": true,
+                "prime": false,
                 "mask": 0,
                 "string": [
                     "0",
@@ -89,6 +160,48 @@
                     "0"
                 ],
                 "ones": 1
+            },
+            {
+                "values": [
+                    4
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "1",
+                    "0",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    5
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "1",
+                    "0",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    6
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "1",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
             },
             {
                 "values": [
@@ -101,6 +214,48 @@
                     "0",
                     "0",
                     "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    10
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "0",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    11
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "0",
+                    "1",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    12
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "1",
+                    "0",
+                    "0"
                 ],
                 "ones": 2
             },
@@ -150,10 +305,160 @@
         [
             {
                 "values": [
+                    0,
+                    2
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "0",
+                    "0",
+                    "-",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    0,
+                    4
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "0",
+                    "-",
+                    "0",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    2,
+                    6
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "0",
+                    "-",
+                    "1",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    2,
+                    10
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "0",
+                    "1",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    5
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "0",
+                    "1",
+                    "0",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    6
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "0",
+                    "1",
+                    "-",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    12
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "1",
+                    "0",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    5,
+                    13
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "1",
+                    "0",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    6,
+                    14
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "1",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    9,
+                    11
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "1",
+                    "0",
+                    "-",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
                     9,
                     13
                 ],
-                "prime": true,
+                "prime": false,
                 "mask": 4,
                 "string": [
                     "1",
@@ -165,10 +470,85 @@
             },
             {
                 "values": [
+                    10,
+                    11
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "1",
+                    "0",
+                    "1",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    10,
+                    14
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "1",
+                    "-",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    11,
+                    15
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "1",
+                    "-",
+                    "1",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    12,
+                    13
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "1",
+                    "1",
+                    "0",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    12,
+                    14
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "1",
+                    "1",
+                    "-",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
                     13,
                     15
                 ],
-                "prime": true,
+                "prime": false,
                 "mask": 2,
                 "string": [
                     "1",
@@ -183,7 +563,7 @@
                     14,
                     15
                 ],
-                "prime": true,
+                "prime": false,
                 "mask": 1,
                 "string": [
                     "1",
@@ -193,29 +573,184 @@
                 ],
                 "ones": 3
             }
+        ],
+        [
+            {
+                "values": [
+                    0,
+                    2,
+                    4,
+                    6
+                ],
+                "prime": true,
+                "mask": 6,
+                "string": [
+                    "0",
+                    "-",
+                    "-",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    2,
+                    6,
+                    10,
+                    14
+                ],
+                "prime": true,
+                "mask": 12,
+                "string": [
+                    "-",
+                    "-",
+                    "1",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    5,
+                    12,
+                    13
+                ],
+                "prime": true,
+                "mask": 9,
+                "string": [
+                    "-",
+                    "1",
+                    "0",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    6,
+                    12,
+                    14
+                ],
+                "prime": true,
+                "mask": 10,
+                "string": [
+                    "-",
+                    "1",
+                    "-",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    9,
+                    11,
+                    13,
+                    15
+                ],
+                "prime": true,
+                "mask": 6,
+                "string": [
+                    "1",
+                    "-",
+                    "-",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    10,
+                    11,
+                    14,
+                    15
+                ],
+                "prime": true,
+                "mask": 5,
+                "string": [
+                    "1",
+                    "-",
+                    "1",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    12,
+                    13,
+                    14,
+                    15
+                ],
+                "prime": true,
+                "mask": 3,
+                "string": [
+                    "1",
+                    "1",
+                    "-",
+                    "-"
+                ],
+                "ones": 2
+            }
         ]
     ],
     "implicantsCharts": [
         {
             "rows": [
                 [
-                    9,
+                    0,
+                    2,
+                    4,
+                    6
+                ],
+                [
+                    2,
+                    6,
+                    10,
+                    14
+                ],
+                [
+                    4,
+                    5,
+                    12,
                     13
                 ],
                 [
+                    4,
+                    6,
+                    12,
+                    14
+                ],
+                [
+                    9,
+                    11,
                     13,
                     15
                 ],
                 [
+                    10,
+                    11,
                     14,
                     15
                 ],
                 [
-                    2
+                    12,
+                    13,
+                    14,
+                    15
                 ]
             ],
             "cols": [
+                0,
                 2,
+                4,
+                5,
+                6,
+                10,
+                11,
+                12,
                 13,
                 14,
                 15
@@ -223,19 +758,24 @@
             "highlight": [
                 {
                     "row": [
-                        2
+                        0,
+                        2,
+                        4,
+                        6
                     ],
                     "col": [
-                        "2"
+                        "0"
                     ]
                 },
                 {
                     "row": [
-                        14,
-                        15
+                        4,
+                        5,
+                        12,
+                        13
                     ],
                     "col": [
-                        "14"
+                        "5"
                     ]
                 }
             ]
@@ -243,21 +783,31 @@
         {
             "rows": [
                 [
-                    9,
-                    13
+                    10,
+                    11,
+                    14,
+                    15
                 ]
             ],
             "cols": [
-                13
+                10,
+                11,
+                14,
+                15
             ],
             "highlight": [
                 {
                     "row": [
-                        9,
-                        13
+                        10,
+                        11,
+                        14,
+                        15
                     ],
                     "col": [
-                        "13"
+                        "10",
+                        "11",
+                        "14",
+                        "15"
                     ]
                 }
             ]
@@ -265,64 +815,125 @@
     ],
     "cover": [
         [
-            2
+            0,
+            2,
+            4,
+            6
         ],
         [
+            4,
+            5,
+            12,
+            13
+        ],
+        [
+            10,
+            11,
             14,
             15
-        ],
-        [
-            9,
-            13
         ]
     ],
     "coverSymbolic": [
         {
             "implicantValue": [
-                2
+                0,
+                2,
+                4,
+                6
             ],
             "implicantSymbol": [
                 "0",
-                "0",
-                "1",
+                "-",
+                "-",
                 "0"
             ]
         },
         {
             "implicantValue": [
-                14,
-                15
+                4,
+                5,
+                12,
+                13
             ],
             "implicantSymbol": [
+                "-",
                 "1",
-                "1",
-                "1",
+                "0",
                 "-"
             ]
         },
         {
             "implicantValue": [
-                9,
-                13
+                10,
+                11,
+                14,
+                15
             ],
             "implicantSymbol": [
                 "1",
                 "-",
-                "0",
-                "1"
+                "1",
+                "-"
             ]
         }
     ],
-    "latex": {
-        "implicantsTables": "\n\\begin{table}[H]\n\t\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}\t\t\n\t\t% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray\n                \\begin{tabular}{rr}\n\\rowcolor{black!75}\\head{Imp. Ord. 0} & \\head{Imp. Ord. 1} \\\\\n\\bullet (2) \\texttt{0010}  & \\bullet (9,13) \\texttt{1-01} \\\\ \n (9) \\texttt{1001}  & \\bullet (13,15) \\texttt{11-1} \\\\ \n (13) \\texttt{1101}  & \\bullet (14,15) \\texttt{111-} \\\\ \n (14) \\texttt{1110}  & \\\\ \n (15) \\texttt{1111}  & \n        \\end{tabular}\n\\end{table}\n",
-        "sopForm": "\\begin{equation}\\mathrm{on} = \\sum (2, 13, 14, 15), \\mathrm{dc} = \\sum (9) \\end{equation}",
-        "implicantsCharts": [
-            "\n\\begin{table}[H]\n\t\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}\t\t\n\t\t% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray\n                \\begin{tabular}{ccccc}\n\\rowcolor{black!75} \\head{Impl.} & \\head{2} & \\head{13} & \\head{14} & \\head{15} \\\\\n(9,13) &  & \\circ &  & \\\\ \n(13,15) &  & \\circ &  & \\circ\\\\ \n(14,15) &  &  & \\bullet & \\circ\\\\ \n(2) & \\bullet &  &  & \n        \\end{tabular}\n\\end{table}\n",
-            "\n\\begin{table}[H]\n\t\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}\t\t\n\t\t% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray\n                \\begin{tabular}{cc}\n\\rowcolor{black!75} \\head{Impl.} & \\head{13} \\\\\n(9,13) & \\bullet\n        \\end{tabular}\n\\end{table}\n"
-        ],
-        "implicantsChartsAll": "\\noindent Iterazione 0: \\ \n\\begin{table}[H]\n\t\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}\t\t\n\t\t% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray\n                \\begin{tabular}{ccccc}\n\\rowcolor{black!75} \\head{Impl.} & \\head{2} & \\head{13} & \\head{14} & \\head{15} \\\\\n(9,13) &  & \\circ &  & \\\\ \n(13,15) &  & \\circ &  & \\circ\\\\ \n(14,15) &  &  & \\bullet & \\circ\\\\ \n(2) & \\bullet &  &  & \n        \\end{tabular}\n\\end{table}\n\n\\noindent Iterazione 1: \\ \n\\begin{table}[H]\n\t\\newcommand{\\head}[1]{\\textcolor{white}{\\textbf{#1}}}\t\t\n\t\t% \\rowcolors{2}{gray!10}{white} % Color every other line a light gray\n                \\begin{tabular}{cc}\n\\rowcolor{black!75} \\head{Impl.} & \\head{13} \\\\\n(9,13) & \\bullet\n        \\end{tabular}\n\\end{table}\n",
-        "soluzione": "\\noindent La soluzione ricavata con 2 passaggi è la seguente: \\begin{itemize}\\item \\texttt{0010} prodotta dall'implicante (2)\n\\item \\texttt{111-} prodotta dall'implicante (14,15)\n\\item \\texttt{1-01} prodotta dall'implicante (9,13)\\end{itemize} ovvero \\[ \\overline{x_0} \\cdot \\overline{x_1} \\cdot x_2 \\cdot \\overline{x_3}+x_0 \\cdot x_1 \\cdot x_2+x_0 \\cdot \\overline{x_2} \\cdot x_3 \\]",
-        "karnaugh": "\n \\begin{center}\n    \\begin{karnaugh-map}[4][4][1][$x_2x_3$][$x_0x_1$]\n    \\manualterms{0,0,1,0,0,0,0,0,0,x,0,0,0,1,1,1}\n    \\implicant{2}{2}\n\\implicant{15}{14}\n\\implicant{13}{9}\n    \\end{karnaugh-map}\n\\end{center}\n",
-        "solution": "\\overline{x_0} \\cdot \\overline{x_1} \\cdot x_2 \\cdot \\overline{x_3}+x_0 \\cdot x_1 \\cdot x_2+x_0 \\cdot \\overline{x_2} \\cdot x_3"
-    }
+    "latex": [
+        {
+            "code": "\n\\begin{table}[h]\n                \\begin{tabular}{rrr}\n{Imp. Ord. 0} & {Imp. Ord. 1} & {Imp. Ord. 2} \\\\\n (0) \\texttt{0000}  &  (0,2) \\texttt{00-0}  & $\\bullet$ (0,2,4,6) \\texttt{0--0} \\\\ \n (2) \\texttt{0010}  &  (0,4) \\texttt{0-00}  & $\\bullet$ (2,6,10,14) \\texttt{--10} \\\\ \n (4) \\texttt{0100}  &  (2,6) \\texttt{0-10}  & $\\bullet$ (4,5,12,13) \\texttt{-10-} \\\\ \n (5) \\texttt{0101}  &  (2,10) \\texttt{-010}  & $\\bullet$ (4,6,12,14) \\texttt{-1-0} \\\\ \n (6) \\texttt{0110}  &  (4,5) \\texttt{010-}  & $\\bullet$ (9,11,13,15) \\texttt{1--1} \\\\ \n (9) \\texttt{1001}  &  (4,6) \\texttt{01-0}  & $\\bullet$ (10,11,14,15) \\texttt{1-1-} \\\\ \n (10) \\texttt{1010}  &  (4,12) \\texttt{-100}  & $\\bullet$ (12,13,14,15) \\texttt{11--} \\\\ \n (12) \\texttt{1100}  &  (5,13) \\texttt{-101}  & \\\\ \n (11) \\texttt{1011}  &  (6,14) \\texttt{-110}  & \\\\ \n (13) \\texttt{1101}  &  (9,11) \\texttt{10-1}  & \\\\ \n (14) \\texttt{1110}  &  (9,13) \\texttt{1-01}  & \\\\ \n (15) \\texttt{1111}  &  (10,11) \\texttt{101-}  & \\\\ \n &  (10,14) \\texttt{1-10}  & \\\\ \n &  (12,13) \\texttt{110-}  & \\\\ \n &  (12,14) \\texttt{11-0}  & \\\\ \n &  (11,15) \\texttt{1-11}  & \\\\ \n &  (13,15) \\texttt{11-1}  & \\\\ \n &  (14,15) \\texttt{111-}  & \n        \\end{tabular}\n\\end{table}\n",
+            "clss": "article",
+            "name": "implicants tables",
+            "sfx": "implicants-tables",
+            "engine": "pdflatex"
+        },
+        {
+            "code": "\\begin{equation}\\mathrm{on} = \\sum (0, 2, 4, 5, 6, 10, 11, 12, 13, 14, 15), \\mathrm{dc} = \\sum (9) \\end{equation}",
+            "clss": "article",
+            "name": "sop form",
+            "sfx": "sop-form",
+            "engine": "pdflatex"
+        },
+        {
+            "code": "\\noindent Iterazione 0: \\ \n\\begin{table}[h]\n                \\begin{tabular}{cccccccccccc}\n Impl. & {0} & {2} & {4} & {5} & {6} & {10} & {11} & {12} & {13} & {14} & {15} \\\\\n(0,2,4,6) & $\\bullet$ & $\\circ$ & $\\circ$ &  & $\\circ$ &  &  &  &  &  & \\\\ \n(2,6,10,14) &  & $\\circ$ &  &  & $\\circ$ & $\\circ$ &  &  &  & $\\circ$ & \\\\ \n(4,5,12,13) &  &  & $\\circ$ & $\\bullet$ &  &  &  & $\\circ$ & $\\circ$ &  & \\\\ \n(4,6,12,14) &  &  & $\\circ$ &  & $\\circ$ &  &  & $\\circ$ &  & $\\circ$ & \\\\ \n(9,11,13,15) &  &  &  &  &  &  & $\\circ$ &  & $\\circ$ &  & $\\circ$\\\\ \n(10,11,14,15) &  &  &  &  &  & $\\circ$ & $\\circ$ &  &  & $\\circ$ & $\\circ$\\\\ \n(12,13,14,15) &  &  &  &  &  &  &  & $\\circ$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n\n\\noindent Iterazione 1: \\ \n\\begin{table}[h]\n                \\begin{tabular}{ccccc}\n Impl. & {10} & {11} & {14} & {15} \\\\\n(10,11,14,15) & $\\bullet$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n",
+            "clss": "article",
+            "name": "implicant charts complete",
+            "sfx": "implicant-charts-complete",
+            "engine": "pdflatex"
+        },
+        {
+            "code": "\\noindent La soluzione ricavata con 2 passaggi è la seguente: \\begin{itemize}\\item \\texttt{0--0} prodotta dall'implicante (0,2,4,6)\n\\item \\texttt{-10-} prodotta dall'implicante (4,5,12,13)\n\\item \\texttt{1-1-} prodotta dall'implicante (10,11,14,15)\\end{itemize} ovvero \\[ \\overline{x_0} \\cdot \\overline{x_3}+x_1 \\cdot \\overline{x_2}+x_0 \\cdot x_2 \\]",
+            "clss": "article",
+            "name": "solution detailed",
+            "sfx": "solution-detailed",
+            "engine": "pdflatex"
+        },
+        {
+            "code": "$\\overline{x_0} \\cdot \\overline{x_3}+x_1 \\cdot \\overline{x_2}+x_0 \\cdot x_2$",
+            "clss": "article",
+            "name": "solution expression",
+            "sfx": "solution-expression",
+            "engine": "pdflatex"
+        },
+        {
+            "code": "\n \\begin{center}\n    \\begin{karnaugh-map}[4][4][1][$x_2x_3$][$x_0x_1$]\n    \\manualterms{1,0,1,0,1,1,1,0,0,x,1,1,1,1,1,1}\n    \\implicantedge{0}{4}{2}{6}\n\\implicant{4}{13}\n\\implicant{15}{10}\n    \\end{karnaugh-map}\n\\end{center}\n",
+            "clss": "article",
+            "name": "karnaugh maps",
+            "sfx": "karnaugh-maps",
+            "engine": "pdflatex",
+            "addoptions": "--usepackage karnaugh-map"
+        },
+        {
+            "code": "\n\\begin{table}[h]\n                \\begin{tabular}{cccccccccccc}\n Impl. & {0} & {2} & {4} & {5} & {6} & {10} & {11} & {12} & {13} & {14} & {15} \\\\\n(0,2,4,6) & $\\bullet$ & $\\circ$ & $\\circ$ &  & $\\circ$ &  &  &  &  &  & \\\\ \n(2,6,10,14) &  & $\\circ$ &  &  & $\\circ$ & $\\circ$ &  &  &  & $\\circ$ & \\\\ \n(4,5,12,13) &  &  & $\\circ$ & $\\bullet$ &  &  &  & $\\circ$ & $\\circ$ &  & \\\\ \n(4,6,12,14) &  &  & $\\circ$ &  & $\\circ$ &  &  & $\\circ$ &  & $\\circ$ & \\\\ \n(9,11,13,15) &  &  &  &  &  &  & $\\circ$ &  & $\\circ$ &  & $\\circ$\\\\ \n(10,11,14,15) &  &  &  &  &  & $\\circ$ & $\\circ$ &  &  & $\\circ$ & $\\circ$\\\\ \n(12,13,14,15) &  &  &  &  &  &  &  & $\\circ$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n",
+            "clss": "article",
+            "name": "implicant chart 0",
+            "sfx": "implicant-chart-0",
+            "engine": "pdflatex"
+        },
+        {
+            "code": "\n\\begin{table}[h]\n                \\begin{tabular}{ccccc}\n Impl. & {10} & {11} & {14} & {15} \\\\\n(10,11,14,15) & $\\bullet$ & $\\circ$ & $\\circ$ & $\\circ$\n        \\end{tabular}\n\\end{table}\n",
+            "clss": "article",
+            "name": "implicant chart 1",
+            "sfx": "implicant-chart-1",
+            "engine": "pdflatex"
+        }
+    ]
 }

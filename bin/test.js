@@ -40,7 +40,7 @@ let quineTestBatch = {
   tests: [
     {
       msg: `with dont cares`,
-      cmd: (s, fd) => `${s} "001000000x000111"`,
+      cmd: (s, fd) => `${s} "101011100x111111"`,
       expected: fd => `${fd}/quine-expected-output-with-dont-cares.json`
     }
   ]

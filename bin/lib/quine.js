@@ -55,7 +55,7 @@ let sopForm = res => {
 };
 
 let table = c => `
-\\begin{table}
+\\begin{table}[h]
                 ${c}
 \\end{table}
 `;
@@ -104,10 +104,7 @@ let reduceToTable = columns => {
   let titles = _.map(columns, "title");
   let ncols = cols.length;
   let head = `\\begin{tabular}{${_.repeat("r", ncols)}}
-${_.join(
-    _.map(titles, t => "{" + t + "}"),
-    " & "
-  )} \\\\
+${_.join(_.map(titles, t => "{" + t + "}"), " & ")} \\\\
 `;
 
   let rows = _.join(
@@ -325,7 +322,7 @@ let synthesize = (data, vars) => {
     s
   )} ovvero \\[ ${symbolicSolution(vars, s)} \\]`;
 
-  let karnaugh =
+  let kmap =
     nvars === 4 ? karnaugh(s, vars) : "only 4 variables maps are supported";
 
   s.latex = _.concat(
@@ -345,13 +342,13 @@ let synthesize = (data, vars) => {
       ),
       latexArtifact(soluzione, "solution detailed", "article", "pdflatex"),
       latexArtifact(
-        symbolicSolution(vars, s),
+        `$${symbolicSolution(vars, s)}$`,
         "solution expression",
         "article",
         "pdflatex"
       ),
       latexArtifact(
-        karnaugh,
+        kmap,
         "karnaugh maps",
         "article",
         "pdflatex",
