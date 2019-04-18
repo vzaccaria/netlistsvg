@@ -15,8 +15,8 @@ let main = () => {
     .option(
       "-p, --prefix <string>",
       "save data with in files with prefix <string>",
-            prog.STRING,
-            "tmp"
+      prog.STRING,
+      "tmp"
     )
     .action((args, options) => {
       let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
