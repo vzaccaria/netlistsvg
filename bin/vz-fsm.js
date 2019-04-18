@@ -34,8 +34,8 @@ let main = () => {
     )
     .option("-w, --draw", "produce only latex code for drawing")
     .action((args, options) => {
-      if (options.template) {
-        dumpEx(options.template);
+      if (options.example) {
+        dumpEx(options.example);
       } else {
         let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
         datap.then(JSON.parse).then(fsm => {

@@ -143,7 +143,7 @@ let codeWords = l => {
 };
 
 let dumpEx = m => {
-  $fs.readFile(`${__dirname}/examples/${m}.json`, "utf7").then(console.log);
+  $fs.readFile(`${__dirname}/examples/${m}.json`, "utf8").then(console.log);
 };
 
 let getTransitionTable = fsm => {
@@ -250,12 +250,16 @@ let saveResults = (prefix, data) => {
 };
 
 let elaborateFSM = (fsm, options) => {
-  let data = synthesizeD(fsm, options);
-  if (options.save) {
-    saveResults(options.save, data);
+  if (options.draw) {
+    console.log(drawFSM(fsm, options));
+    return;
   } else {
-    if (options.draw) console.log(data.latex.diagram);
-    else console.log(JSON.stringify(data));
+    let data = synthesizeD(fsm, options);
+    if (options.save) {
+      saveResults(options.save, data);
+    } else {
+      console.log(JSON.stringify(data));
+    }
   }
 };
 
