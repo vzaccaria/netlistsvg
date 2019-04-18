@@ -17,7 +17,7 @@ let produceTables = tables => {
       data: _.map(
         t,
         m =>
-          `${m.prime ? "\\bullet" : ""} (${m.values}) \\texttt{${_.join(
+          `${m.prime ? "$\\bullet$" : ""} (${m.values}) \\texttt{${_.join(
             m.string,
             ""
           )}} `
@@ -56,7 +56,6 @@ let sopForm = res => {
 
 let table = c => `
 \\begin{table}
-	\\newcommand{\\head}[1]{{\\textbf{#1}}}		
                 ${c}
 \\end{table}
 `;
@@ -64,10 +63,7 @@ let table = c => `
 let reduceToChartTable = chart => {
   let ncols = chart.cols.length;
   let head = `\\begin{tabular}{${_.repeat("c", ncols + 1)}}
- \\head{Impl.} & ${_.join(
-   _.map(chart.cols, t => "\\head{" + t + "}"),
-   " & "
- )} \\\\
+ Impl. & ${_.join(_.map(chart.cols, t => "{" + t + "}"), " & ")} \\\\
 `;
   let shouldHighlight = (i, j) => {
     return (
@@ -88,8 +84,8 @@ let reduceToChartTable = chart => {
         " & " +
         _.join(
           _.map(chart.cols, j => {
-            if (shouldHighlight(i, j)) return "\\bullet";
-            else if (_.includes(i, j)) return "\\circ";
+            if (shouldHighlight(i, j)) return "$\\bullet$";
+            else if (_.includes(i, j)) return "$\\circ$";
             else return "";
           }),
           " & "
@@ -108,8 +104,8 @@ let reduceToTable = columns => {
   let titles = _.map(columns, "title");
   let ncols = cols.length;
   let head = `\\begin{tabular}{${_.repeat("r", ncols)}}
-\\rowcolor{black!75}${_.join(
-    _.map(titles, t => "\\head{" + t + "}"),
+${_.join(
+    _.map(titles, t => "{" + t + "}"),
     " & "
   )} \\\\
 `;
