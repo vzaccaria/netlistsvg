@@ -33,6 +33,21 @@ let fsmTestBatch = {
   ]
 };
 
+let quineTestBatch = {
+  name: "vz-quine",
+  scriptname: `${__dirname}/vz-quine.js`,
+  fixtures: `${__dirname}/fixtures`,
+  tests: [
+    {
+      msg: `with dont cares`,
+      cmd: (s, fd) => `${s} "001000000x000111"`,
+      expected: fd => `${fd}/quine-expected-output-with-dont-cares.json`
+    }
+  ]
+};
+
+// vz-quine "001000000x000111"
+
 let testBatch = b => {
   describe(b.name, () => {
     // The following line is temporary, remove it!!!
@@ -47,7 +62,8 @@ let testBatch = b => {
       )} > ${q.expected(fd)} ] `, () => {
         let f = $fs.readFileSync(q.expected(fd), "utf8");
         return exec(q.cmd(s, fd))
-          .then(a => a[0]).then(JSON.parse)
+          .then(a => a[0])
+          .then(JSON.parse)
           .should.eventually.deep.equal(JSON.parse(f));
       });
     });
@@ -55,3 +71,4 @@ let testBatch = b => {
 };
 
 testBatch(fsmTestBatch);
+testBatch(quineTestBatch);
