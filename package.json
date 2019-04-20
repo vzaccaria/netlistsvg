@@ -34,8 +34,12 @@
   },
   "bin": {
     "netlistsvg": "./bin/vz-netlist.js",
+    "vz-netlist": "./bin/vz-netlist.js",
+    "vz-compile-artifacts": "./bin/vz-compile-artifacts.js",
+    "vz-wave": "./bin/vz-wave.js",
     "vz-quine": "./bin/vz-quine.js",
     "vz-pipe": "./bin/vz-pipe.js",
+    "vz-fsm": "./bin/vz-fsm.js",
     "vz-memmap": "./bin/vz-memmap.js"
   },
   "scripts": {
