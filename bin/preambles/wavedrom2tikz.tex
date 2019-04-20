@@ -1,0 +1,397 @@
+
+% Seperation between lines
+\pgfmathsetlengthmacro{\wavesep}{2.0em}
+
+% Height of a waveform
+\pgfmathsetlengthmacro{\waveheight}{1.2em}
+
+% Width of a brick (half a cycle)
+\pgfmathsetlengthmacro{\wavewidth}{1em}
+
+% Width of the slant on slanted signal changes
+\pgfmathsetlengthmacro{\transitionwidth}{0.3em}
+
+% Width of the curve on slow signal changes (e.g. to z)
+\pgfmathsetlengthmacro{\curvedtransitionwidth}{1.0em}
+
+% Special signal styles
+\tikzset{wave x/.style={pattern=north east lines}}
+\tikzset{wave bus/.style={fill=white}}
+\tikzset{wave busyellow/.style={fill=yellow!25!white}}
+\tikzset{wave busorange/.style={fill=orange!25!white}}
+\tikzset{wave busblue/.style={fill=blue!25!white}}
+\tikzset{wave pulled/.style={dotted}}
+
+% Initialise pointer
+% \coordinate (last waveform);
+
+% Label for a signal. Arguments:
+%  #1: The human-readable label string
+\newcommand{\signallabel}[1]{
+   \node [ anchor=east
+         , left=0 of last waveform
+         , minimum height=\waveheight
+         ]
+         {#1};
+}
+
+% Advance the "last brick" coordinate to the next position
+%  #1: Width of a brick
+\newcommand{\advancebrick}[1]{
+   \coordinate (last brick) at ([shift={(#1*\wavewidth,0)}]last brick);
+}
+
+% Add the label for a bus
+%  #1: Label coordinate
+%  #2: Label text
+\newcommand{\busdata}[2]{
+   \node [ inner sep=0
+         , minimum height=\waveheight
+         , anchor=mid
+         , font=\footnotesize
+         ]
+         at ([shift={(0.5*\transitionwidth,0)}]#1)
+         {#2};
+}
+
+% Define a clip which will truncate a waveform at the left-hand side
+%  #1: Width of a brick
+%  #2: Truncation offset (in bricks)
+%  #3: Number of bricks in waveform
+\newcommand{\truncatewaveform}[3]{
+   \coordinate (last brick) at ([shift={(-#2*\wavewidth,0)}]last brick);
+   \clip ([shift={(#2*\wavewidth, 0.6*\waveheight)}]last brick)
+         rectangle ++(#3*#1*\wavewidth-#2*\wavewidth,-1.2*\waveheight);
+}
+
+% Spacer Brick Overlay
+%  #1: brick width
+\newcommand{\brickspaceroverly}[1]{
+   \pgfmathsetlengthmacro{\spacerheight}{1.2*\waveheight}
+   \pgfmathsetlengthmacro{\spacerwidth}{\transitionwidth}
+   \pgfmathsetlengthmacro{\spacergap}{0.7*\transitionwidth}
+
+   % Mask off the waveform
+   \fill [fill=white]
+         ([xshift=-#1*\wavewidth-0.5*\spacergap-0.5*\spacerwidth, yshift=-0.5*\spacerheight]last brick)
+      .. controls +(0.8*\spacergap, 0) and +(-0.8*\spacergap, 0)
+      .. ++(\spacerwidth, \spacerheight)
+      -- ++(\spacergap,0)
+      .. controls +(-0.8*\spacergap, 0) and +(0.8*\spacergap, 0)
+      .. ++(-\spacerwidth, -\spacerheight)
+       ;
+
+   % Lines
+   \draw ([xshift=-#1*\wavewidth-0.5*\spacergap-0.5*\spacerwidth, yshift=-0.5*\spacerheight]last brick)
+      .. controls +(0.8*\spacergap, 0) and +(-0.8*\spacergap, 0)
+      .. ++(\spacerwidth, \spacerheight)
+         ++(\spacergap,0)
+      .. controls +(-0.8*\spacergap, 0) and +(0.8*\spacergap, 0)
+      .. ++(-\spacerwidth, -\spacerheight)
+       ;
+
+}
+
+% Generic mid-bus brick
+%  #1: brick width
+%  #2: brick style
+\newcommand{\brickbus}[2]{
+   \fill [#2]
+         ([yshift= 0.5*\waveheight]last brick)
+      -- ++(#1*\wavewidth,0)
+      -- ++(0,-\waveheight)
+      -- ++(-#1*\wavewidth,0)
+      -- cycle
+       ;
+   \draw ([yshift= 0.5*\waveheight]last brick) -- ++(#1*\wavewidth,0)
+         ([yshift=-0.5*\waveheight]last brick) -- ++(#1*\wavewidth,0)
+       ;
+
+   \advancebrick{#1}
+}
+
+% Generic mid-bit brick
+%  #1: brick width
+%  #2: Line style
+%  #3: Start line offset (from bottom)
+%  #4: End line offset (from bottom)
+%  #5: Add arrow on transition
+\newcommand{\brickbit}[5]{
+   \pgfmathsetlengthmacro{\vstart}{(#3-0.5)*\waveheight}
+   \pgfmathsetlengthmacro{\vend}{(#4-0.5)*\waveheight}
+
+   % The bit value
+   \draw [#2]
+         ([yshift=\vend]last brick)
+      |- ([yshift=\vstart, xshift=#1*\wavewidth]last brick);
+
+   % Arrow (if required)
+   \ifthenelse{\equal{#5}{1}}{
+      \path [decoration={ markings
+                        , mark=at position 0.5 with {\arrow{>}}
+                        }
+            , postaction={decorate}
+            ]
+            ([yshift=\vend]last brick)
+         -- ([yshift=\vstart]last brick);
+   }{}
+
+   \advancebrick{#1}
+}
+
+% Generic bit-glitch brick
+%  #1: brick width
+%  #2: Style
+%  #3: Edge start (offset from bottom)
+\newcommand{\brickbitglitch}[3]{
+   \pgfmathsetlengthmacro{\voffset}{(#3-0.5)*\waveheight}
+
+   \draw [#2]
+         ([yshift=\voffset]last brick)
+      -- ([xshift=0.5*\transitionwidth]last brick)
+      -- ([yshift=\voffset, xshift=\transitionwidth]last brick)
+      -- ++(#1*\wavewidth - \transitionwidth,0);
+
+   \advancebrick{#1}
+}
+
+% Generic sharp bit-to-bit transition
+%  #1: brick width
+%  #2: Brick style
+%  #3: Old bit (offset from bottom)
+%  #4: New bit (offset from bottom)
+%  #5: Include arrow
+\newcommand{\bricksharpbittobit}[5]{
+   \pgfmathsetlengthmacro{\vstart}{(#3-0.5)*\waveheight}
+   \pgfmathsetlengthmacro{\vend}{(#4-0.5)*\waveheight}
+
+   % The transition and new bit
+   \draw [#2]
+         ([yshift=\vstart]last brick)
+      -- ([yshift=\vend]last brick)
+      -- ++(#1*\wavewidth,0);
+
+   % Arrow (if required)
+   \ifthenelse{\equal{#5}{1}}{
+      \ifthenelse{\not\equal{#3}{#4}}{
+         \path [decoration={ markings
+                           , mark=at position 0.5 with {\arrow{>}}
+                           }
+               , postaction={decorate}
+               ]
+               ([yshift=\vstart]last brick)
+            -- ([yshift=\vend]last brick);
+      }{}
+   }{}
+
+   \advancebrick{#1}
+}
+
+% Generic sharp bus-to-bit transition
+%  #1: brick width
+%  #2: Brick style
+%  #3: New bit (offset from bottom)
+%  #4: Include arrow
+\newcommand{\bricksharpbustobit}[4]{
+   \pgfmathsetlengthmacro{\vstart}{((1-#3)-0.5)*\waveheight}
+   \pgfmathsetlengthmacro{\vend}{(#3-0.5)*\waveheight}
+
+   % The transition and new bit
+   \draw [#2]
+         ([yshift=\vstart]last brick)
+      -- ([yshift=\vend]last brick)
+      -- ++(#1*\wavewidth,0);
+
+   % Arrow (if required)
+   \ifthenelse{\equal{#4}{1}}{
+      \path [decoration={ markings
+                        , mark=at position 0.5 with {\arrow{>}}
+                        }
+            , postaction={decorate}
+            ]
+            ([yshift=\vstart]last brick)
+         -- ([yshift=\vend]last brick);
+   }{}
+
+   \advancebrick{#1}
+}
+
+% Generic soft bit-to-bit transition
+%  #1: brick width
+%  #2: Last brick style
+%  #3: This brick style
+%  #4: Last bit (offset from bottom)
+%  #5: New bit (offset from bottom)
+\newcommand{\bricksmoothbittobit}[5]{
+   \pgfmathsetlengthmacro{\vstart}{(#4-0.5)*\waveheight}
+   \pgfmathsetlengthmacro{\vend}{(#5-0.5)*\waveheight}
+
+   % Scale the transition depending on the magnitude of the level change
+   \pgfmathsetlengthmacro{\thistranswidth}{abs(#4-#5)*\transitionwidth}
+   \pgfmathsetlengthmacro{\thisleadwidth}{\transitionwidth - \thistranswidth}
+
+   % The lead up to the transition
+   \draw [#2]
+         ([yshift=\vstart]last brick)
+      -- ([yshift=\vstart, xshift=\thisleadwidth]last brick);
+
+   % The transition itself
+   \draw [#3]
+         ([yshift=\vstart, xshift=\thisleadwidth]last brick)
+      -- ([yshift=\vend, xshift=\transitionwidth]last brick)
+      -- ++(#1*\wavewidth - \transitionwidth,0);
+
+   \coordinate (last transition) at ([xshift=0.5*\transitionwidth]last brick);
+
+   \advancebrick{#1}
+}
+
+% Generic curved bit-to-bit transition
+%  #1: brick width
+%  #2: Last brick style
+%  #3: This brick style
+%  #4: Last bit (offset from bottom)
+%  #5: New bit (offset from bottom)
+\newcommand{\brickcurvedbittobit}[5]{
+   \pgfmathsetlengthmacro{\vstart}{(#4-0.5)*\waveheight}
+   \pgfmathsetlengthmacro{\vend}{(#5-0.5)*\waveheight}
+
+   % The curve itself
+   \draw [#2]
+         ([yshift=\vstart]last brick)
+      .. controls ([yshift=\vstart]last brick)
+              and ([yshift=\vend, xshift=0.2*\curvedtransitionwidth]last brick)
+      .. ([yshift=\vend, xshift=\curvedtransitionwidth]last brick);
+
+   % Start of the new bit
+   \draw [#3]
+         ([yshift=\vend, xshift=\curvedtransitionwidth]last brick)
+      -- ++(#1*\wavewidth - \curvedtransitionwidth,0);
+
+   \coordinate (last transition) at ([xshift=0.5*\curvedtransitionwidth]last brick);
+
+   \advancebrick{#1}
+}
+
+% Generic soft transition from bit to bus
+%  #1: brick width
+%  #2: Bit style
+%  #3: Bus style
+%  #4: Bit (offset from bottom)
+\newcommand{\bricksmoothbittobus}[4]{
+   \pgfmathsetlengthmacro{\voffset}{(#4-0.5)*\waveheight}
+
+   % Scale the transition depending on the magnitude of the level change
+   \pgfmathsetlengthmacro{\thistranswidth}{(abs(#4-0.5)+0.5)*\transitionwidth}
+   \pgfmathsetlengthmacro{\thisleadwidth}{\transitionwidth - \thistranswidth}
+
+   % The lead up to the transition
+   \draw [#2]
+         ([yshift=\voffset]last brick)
+      -- ([yshift=\voffset, xshift=\thisleadwidth]last brick);
+
+   % Open-up the bus
+   \draw [#3]
+         ([xshift=#1*\wavewidth,    yshift= 0.5*\waveheight]last brick)
+      -- ([xshift=\transitionwidth, yshift= 0.5*\waveheight]last brick)
+      -- ([xshift=\thisleadwidth,   yshift=     \voffset]   last brick)
+      -- ([xshift=\transitionwidth, yshift=-0.5*\waveheight]last brick)
+      -- ([xshift=#1*\wavewidth,    yshift=-0.5*\waveheight]last brick)
+      ;
+
+   \coordinate (last transition) at ([xshift=0.5*\transitionwidth]last brick);
+
+   \advancebrick{#1}
+}
+
+% Generic smooth transition from bus to bus
+%  #1: brick width
+%  #2: Bus style
+%  #3: Bit style
+\newcommand{\brickbustobus}[3]{
+
+   % Close-down the old bus
+   \draw [#2]
+         ([yshift= 0.5*\waveheight]    last brick)
+      -- ([xshift=0.5*\transitionwidth]last brick)
+      -- ([yshift=-0.5*\waveheight]    last brick)
+      ;
+
+   % Open-up the new bus
+   \draw [#3]
+         ([xshift=#1*\wavewidth,    yshift= 0.5*\waveheight]last brick)
+      -- ([xshift=\transitionwidth, yshift= 0.5*\waveheight]last brick)
+      -- ([xshift=0.5*\transitionwidth]                     last brick)
+      -- ([xshift=\transitionwidth, yshift=-0.5*\waveheight]last brick)
+      -- ([xshift=#1*\wavewidth,    yshift=-0.5*\waveheight]last brick)
+      ;
+
+   \coordinate (last transition) at ([xshift=0.5*\transitionwidth]last brick);
+
+   \advancebrick{#1}
+}
+
+% Generic smooth transition from bus to bit
+%  #1: brick width
+%  #2: Bus style
+%  #3: Bit style
+%  #4: Bit (offset from bottom)
+\newcommand{\bricksmoothbustobit}[4]{
+   \pgfmathsetlengthmacro{\voffset}{(#4-0.5)*\waveheight}
+
+   % Scale the transition depending on the magnitude of the level change
+   \pgfmathsetlengthmacro{\thistranswidth}{(abs(#4-0.5)+0.5)*\transitionwidth}
+   \pgfmathsetlengthmacro{\thisleadwidth}{\transitionwidth - \thistranswidth}
+
+   % Close-down the bus
+   \draw [#2]
+         ([                         yshift= 0.5*\waveheight]last brick)
+      -- ([xshift=\thisleadwidth,   yshift= 0.5*\waveheight]last brick)
+      -- ([xshift=\transitionwidth, yshift=     \voffset]   last brick)
+      -- ([xshift=\thisleadwidth,   yshift=-0.5*\waveheight]last brick)
+      -- ([                         yshift=-0.5*\waveheight]last brick)
+      ;
+
+   % The new bit
+   \draw [#3]
+         ([xshift=\transitionwidth, yshift=\voffset]last brick)
+      -- ([xshift=#1*\wavewidth,    yshift=\voffset]last brick);
+
+   \coordinate (last transition) at ([xshift=0.5*\transitionwidth]last brick);
+
+   \advancebrick{#1}
+}
+
+% Generic curved transition from bus to bit
+%  #1: brick width
+%  #2: Bus style
+%  #3: Bit style
+%  #4: Bit (offset from bottom)
+\newcommand{\brickcurvedbustobit}[4]{
+   \pgfmathsetlengthmacro{\voffset}{(#4-0.5)*\waveheight}
+
+   % Scale the transition depending on the magnitude of the level change
+   \pgfmathsetlengthmacro{\thistranswidth}{(abs(#4-0.5)+0.5)*\transitionwidth}
+   \pgfmathsetlengthmacro{\thisleadwidth}{\transitionwidth - \thistranswidth}
+
+   % Close-down the bus
+   \draw [#2]
+         ([yshift= 0.5*\waveheight]last brick)
+      .. controls ([                                   yshift= 0.5*\waveheight]last brick)
+              and ([xshift=0.2*\curvedtransitionwidth, yshift=     \voffset]   last brick)
+      .. ([xshift=\curvedtransitionwidth, yshift= \voffset]last brick)
+      .. controls ([xshift=0.2*\curvedtransitionwidth, yshift=     \voffset]   last brick)
+              and ([                                   yshift=-0.5*\waveheight]last brick)
+      .. ([yshift=-0.5*\waveheight]last brick)
+      ;
+
+   % The new bit
+   \draw [#3]
+         ([xshift=\curvedtransitionwidth, yshift=\voffset]last brick)
+      -- ([xshift=#1*\wavewidth,    yshift=\voffset]last brick);
+
+   \coordinate (last transition) at ([xshift=0.5*\curvedtransitionwidth]last brick);
+
+   \advancebrick{#1}
+}
+

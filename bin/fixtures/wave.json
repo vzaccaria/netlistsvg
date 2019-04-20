@@ -1,0 +1,7 @@
+{ "signal": [
+    { "name": "s", "wave": "p......." },
+    { "name": "r", "wave": "P......." },
+    { "name": "clk", "wave": "n......." },
+    { "name": "q", "wave": "phnlPHNL" },
+  { "name": "qbar", "wave": "xhlhLHl." }
+]}

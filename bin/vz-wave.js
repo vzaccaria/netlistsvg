@@ -11,6 +11,15 @@ let vcdParser = require("vcd-parser");
 
 let tmp = require("tmp-promise");
 let { execWithString } = require("./lib/common");
+let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+
+let wave2tikz = (options, wavedata) => {
+  return execWithString(
+    path => `${__dirname}/lib/wavedromtikz.py wavedrom ${path}`,
+    wavedata,
+    { postfix: ".json", logger: options.logger }
+  );
+};
 
 let wave2pdf = (options, wavedata) => {
   return tmp.file({ postfix: ".svg" }).then(tmpsvg => {
@@ -48,7 +57,7 @@ let parseSignal = (end, sig) => {
 
 let produceWave = (args, options, vcd) => {
   let sigs = vcd.signal;
-  console.log(_.map(sigs, s => s.name));
+  // console.log(_.map(sigs, s => s.name));
   let observables = options.signals.split(",");
   let fsigs = _.map(observables, o => {
     return _.find(sigs, s => s.name === o);
@@ -77,6 +86,41 @@ let main = () => {
       let wave_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
       wave_data
         .then(data => wave2pdf(options, data))
+        .catch(e => {
+          logger.error(e);
+        });
+    })
+    .command("vcd2tikz", "produce a tikz wave diagram from a vcd")
+    .argument("<file>", "source VCD file")
+    .option("--end <integer>", "time ends at", prog.INTEGER, 10)
+    .option("-s, --signals <string>", "comma separated list of signals")
+    .option("-a, --save <prefix>", "save with prefix")
+    .action((args, options, logger) => {
+      $fs
+        .readFile(args.file, "utf-8")
+        .then(data => vcdParser.parse(data))
+        .then(data => produceWave(args, options, data))
+        .then(data => {
+          options.logger = logger;
+          let data_p = wave2tikz(options, JSON.stringify(data));
+          data_p.then(ltx => {
+            let artifacts = [
+              latexArtifact(
+                ltx,
+                "wave",
+                "standalone",
+                "pdflatex",
+                `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+              )
+            ];
+            let result = { latex: artifacts };
+            if (options.save) {
+              saveArtifacts(data.latex, options.save);
+            } else {
+              console.log(JSON.stringify(result, 0, 4));
+            }
+          });
+        })
         .catch(e => {
           logger.error(e);
         });
