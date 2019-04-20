@@ -23,4 +23,4 @@ let execWithString = (cmd, string, options) => {
   });
 };
 
-module.exports = { execWithString, saveArtifact };
+module.exports = { execWithString };
