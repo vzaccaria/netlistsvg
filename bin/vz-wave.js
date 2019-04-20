@@ -17,7 +17,7 @@ let wave2tikz = (options, wavedata) => {
   return execWithString(
     path => `${__dirname}/lib/wavedromtikz.py wavedrom ${path}`,
     wavedata,
-    { postfix: ".json", logger: options.logger }
+    { postfix: ".json", cleanup: false, logger: options.logger }
   );
 };
 
@@ -32,7 +32,9 @@ let wave2pdf = (options, wavedata) => {
       { postfix: ".js", cleanup: false, logger: options.logger }
     )
       .then(() => {
-        return exec(`cairosvg ${tmpsvg.path} -f pdf -o ${options.output}`);
+        return exec(
+          `cairosvg ${tmpsvg.path} -f pdf -o ${options.dumpClassicPdf}`
+        );
       })
       .then(() => {
         if (!options.keep) tmpsvg.cleanup();
@@ -40,11 +42,25 @@ let wave2pdf = (options, wavedata) => {
   });
 };
 
-let parseSignal = (end, sig) => {
+let trimName = n => {
+  return _.last(n.split("."));
+};
+
+let parseSignal = (options, sig) => {
   let v = [];
   let last = "q";
-  for (let i = 0; i < end; i++) {
+  let isclock = sig.name.match(/c[l]?[o]?k/i) ? true : false;
+  let negedge = !options.posedgeClock;
+  let nc = isclock && negedge;
+  let pc = isclock && !negedge;
+
+  for (let i = 0; i < options.end; i++) {
     let value = _.last(_.filter(sig.wave, s => parseInt(s[0]) <= i))[1];
+    if (pc) {
+      value = value === "1" ? "H" : "l";
+    } else if (nc) {
+      value = value === "0" ? "L" : "h";
+    }
     if (value !== last) {
       v.push(value);
       last = value;
@@ -52,62 +68,91 @@ let parseSignal = (end, sig) => {
       v.push(".");
     }
   }
-  return { name: sig.name, wave: _.join(v, "") };
+  return {
+    name: options.trimNames ? trimName(_.toUpper(sig.name)) : sig.name,
+    wave: _.join(v, "")
+  };
 };
 
-let produceWave = (args, options, vcd) => {
+let produceWave = _.curry((args, options, vcd) => {
   let sigs = vcd.signal;
   // console.log(_.map(sigs, s => s.name));
   let observables = options.signals.split(",");
   let fsigs = _.map(observables, o => {
     return _.find(sigs, s => s.name === o);
   });
-  return {
-    signal: _.map(fsigs, _.curry(parseSignal)(options.end))
+  let s = {
+    signal: _.map(fsigs, _.curry(parseSignal)(options))
   };
+  // console.log(s);
+  return s;
+});
+
+let readWavedrom = (args, options) => {
+  let file_p = $fs.readFile(args.file, "utf-8");
+  let wavedrom = options.isVcd
+    ? file_p
+        .then(vcdParser.parse)
+        .then(produceWave(args, options))
+        .then(JSON.stringify)
+    : file_p;
+  return wavedrom;
+};
+
+let processWhitelist = (wavedrom, options) => {
+  if (options.whiteList) {
+    let wd = _.map(JSON.parse(wavedrom).signal, ({ name, wave }) => {
+      if (!_.includes(options.whiteList, name)) return { name, wave: "" };
+      else return { name, wave };
+    });
+
+    return JSON.stringify({
+      signal: wd
+    });
+  } else {
+    return wavedrom;
+  }
 };
 
 let main = () => {
   prog
     .description("Produce a wave diagram")
-    .command("wavedrom2pdf", "produce a wave diagram")
-    .argument(
-      "[file]",
-      "JSON file (see http://wavedrom.com/tutorial.html for syntax)"
-    )
-    .option(
-      "-o, --output <filename>",
-      "Output filename",
-      prog.STRING,
-      "output.pdf"
-    )
-    .action((args, options, logger) => {
-      options.logger = logger;
-      let wave_data = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
-      wave_data
-        .then(data => wave2pdf(options, data))
-        .catch(e => {
-          logger.error(e);
-        });
-    })
-    .command("vcd2tikz", "produce a tikz wave diagram from a vcd")
-    .argument("<file>", "source VCD file")
+    .argument("<file>", "source Wavedrom/VCD file")
     .option("--end <integer>", "time ends at", prog.INTEGER, 10)
     .option("-s, --signals <string>", "comma separated list of signals")
     .option("-a, --save <prefix>", "save with prefix")
+    .option("-c, --is-vcd", "input is a vcd file")
+    .option("-p, --posedge-clock", "clock is posedge, otherwise negedge")
+    .option("-n, --trim-names", "trim hierarchic path names")
+    .option("-w, --white-list <names>", "whitelisted names", prog.LIST)
+    .option(
+      "-z, --dump-tikz",
+      "Just dump only tikz, not reproducible artifacts"
+    )
+    .option(
+      "-d, --dump-classic-pdf <file>",
+      "Produce the wave from the classic wavedrom cli"
+    )
     .action((args, options, logger) => {
-      $fs
-        .readFile(args.file, "utf-8")
-        .then(data => vcdParser.parse(data))
-        .then(data => produceWave(args, options, data))
-        .then(data => {
-          options.logger = logger;
-          let data_p = wave2tikz(options, JSON.stringify(data));
-          data_p.then(ltx => {
+      options.logger = logger;
+      readWavedrom(args, options)
+        .then(wavedrom => {
+          let whitelisted = processWhitelist(wavedrom, options);
+          Promise.all([
+            wave2tikz(options, wavedrom),
+            wave2tikz(options, whitelisted)
+          ]).then(([complete, whitel]) => {
             let artifacts = [
               latexArtifact(
-                ltx,
+                complete,
                 "wave",
+                "standalone",
+                "pdflatex",
+                `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+              ),
+              latexArtifact(
+                whitel,
+                "wave whitelisted",
                 "standalone",
                 "pdflatex",
                 `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
@@ -115,30 +160,19 @@ let main = () => {
             ];
             let result = { latex: artifacts };
             if (options.save) {
-              saveArtifacts(data.latex, options.save);
+              saveArtifacts(result.latex, options.save);
             } else {
-              console.log(JSON.stringify(result, 0, 4));
+              if (options.dumpTikz) {
+                console.log(complete);
+              } else {
+                if (options.dumpClassicPdf) {
+                  return wave2pdf(options, wavedrom);
+                } else {
+                  console.log(JSON.stringify(result, 0, 4));
+                }
+              }
             }
           });
-        })
-        .catch(e => {
-          logger.error(e);
-        });
-    })
-    .command("vcd2pdf", "produce a wave diagram from a vcd")
-    .argument("<file>", "source VCD file")
-    .option("--end <integer>", "time ends at", prog.INTEGER, 10)
-    .option("-s, --signals <string>", "comma separated list of signals")
-    .action((args, options, logger) => {
-      $fs
-        .readFile(args.file, "utf-8")
-        .then(data => vcdParser.parse(data))
-        .then(data => produceWave(args, options, data))
-        .then(data => {
-          console.log(data);
-          options.output = args.file + ".pdf";
-          options.logger = logger;
-          return wave2pdf(options, JSON.stringify(data));
         })
         .catch(e => {
           logger.error(e);
