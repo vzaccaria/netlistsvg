@@ -40,4 +40,21 @@ let pipeTestBatch = {
   ]
 };
 
-module.exports = [fsmTestBatch, quineTestBatch, pipeTestBatch];
+let waveTestBatch = {
+  name: "vz-wave",
+  scriptname: `${__dirname}/vz-wave.js`,
+  fixtures: `${__dirname}/fixtures`,
+  tests: [
+    {
+      msg: `parse vcd`,
+      cmd: (s, fd) =>
+        `${s} -n -c -s test.i,test.z,test.dut.d1,test.dut.q1,test.dut.d2,test.dut.q2,test.clk,test.rst --end 28 -w I,CLK ${fd}/wave.vcd`
+    },
+    {
+      msg: `parse wavedrom`,
+      cmd: (s, fd) => `${s} ${fd}/wave.json`
+    }
+  ]
+};
+
+module.exports = [fsmTestBatch, quineTestBatch, pipeTestBatch, waveTestBatch];
