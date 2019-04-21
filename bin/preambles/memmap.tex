@@ -1,0 +1,87 @@
+
+\usetikzlibrary{shapes, shapes.geometric, patterns,
+                decorations.pathreplacing, calc, positioning}
+
+\tikzset{regionnum/.style={
+    rectangle, fill=white, fill opacity=0.4, text opacity=1, font=\small,
+    outer sep=0.2em,inner sep=0.2em,
+    }
+}
+\tikzset{one sided/.style={
+    draw=none,
+        append after command={
+            [shorten <= -0.5\pgflinewidth]
+           ([shift={(-1.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north east)
+        ([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+            ([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+        ([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+            ([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+        edge([shift={(-1.0\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south east)
+        }
+  }
+}
+\tikzset{empty/.style={
+    draw=none,
+        append after command={
+            [shorten <= -0.5\pgflinewidth]
+           ([shift={(-1.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north east)
+        ([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+            ([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+        edge ([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+            ([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+        ([shift={(-0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south east)
+       edge ([shift={(-0.5\pgflinewidth,0\pgflinewidth)}]\tikzlastnode.north east)
+        }
+  }
+}
+
+\tikzset{grow up/.style={
+    draw=none,
+        % append after command={
+        %     [shorten <= -0.5\pgflinewidth]
+        %    ([shift={(-1.5\pgflinewidth,-15\pgflinewidth)}]\tikzlastnode.north east)
+        % edge[]([shift={( 0.5\pgflinewidth,-15\pgflinewidth)}]\tikzlastnode.north west)
+        %     ([shift={( +1.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+    % edge []([shift={( +1.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+       % ([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+    % edge[solid]([shift={(-1.0\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south east)
+    % ([shift={(-1.0\pgflinewidth,0\pgflinewidth)}]\tikzlastnode.south east)
+% edge[] ([shift={(-1.0\pgflinewidth,0\pgflinewidth)}]\tikzlastnode.north east)
+        % }
+  }
+}
+
+\tikzset{grow down/.style={
+    draw=none,
+        % append after command={
+        %     [shorten <= -0.5\pgflinewidth]
+        %    ([shift={(-1.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north east)
+    % edge [solid, very thick]([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+        %     ([shift={( +1.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+    % edge [solid, very thick]([shift={( +1.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+       % ([shift={( 0.5\pgflinewidth,+15\pgflinewidth)}]\tikzlastnode.south west)
+    % edge[dotted, very thick]([shift={(-1.0\pgflinewidth,+15\pgflinewidth)}]\tikzlastnode.south east)
+    % ([shift={(-1.0\pgflinewidth,0\pgflinewidth)}]\tikzlastnode.south east)
+% edge[solid, very thick] ([shift={(-1.0\pgflinewidth,0\pgflinewidth)}]\tikzlastnode.north east)
+        % }
+  }
+}
+
+\tikzstyle{stack} = [thick, draw]
+\tikzstyle{heap} = [thick, draw]
+\tikzstyle{notmapped} = [fill opacity=0.4, text opacity=1]
+\tikzstyle{reserved} = [dashed, thick,color=gray!50,fill opacity=0.9, text opacity=1]
+\tikzstyle{registers} = [fill opacity=1, text opacity=1]
+\tikzstyle{regular} = [thick,fill opacity=0.9, text opacity=1]
+\tikzstyle{rempty} = [dashed,thick,color=gray!50,fill opacity=0.9, text opacity=1]
+
+\newcommand{\regionlabel}[2]
+{
+\draw[decoration={brace, amplitude=5, mirror}, xshift=13em, yshift=0] (#1.north west) -- (#1.south west) node [midway, left, xshift=-5, color=black!40, text width=3cm, align=right] {#2};
+}
+\newcommand{\multiregionlabel}[3]
+{
+\draw[decorate, decoration={brace, amplitude=10, mirror}, xshift=13em, yshift=0,color=gray!50] (#1.north west) -- (#2.south west) node [midway, left, xshift=-10, color=black!40] {#3};
+}
+    
+

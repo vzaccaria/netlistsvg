@@ -173,7 +173,7 @@ class MemoryMapNodeTemplate():
     standardattr = "rectangle, draw=%s, minimum width=%sem, "\
                    "minimum height=%sem, text height = 1em, "\
                    "inner sep = 1mm, align=center, alias=last,"
-    minheight = 1.3
+    minheight = 2.5
 
     @classmethod
     def calculate_height(cls, node, memrange, maxheight,
@@ -206,22 +206,21 @@ class MemoryMapNodeTemplate():
         extras = ''
 
         if node.kind.startswith('grow down '):
-            typeattrs += 'very thick, '
             node.kind = node.kind[len('grow down'):].strip()
             if not reverse:
                 typeattrs += 'grow up,'
-                extras = "\n\\draw [->, very thick] ([yshift=-9pt] last.north)"\
+                extras = "\n\\draw [-stealth'] ([] last.north)"\
                          " -- +(0,0.25);"
             else:
                 typeattrs += 'grow down,'
-                extras = "\n\\draw [->, very thick] "\
+                extras = "\n\\draw [->] "\
                          "([yshift=9pt] last.south) -- +(0,-0.25);"
         if node.kind.startswith('grow up '):
             node.kind = node.kind[len('grow up'):].strip()
             if not reverse:
-                typeattrs += 'grow down,'
-                extras = "\n\\draw [->, very thick] "\
-                         "([yshift=9pt] %s.south) -- +(0,-0.25);" % node.node_id
+                typeattrs += 'grow down, heap'
+                extras = "\n\\draw [-stealth'] "\
+                         "([] %s.south) -- +(0,-0.25);" % node.node_id
             else:
                 typeattrs += 'grow up,'
                 extras = "\n\\draw [->, very thick] "\

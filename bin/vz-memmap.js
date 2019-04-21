@@ -27,7 +27,7 @@ let main = () => {
     })
     .command("preamble")
     .action(() => {
-      exec(`${__dirname}/lib/generate_mem_diagram.py -r`).then(output => {
+      exec(`cat ${__dirname}/preambles/memmap.tex`).then(output => {
         console.log(output[0]);
       });
     });
