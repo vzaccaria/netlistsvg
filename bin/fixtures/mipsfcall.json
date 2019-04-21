@@ -1,0 +1,28 @@
+{
+  "omitFramepointer": true,
+  "callee": "$ref/g",
+  "functions": {
+    "$ref/f": {
+      "invokedby": "$ref/main",
+      "stackvarloc": ["d", "e"],
+      "regvarloc": ["a", "b", "c", "tmp"],
+      "invokes": {
+        "name": "$ref/g",
+        "passes": ["a", "b", "c"],
+        "expects": ["tmp"],
+        "preserveAcrossCall": ["a0", "a1", "t0", "t1"]
+      }
+    },
+    "$ref/g": {
+      "regvarloc": [],
+      "stackvarloc": ["r", "s"],
+      "invokedby": "$ref/f",
+      "invokes": {
+        "name": "$ref/other",
+        "passes": ["r", "s"],
+        "expects": ["r"],
+        "preserveAcrossCall": ["t0", "t1"]
+      }
+    }
+  }
+}
