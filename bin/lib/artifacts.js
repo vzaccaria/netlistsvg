@@ -36,7 +36,7 @@ let compileArtifact = _.curry((pfx, a) => {
 });
 
 let compileArtifacts = (data, pfx) => {
-  Promise.all(_.map(data, compileArtifact(pfx))).then(names => {
+  return Promise.all(_.map(data, compileArtifact(pfx))).then(names => {
     return exec(`pdftk ${_.join(names, " ")} cat output ${pfx}-all.pdf`).then(
       () => exec(`rm ${_.join(names, " ")}`)
     );
