@@ -215,31 +215,87 @@ let latexTruth = (table, headings) => {
         ${tail}
         `);
 };
-let synthesizeD = (fsm, options) => {
-  let diagram = drawFSM(fsm, options);
 
+let _rep = (c, n) => {
+  return _.map(_.range(0, n), () => c);
+};
+
+let produceTransitionTable = fsm => {
   let inoutcomb = cartesian(
     codeWords(fsm.encodingSize),
     codeWords(fsm.inputSize)
   );
-  let excitationTable = _.map(inoutcomb, vs => {
+  let transitionTable = _.map(inoutcomb, vs => {
     let ss = _.take(vs, fsm.encodingSize);
     let ii = _.takeRight(vs, fsm.inputSize);
     return _.concat(ss, ii, trans(fsm, ss, ii));
+  });
+  let transitionTableBlank = _.map(inoutcomb, vs => {
+    let ss = _.take(vs, fsm.encodingSize);
+    let ii = _.takeRight(vs, fsm.inputSize);
+    return _.concat(ss, ii, _rep("", fsm.encodingSize));
   });
   let headings = _.concat(
     _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
     _.map(_.range(0, fsm.inputSize), i => `I_${i}`),
     _.map(_.range(0, fsm.encodingSize), i => `D_${i}`)
   );
-  excitationTable = latexTruth(excitationTable, headings);
-  return { diagram, excitationTable };
+  transitionTable = latexTruth(transitionTable, headings);
+  transitionTableBlank = latexTruth(transitionTableBlank, headings);
+  return { transitionTable, transitionTableBlank };
 };
 
-let formatResults = ({ diagram, excitationTable }) => {
+let synthesizeD = (fsm, options) => {
+  let diagram = drawFSM(fsm, options);
+  let { transitionTable, transitionTableBlank } = produceTransitionTable(fsm);
+  let excitationTable = transitionTable;
+  let excitationTableBlank = transitionTableBlank;
+  return {
+    diagram,
+    transitionTable,
+    transitionTableBlank,
+    excitationTable,
+    excitationTableBlank
+  };
+};
+
+let formatResults = ({
+  diagram,
+  excitationTable,
+  excitationTableBlank,
+  transitionTable,
+  transitionTableBlank
+}) => {
   return [
     latexArtifact(diagram, "diagram", "standalone", "lualatex", "-z automata"),
-    latexArtifact(excitationTable, "excitation table", "standalone", "pdflatex", "-r varwidth")
+    latexArtifact(
+      excitationTable,
+      "excitation table",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      excitationTableBlank,
+      "excitation table blank",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      transitionTable,
+      "transition table",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      transitionTableBlank,
+      "transition table blank",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    )
   ];
 };
 
