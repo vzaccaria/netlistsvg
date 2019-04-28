@@ -42,9 +42,34 @@ let produceEnv = (data, options) => {
   };
 };
 
+let wrap = c => {
+ return `
+\\begin{tikzpicture}[overlay,remember picture]
+${c}
+\\end{tikzpicture}
+`;
+};
+
+let nannotate = _.curry((options, data) => {
+  let dts = data.split(",");
+  let nodes = _.initial(dts);
+  let string = _.last(dts);
+  let marks = "bm" + _.join(nodes, "");
+  let fit = _.join(_.map(nodes, n => `(${n})`), " ");
+  return `
+\\node [inner sep=0pt, fit=${fit}] (${marks}}) {};
+\\draw[color=gray!50, very thick]  (${marks}.north east) -- (${marks}.south east) node [midway, right, xshift=-3, color=black!40] {${string}};`;
+});
+
+let nannotates = (options, data) => {
+  data = data.split("/");
+  return wrap(_.join(_.map(data, nannotate(options)), "\n"));
+};
+
 let main = () => {
   prog
     .description("Create a referenceable minted env for source code")
+    .command("decorate", "decorate a source file")
     .argument("[file]", `Source file`)
     .option("-l, --language <string>", "language", prog.STRING, "c")
     .option("-p, --prefix <string>", "prefix for labels", prog.STRING, "ml")
@@ -57,6 +82,11 @@ let main = () => {
         if (!options.latex) console.log(JSON.stringify(res));
         else console.log(res.latex[0].code);
       });
+    })
+    .command("annotate")
+    .argument("<string>")
+    .action((args, options) => {
+      console.log(nannotates(options, args.string));
     });
   prog.parse(process.argv);
 };
