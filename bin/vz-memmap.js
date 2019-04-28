@@ -13,7 +13,7 @@ let main = () => {
   prog
     .description("Memory map generator")
     .command("generate")
-    .argument("[csvfile]>")
+    .argument("[csvfile]")
     .action((args, options, logger) => {
       (args.csvfile ? $fs.readFile(args.csvfile, "utf8") : $gstd()).then(data =>
         execWithString(

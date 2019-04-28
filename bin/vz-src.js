@@ -3,14 +3,23 @@
 
 const prog = require("caporal");
 const { latexArtifact } = require("./lib/artifacts");
+const { lab } = require("./lib/common");
 let $gstd = require("get-stdin");
 
 let _ = require("lodash");
 let $fs = require("mz/fs");
 
+let annotate = () => {
+  return `
+\\begin{tikzpicture}[overlay, remember picture]
+\\draw[color=gray!50, very thick] ($ (pic cs:mla) + (-10pt,4pt) $) -- ($ (pic cs:mlc) + (-10pt, 0pt) $) node [midway, left, xshift=-3, color=black!40] {pippo};
+\\end{tikzpicture}
+`;
+};
+
 let code = (data, options) => {
   data = _.map(data.split("\n"), (l, i) => {
-    let mk = `?\\tikzmark{${options.prefix}${i}}?`;
+    let mk = `?\\tikzmark{${lab(options.prefix, i)}}?`;
     return options.pos === "left" ? `${mk}${l}` : `${l}${mk}`;
   }).join("\n");
   data = `\\begin{minted}[escapeinside=??]{${options.language}}
@@ -23,11 +32,11 @@ let produceEnv = (data, options) => {
   return {
     latex: [
       latexArtifact(
-        code(data, options),
+        code(data, options) + annotate(),
         "code",
-        "standalone",
+        "article",
         "pdflatex",
-        "--usepackage minted,tikz --usetikzlibrary tikzmark -r varwidth"
+        "--usepackage minted,tikz --usetikzlibrary tikzmark -r varwidth -b"
       )
     ]
   };
