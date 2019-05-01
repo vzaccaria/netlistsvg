@@ -18,7 +18,7 @@ let lab = (pfx, idx) => {
   return pfx + _.join(x, "");
 };
 
-let execWithString = (cmd, string, options) => {
+let execWithStringStdErr = (cmd, string, options) => {
   let keep = !_.get(options, "cleanup", true);
   let postfix = _.get(options, "postfix", ".tmp");
   return tmp.file({ postfix, keep }).then(o => {
@@ -33,9 +33,13 @@ let execWithString = (cmd, string, options) => {
         if (!keep) {
           o.cleanup();
         }
-        return a[0];
+        return a;
       });
   });
 };
 
-module.exports = { execWithString, lab };
+let execWithString = (cmd, string, options) => {
+  return execWithStringStdErr(cmd, string, options).then(a => a[0]);
+};
+
+module.exports = { execWithString, execWithStringStdErr, lab };

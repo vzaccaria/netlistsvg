@@ -40,7 +40,8 @@
     "vz-quine": "./bin/vz-quine.js",
     "vz-pipe": "./bin/vz-pipe.js",
     "vz-fsm": "./bin/vz-fsm.js",
-    "vz-memmap": "./bin/vz-memmap.js"
+    "vz-memmap": "./bin/vz-memmap.js",
+    "vz-spim": "./bin/vz-spim.js"
   },
   "scripts": {
     "test": "eslint lib/**/*.js bin/**/*.js && eslint --global=document demo/**/*.js && node test/test-all.js",
