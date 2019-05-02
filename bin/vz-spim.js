@@ -30,6 +30,10 @@ let parseLine = line => {
   return r;
 };
 
+let clog = (p, x) => {
+  console.log(`${p}${_.trim(x)}`);
+};
+
 let printLine = _.curry(
   (
     {
@@ -45,23 +49,24 @@ let printLine = _.curry(
   ) => {
     if (!line.directive && !line.instruction && !line.label) {
       // Just a line comment.
-      if (line.comment) console.log(line.comment);
+      if (line.comment) clog("", line.comment);
       else if (lastidx !== idx) console.log("");
     }
     if (line.label) {
-      console.log(`${line.label}:`);
+      clog("", `${line.label}:`);
     }
     if (line.instruction) {
       let instr = _.padEnd(line.instruction, maxInstructionSize + 1);
       let ops = _.padEnd(line.operands, maxOperandsSize + 1);
       line.comment = line.comment ? line.comment : "";
-      console.log(`${pad}${instr}${ops}${line.comment}`);
+
+      clog(pad, `${instr}${ops}${line.comment}`);
     }
     if (line.directive) {
       let instr = _.padEnd(line.directive, maxDirectiveSize + 1);
       let ops = _.padEnd(line.parameters, maxOperandsSize + 1);
       line.comment = line.comment ? line.comment : "";
-      console.log(`${pad}.${instr}${ops}${line.comment}`);
+      clog(pad, `.${instr}${ops}${line.comment}`);
     }
   }
 );
@@ -146,6 +151,25 @@ let assemble = (filename, options, logger, program) => {
     .then(console.log);
 };
 
+let run = async (options, logger, filename) => {
+  let script = `
+   load "${filename}"
+   run
+   print_all_regs hex
+   exit
+`;
+  return execWithStringStdErr(
+    path => `cat ${path} | ${options.spimBinary}  -noexception`,
+    script,
+    { postfix: ".script", cleanup: false, logger: logger }
+  )
+    .then(([stdout, stderr]) => {
+      logger.debug(stderr);
+      console.log(stdout);
+    })
+    .then(console.log);
+};
+
 let $fs = require("mz/fs");
 
 let main = () => {
@@ -171,11 +195,22 @@ let main = () => {
     })
     .command("format", "format a source file")
     .argument("[file]", `Source file`)
-    .action(async (args, options, logger) => {
+    .action(async (args, options) => {
       let program = await (args.file
         ? $fs.readFile(args.file, "utf-8")
         : $gstd());
       beautifyProg(options, program);
+    })
+    .command("run", "run a source file")
+    .argument("<file>", `Source file`)
+    .option(
+      "-b, --spim-binary <string>",
+      "absolute path of spim executable",
+      prog.STRING,
+      "spim -delayed_branches -delayed_loads"
+    )
+    .action(async (args, options, logger) => {
+      run(options, logger, args.file);
     });
   prog.parse(process.argv);
 };
