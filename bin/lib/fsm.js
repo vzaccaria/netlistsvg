@@ -44,6 +44,16 @@ let getSrcOpts = (fsm, n1) => {
   return _.join(ops, ",");
 };
 
+let labelcmd = (lab, label) => {
+  if (lab === "c") {
+    return `edge node={node [] {\\tiny ${label}}}`;
+  } else {
+    if (lab === "d") {
+      return `edge node={node [auto] {\\tiny${label}}}`;
+    } else return `edge node={node [auto, swap] {\\tiny${label}}}`;
+  }
+};
+
 let connectMealy = (fsm, o1, o2, input) => {
   let _out = q => _.join(_.flatten(_.values(q)), "");
   //  get from { "name: .... } -> "name"
@@ -57,9 +67,10 @@ let connectMealy = (fsm, o1, o2, input) => {
 
   let type = n1 === n2 ? `${lp}` : `bend left=${angle}`;
   let label = `$${_.join(input, "")}/${_out(o2)}$`;
-  return `"$${n1}$" [${getSrcOpts(fsm, n1)}] -> [${type}, edge label${
-    lab === "d" ? "'" : ""
-  }={\\tiny ${label}}] "$${n2}$" [state]`;
+  return `"$${n1}$" [${getSrcOpts(fsm, n1)}] -> [${type}, ${labelcmd(
+    lab,
+    label
+  )}] "$${n2}$" [state]`;
 };
 
 let getMooreTransLabel = (fsm, n1, n2, input) => {
@@ -89,12 +100,10 @@ let connectMoore = (fsm, o1, o2, input, output) => {
 
   let type = n1 === n2 ? `${loopDir(angle)}` : `bend left=${angle}`;
   let label = `$${tl}$`;
-  return `"$${n1}$" [${getSrcOpts(
-    fsm,
-    n1
-  )},as=$${l1}$] -> [${type}, edge label${
-    lab === "d" ? "'" : ""
-  }={\\tiny ${label}}] "$${n2}$" [state, as=$${l2}$]`;
+  return `"$${n1}$" [${getSrcOpts(fsm, n1)},as=$${l1}$] -> [${type}, ${labelcmd(
+    lab,
+    label
+  )} ] "$${n2}$" [state, as=$${l2}$]`;
 };
 
 let mealy = fsm => {
@@ -177,21 +186,6 @@ let getTransitionTable = fsm => {
   }
 };
 
-let trans = (fsm, s, i) => {
-  if (_.isUndefined(fsm.encoding)) throw "undefined encoding!";
-  if (i.length !== fsm.inputSize) throw "wrong input size!";
-  let stateName = _.findKey(fsm.encoding, v => {
-    return _.isEqual(v, s);
-  });
-  let undef = _.map(_.repeat("x", fsm.encodingSize));
-  if (_.isUndefined(stateName)) return undef;
-  else {
-    let inputEncoding = parseInt(_.join(i, ""), 2);
-    let ttable = getTransitionTable(fsm);
-    return fsm.encoding[ttable[stateName][inputEncoding]];
-  }
-};
-
 let tableWrap = c => `
 \\begin{table}
         \\newcommand{\\head}[1]{{\\textbf{#1}}}
@@ -220,78 +214,128 @@ let _rep = (c, n) => {
   return _.map(_.range(0, n), () => c);
 };
 
+let trans = (fsm, s, i) => {
+  if (_.isUndefined(fsm.encoding)) throw "undefined encoding!";
+  if (i.length !== fsm.inputSize) throw "wrong input size!";
+  let stateName = _.findKey(fsm.encoding, v => {
+    return _.isEqual(v, s);
+  });
+  let undef = _.map(_.repeat("x", fsm.encodingSize));
+  if (_.isUndefined(stateName)) return undef;
+  else {
+    let inputEncoding = parseInt(_.join(i, ""), 2);
+    let ttable = getTransitionTable(fsm);
+    return fsm.encoding[ttable[stateName][inputEncoding]];
+  }
+};
+
+let transJK = (fsm, s, i) => {
+  let encodings = trans(fsm, s, i);
+  return _.flatten(
+    _.map(encodings, (qtp1, eidx) => {
+      let qt = s[eidx];
+      if (qt === 0 && qtp1 === 0) return ["0", "x"];
+      if (qt === 0 && qtp1 === 1) return ["1", "x"];
+      if (qt === 1 && qtp1 === 0) return ["x", "1"];
+      if (qt === 1 && qtp1 === 1) return ["x", "0"];
+      if (qtp1 === "x") return ["x", "x"];
+    })
+  );
+};
+
 let produceTransitionTable = fsm => {
   let inoutcomb = cartesian(
     codeWords(fsm.encodingSize),
     codeWords(fsm.inputSize)
   );
-  let transitionTable = _.map(inoutcomb, vs => {
-    let ss = _.take(vs, fsm.encodingSize);
-    let ii = _.takeRight(vs, fsm.inputSize);
-    return _.concat(ss, ii, trans(fsm, ss, ii));
-  });
-  let transitionTableBlank = _.map(inoutcomb, vs => {
-    let ss = _.take(vs, fsm.encodingSize);
-    let ii = _.takeRight(vs, fsm.inputSize);
-    return _.concat(ss, ii, _rep("", fsm.encodingSize));
-  });
-  let headings = _.concat(
-    _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
-    _.map(_.range(0, fsm.inputSize), i => `I_${i}`),
-    _.map(_.range(0, fsm.encodingSize), i => `D_${i}`)
-  );
-  transitionTable = latexTruth(transitionTable, headings);
-  transitionTableBlank = latexTruth(transitionTableBlank, headings);
-  return { transitionTable, transitionTableBlank };
+
+  let genTable = f => {
+    return _.map(inoutcomb, vs => {
+      let ss = _.take(vs, fsm.encodingSize);
+      let ii = _.takeRight(vs, fsm.inputSize);
+      return _.concat(ss, ii, _.flatten(f(fsm, ss, ii)));
+    });
+  };
+
+  let genTableHeadings = f =>
+    _.concat(
+      _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
+      _.map(_.range(0, fsm.inputSize), i => `I_${i}`),
+      _.flatten(_.map(_.range(0, fsm.encodingSize), i => f(i)))
+    );
+
+  let ttd = genTable(trans);
+  let ttdb = genTable(() => _rep("", fsm.encodingSize));
+  let jkttd = genTable(transJK);
+  let jkttdb = genTable(() => _rep("", fsm.encodingSize * 2));
+
+  let tth = genTableHeadings(i => `Q^*_${i}`);
+  let dtth = genTableHeadings(i => `D_${i}`);
+  let jktth = genTableHeadings(i => [`J_${i}`, `K_${i}`]);
+
+  let ttl = latexTruth(ttd, tth);
+  let ttbl = latexTruth(ttdb, tth);
+  let dttl = latexTruth(ttd, dtth);
+  let dttbl = latexTruth(ttdb, dtth);
+  let jkttl = latexTruth(jkttd, jktth);
+  let jkttbl = latexTruth(jkttdb, jktth);
+
+  return { ttl, ttbl, dttl, dttbl, jkttl, jkttbl };
 };
 
 let synthesizeD = (fsm, options) => {
   let diagram = drawFSM(fsm, options);
-  let { transitionTable, transitionTableBlank } = produceTransitionTable(fsm);
-  let excitationTable = transitionTable;
-  let excitationTableBlank = transitionTableBlank;
-  return {
-    diagram,
-    transitionTable,
-    transitionTableBlank,
-    excitationTable,
-    excitationTableBlank
-  };
+  let ttables = produceTransitionTable(fsm);
+  return _.merge({}, { diagram }, ttables);
 };
 
-let formatResults = ({
-  diagram,
-  excitationTable,
-  excitationTableBlank,
-  transitionTable,
-  transitionTableBlank
-}) => {
+let formatResults = d => {
   return [
-    latexArtifact(diagram, "diagram", "standalone", "lualatex", "-z automata"),
     latexArtifact(
-      excitationTable,
-      "excitation table",
+      d.diagram,
+      "diagram",
       "standalone",
-      "pdflatex",
-      "-r varwidth"
+      "lualatex",
+      "-z automata,quotes"
     ),
     latexArtifact(
-      excitationTableBlank,
-      "excitation table blank",
-      "standalone",
-      "pdflatex",
-      "-r varwidth"
-    ),
-    latexArtifact(
-      transitionTable,
+      d.ttl,
       "transition table",
       "standalone",
       "pdflatex",
       "-r varwidth"
     ),
     latexArtifact(
-      transitionTableBlank,
+      d.ttbl,
       "transition table blank",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      d.dttl,
+      "D excitation table",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      d.dttbl,
+      "D excitation table blank",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      d.jkttl,
+      "JK excitation table",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      d.jkttbl,
+      "JK excitation table blank",
       "standalone",
       "pdflatex",
       "-r varwidth"
