@@ -4,25 +4,19 @@
   "functions": {
     "$ref/f": {
       "invokedby": "$ref/main",
-      "stackvarloc": ["d", "e"],
-      "regvarloc": ["a", "b", "c", "tmp"],
+      "parameters": [],
+      "localvars": ["a/$s0", "b/$s1", "c/$s2", "d/$s3", "e/$s4", "f/$s5"],
       "invokes": {
-        "name": "$ref/g",
-        "passes": ["a", "b", "c"],
-        "expects": ["tmp"],
-        "preserveAcrossCall": ["a0", "a1", "t0", "t1"]
+        "name": "@k1",
+        "target": "$ref/g",
+        "passes": ["a", "b", "c", "d", "e", "f"],
+        "expects": ["a"]
       }
     },
     "$ref/g": {
-      "regvarloc": [],
-      "stackvarloc": ["r", "s"],
       "invokedby": "$ref/f",
-      "invokes": {
-        "name": "$ref/other",
-        "passes": ["r", "s"],
-        "expects": ["r"],
-        "preserveAcrossCall": ["t0", "t1"]
-      }
+      "parameters": ["u", "v", "w", "x", "y", "z"],
+      "localvars": ["q/$s0"]
     }
   }
 }
