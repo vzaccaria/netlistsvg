@@ -1,6 +1,7 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let { latexArtifact, saveArtifacts } = require("./artifacts");
+let { quickSynth } = require("./quine");
 
 let wrap = (c, options) => `
 \\begin{tikzpicture}[>=stealth', initial text=$ $]
@@ -243,6 +244,34 @@ let transJK = (fsm, s, i) => {
   );
 };
 
+let transT = (fsm, s, i) => {
+  let encodings = trans(fsm, s, i);
+  return _.flatten(
+    _.map(encodings, (qtp1, eidx) => {
+      let qt = s[eidx];
+      if (qt === 0 && qtp1 === 0) return ["0"];
+      if (qt === 0 && qtp1 === 1) return ["1"];
+      if (qt === 1 && qtp1 === 0) return ["1"];
+      if (qt === 1 && qtp1 === 1) return ["0"];
+      if (qtp1 === "x") return ["x", "x"];
+    })
+  );
+};
+
+let transSR = (fsm, s, i) => {
+  let encodings = trans(fsm, s, i);
+  return _.flatten(
+    _.map(encodings, (qtp1, eidx) => {
+      let qt = s[eidx];
+      if (qt === 0 && qtp1 === 0) return ["0", "x"];
+      if (qt === 0 && qtp1 === 1) return ["1", "0"];
+      if (qt === 1 && qtp1 === 0) return ["0", "1"];
+      if (qt === 1 && qtp1 === 1) return ["x", "0"];
+      if (qtp1 === "x") return ["x", "x"];
+    })
+  );
+};
+
 let produceTransitionTable = fsm => {
   let inoutcomb = cartesian(
     codeWords(fsm.encodingSize),
@@ -256,6 +285,13 @@ let produceTransitionTable = fsm => {
       return _.concat(ss, ii, _.flatten(f(fsm, ss, ii)));
     });
   };
+  let column = (f, i) => {
+    return _.map(inoutcomb, vs => {
+      let ss = _.take(vs, fsm.encodingSize);
+      let ii = _.takeRight(vs, fsm.inputSize);
+      return _.flatten(f(fsm, ss, ii))[i];
+    });
+  };
 
   let genTableHeadings = f =>
     _.concat(
@@ -264,83 +300,83 @@ let produceTransitionTable = fsm => {
       _.flatten(_.map(_.range(0, fsm.encodingSize), i => f(i)))
     );
 
-  let ttd = genTable(trans);
-  let ttdb = genTable(() => _rep("", fsm.encodingSize));
-  let jkttd = genTable(transJK);
-  let jkttdb = genTable(() => _rep("", fsm.encodingSize * 2));
+  let produceLatex = (name, transf, size, headings) => {
+    let dta = genTable(transf);
+    let blk = genTable(() => _rep("", fsm.encodingSize * size));
+    let thevars = _.concat(
+      _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
+      _.map(_.range(0, fsm.inputSize), i => `I_${i}`)
+    );
 
-  let tth = genTableHeadings(i => `Q^*_${i}`);
-  let dtth = genTableHeadings(i => `D_${i}`);
-  let jktth = genTableHeadings(i => [`J_${i}`, `K_${i}`]);
+    let fhdgs = _.flatten(_.map(_.range(0, fsm.encodingSize), headings));
+    let expressions = _.map(_.range(0, fsm.encodingSize * size), kk => {
+      return latexArtifact(
+        `$${fhdgs[kk]} = ${quickSynth(
+          _.join(column(transf, kk), ""),
+          thevars
+        )}$`,
+        `${fhdgs[kk]} expression`,
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
+      );
+    });
 
-  let ttl = latexTruth(ttd, tth);
-  let ttbl = latexTruth(ttdb, tth);
-  let dttl = latexTruth(ttd, dtth);
-  let dttbl = latexTruth(ttdb, dtth);
-  let jkttl = latexTruth(jkttd, jktth);
-  let jkttbl = latexTruth(jkttdb, jktth);
+    return _.concat(
+      [
+        latexArtifact(
+          latexTruth(dta, genTableHeadings(headings)),
+          name,
+          "standalone",
+          "pdflatex",
+          "-r varwidth"
+        ),
+        latexArtifact(
+          latexTruth(blk, genTableHeadings(headings)),
+          `${name} blank`,
+          "standalone",
+          "pdflatex",
+          "-r varwidth"
+        )
+      ],
+      expressions
+    );
+  };
 
-  return { ttl, ttbl, dttl, dttbl, jkttl, jkttbl };
+  let tt = produceLatex("transition table", trans, 1, i => `Q^*_${i}`);
+  let dt = produceLatex("D excitation table", trans, 1, i => `D_${i}`);
+  let jkt = produceLatex("JK excitation table", transJK, 2, i => [
+    `J_${i}`,
+    `K_${i}`
+  ]);
+  let srt = produceLatex("SR excitation table", transSR, 2, i => [
+    `S_${i}`,
+    `R_${i}`
+  ]);
+  let ttt = produceLatex("T excitation table", transT, 1, i => `T_${i}`);
+
+  return _.flatten([tt, dt, jkt, srt, ttt]);
 };
 
-let synthesizeD = (fsm, options) => {
+let synthesize = (fsm, options) => {
   let diagram = drawFSM(fsm, options);
   let ttables = produceTransitionTable(fsm);
-  return _.merge({}, { diagram }, ttables);
+  return _.merge({}, { diagram }, { ttables });
 };
 
 let formatResults = d => {
-  return [
-    latexArtifact(
-      d.diagram,
-      "diagram",
-      "standalone",
-      "lualatex",
-      "-z automata,quotes"
-    ),
-    latexArtifact(
-      d.ttl,
-      "transition table",
-      "standalone",
-      "pdflatex",
-      "-r varwidth"
-    ),
-    latexArtifact(
-      d.ttbl,
-      "transition table blank",
-      "standalone",
-      "pdflatex",
-      "-r varwidth"
-    ),
-    latexArtifact(
-      d.dttl,
-      "D excitation table",
-      "standalone",
-      "pdflatex",
-      "-r varwidth"
-    ),
-    latexArtifact(
-      d.dttbl,
-      "D excitation table blank",
-      "standalone",
-      "pdflatex",
-      "-r varwidth"
-    ),
-    latexArtifact(
-      d.jkttl,
-      "JK excitation table",
-      "standalone",
-      "pdflatex",
-      "-r varwidth"
-    ),
-    latexArtifact(
-      d.jkttbl,
-      "JK excitation table blank",
-      "standalone",
-      "pdflatex",
-      "-r varwidth"
-    )
-  ];
+  return _.concat(
+    [
+      latexArtifact(
+        d.diagram,
+        "diagram",
+        "standalone",
+        "lualatex",
+        "-z automata,quotes"
+      )
+    ],
+    d.ttables
+  );
 };
 
 let elaborateFSM = (fsm, options) => {
@@ -348,7 +384,7 @@ let elaborateFSM = (fsm, options) => {
     console.log(drawFSM(fsm, options));
     return;
   } else {
-    let data = { latex: formatResults(synthesizeD(fsm, options)) };
+    let data = { latex: formatResults(synthesize(fsm, options)) };
     if (options.save) {
       return saveArtifacts(data.latex, options.save);
     } else {

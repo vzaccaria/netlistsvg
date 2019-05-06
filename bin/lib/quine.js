@@ -307,6 +307,12 @@ let symbolicSolution = _.curry((vars, res) =>
   _.join(_.map(res.coverSymbolic, symbolicAsLogicFormula(vars)), "+")
 );
 
+let quickSynth = (data, vars) => {
+  let s = synthesize(data, vars);
+  let solution = s.quicksynth;
+  return solution;
+};
+
 let synthesize = (data, vars) => {
   let nvars = vars.length;
   let s = tt2qm(nvars, data);
@@ -325,6 +331,7 @@ let synthesize = (data, vars) => {
   let kmap =
     nvars === 4 ? karnaugh(s, vars) : "only 4 variables maps are supported";
 
+  s.quicksynth = `${symbolicSolution(vars, s)}`;
   s.latex = _.concat(
     [
       latexArtifact(
@@ -383,4 +390,4 @@ let synthesize = (data, vars) => {
   return s;
 };
 
-module.exports = { synthesize };
+module.exports = { synthesize, quickSynth };

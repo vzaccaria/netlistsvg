@@ -11,8 +11,8 @@ let { exec } = require("mz/child_process");
 let tmp = require("tmp-promise");
 let open = require("open");
 
-let compile = f => {
-  tmp.dir({ unsafeCleanup: true }).then(o => {
+let compile = (options, f) => {
+  tmp.dir({ unsafeCleanup: !options.keep }).then(o => {
     f = JSON.parse(f);
     compileArtifacts(f.latex, `${o.path}/artifact`)
       .then(() => exec(`mv ${o.path}/artifact-all.pdf .`))
@@ -25,9 +25,10 @@ let main = () => {
   prog
     .description("View complete artifact")
     .argument("[file]", `The file containing the artifact`)
-    .action(args => {
+    .option("-k, --keep", "Keep directory there")
+    .action((args,options) => {
       let datap = args.file ? $fs.readFile(args.file, "utf8") : $gstd();
-      datap.then(compile);
+      datap.then(dt => compile(options, dt));
     });
   prog.parse(process.argv);
 };

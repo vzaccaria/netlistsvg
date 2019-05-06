@@ -37,14 +37,17 @@ let compileArtifact = _.curry((pfx, a) => {
 
 let compileArtifacts = (data, pfx) => {
   return Promise.all(_.map(data, compileArtifact(pfx))).then(names => {
-    return exec(`pdftk ${_.join(names, " ")} cat output ${pfx}-all.pdf`).then(
-      () => exec(`rm ${_.join(names, " ")}`)
-    );
+    let cmd = `pdftk ${_.join(names, " ")} cat output ${pfx}-all.pdf`;
+    console.log(cmd);
+    return exec(cmd).then(() => {
+      let cmd = `rm ${_.join(names, " ")}`;
+      return exec(cmd);
+    });
   });
 };
 
 let saveArtifacts = (data, pfx) => {
-  Promise.all(_.map(data, saveArtifact(pfx)));
+  return Promise.all(_.map(data, saveArtifact(pfx)));
 };
 
 module.exports = {
