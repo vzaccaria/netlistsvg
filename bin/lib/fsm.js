@@ -253,7 +253,7 @@ let transT = (fsm, s, i) => {
       if (qt === 0 && qtp1 === 1) return ["1"];
       if (qt === 1 && qtp1 === 0) return ["1"];
       if (qt === 1 && qtp1 === 1) return ["0"];
-      if (qtp1 === "x") return ["x", "x"];
+      if (qtp1 === "x") return ["x"];
     })
   );
 };
