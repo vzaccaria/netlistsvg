@@ -309,18 +309,30 @@ let produceTransitionTable = fsm => {
     );
 
     let fhdgs = _.flatten(_.map(_.range(0, fsm.encodingSize), headings));
-    let expressions = _.map(_.range(0, fsm.encodingSize * size), kk => {
-      return latexArtifact(
-        `$${fhdgs[kk]} = ${quickSynth(
+    let expressions = _.flatten(
+      _.map(_.range(0, fsm.encodingSize * size), kk => {
+        let { solution, karnaugh } = quickSynth(
           _.join(column(transf, kk), ""),
           thevars
-        )}$`,
-        `${fhdgs[kk]} expression`,
-        "standalone",
-        "pdflatex",
-        "-r varwidth"
-      );
-    });
+        );
+        return [
+          latexArtifact(
+            `$${fhdgs[kk]} = ${solution}$`,
+            `${fhdgs[kk]} expression`,
+            "standalone",
+            "pdflatex",
+            "-r varwidth"
+          ),
+          latexArtifact(
+            karnaugh,
+            `${fhdgs[kk]} karnaugh map`,
+            "standalone",
+            "pdflatex",
+            "--usepackage karnaugh-map -r varwidth"
+          )
+        ];
+      })
+    );
 
     return _.concat(
       [

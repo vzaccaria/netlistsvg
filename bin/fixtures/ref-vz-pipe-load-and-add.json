@@ -51,7 +51,7 @@
             "name": "pipe hazards complete",
             "sfx": "pipe-hazards-complete",
             "engine": "pdflatex",
-            "addoptions": "-r varwidth -i /home/admin/projects/netlistsvg/bin/preambles/pipe.tex"
+            "addoptions": "-r varwidth -i /Users/zaccaria/development/github/org-writing/netlistsvg/bin/preambles/pipe.tex"
         },
         {
             "code": "\n\\begin{tikzpicture}\n\\node at (0, 0) [align=left, text width=25mm] {\\texttt{lw r2, lab(r1)}};\n\\pic (i0) at (2, 0) {pipe};\n\\node at (0, -1.3) [align=left, text width=25mm] {\\texttt{add r4, r2, r5}};\n\\pic (i1) at (3.5, -1.3) {pipe};\n\\end{tikzpicture}\n",
@@ -59,7 +59,7 @@
             "name": "pipe hazards blank",
             "sfx": "pipe-hazards-blank",
             "engine": "pdflatex",
-            "addoptions": "-r varwidth -i /home/admin/projects/netlistsvg/bin/preambles/pipe.tex"
+            "addoptions": "-r varwidth -i /Users/zaccaria/development/github/org-writing/netlistsvg/bin/preambles/pipe.tex"
         }
     ]
 }
