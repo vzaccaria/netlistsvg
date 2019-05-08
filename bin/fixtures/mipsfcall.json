@@ -1,6 +1,6 @@
 {
   "omitFramepointer": true,
-  "stackgrowsdown": false,
+  "stackgrows": "above",
   "functions": {
     "$ref/f": {
       "parameters": [],
@@ -8,7 +8,7 @@
     },
     "$ref/g": {
       "parameters": ["u/$a0", "v/$a1", "w/$a2", "x/$a3", "y/4", "z/4"],
-      "localvars": ["q/$s0", "v[4]/4"]
+      "localvars": ["q/$s0", "v[1..4]/4"]
     }
   }
 }
