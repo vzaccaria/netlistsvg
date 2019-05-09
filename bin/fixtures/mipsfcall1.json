@@ -1,0 +1,23 @@
+{
+  "note": "see https://drive.google.com/open?id=1y9ZCh6EEaFh740wEqmXzD9Y9PAxg3i05",
+  "omitFramePointer": true,
+  "stackgrows": "below",
+  "functions": {
+    "$ref/main": {
+      "parameters": [],
+      "localvars": []
+    },
+    "$ref/findaddr": {
+      "isLeaf": true,
+      "parameters": ["addr/$a0"],
+      "localvars": [
+        "i/$s0",
+        "vect[3]/4",
+        "vect[2]/4",
+        "vect[1]/4",
+        "vect[0]/4",
+        "lett[0..3]/4"
+      ]
+    }
+  }
+}

@@ -79,7 +79,7 @@ let gpstate = (data, { callee, caller }) => {
   }
 
   /* Allocate space on the stack for local variables */
-  if (!cee.isleaf) {
+  if (!cee.isLeaf) {
     cells.push({ type: "savedreg", name: "$ra", size: 4 });
   }
 

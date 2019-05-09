@@ -1,6 +1,6 @@
 {
-  "omitFramepointer": true,
-  "stackgrows": "above",
+  "omitFramePointer": true,
+  "stackgrows": "below",
   "functions": {
     "$ref/f": {
       "parameters": [],
