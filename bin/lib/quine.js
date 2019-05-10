@@ -276,19 +276,23 @@ let karnaugh = ({ funcdata, coverSymbolic }, vars) => {
 };
 
 let getSolutionTable = res => {
-  return (
-    `\\begin{itemize}` +
-    _.join(
-      _.map(res.coverSymbolic, i => {
-        return `\\item \\texttt{${_.join(
-          i.implicantSymbol,
-          ""
-        )}} prodotta dall'implicante (${_.join(i.implicantValue, ",")})`;
-      }),
-      "\n"
-    ) +
-    `\\end{itemize}`
-  );
+  if (res.coverSymbolic.length > 0)
+    return (
+      `\\begin{itemize}` +
+      _.join(
+        _.map(res.coverSymbolic, i => {
+          return `\\item \\texttt{${_.join(
+            i.implicantSymbol,
+            ""
+          )}} prodotta dall'implicante (${_.join(i.implicantValue, ",")})`;
+        }),
+        "\n"
+      ) +
+      `\\end{itemize}`
+    );
+  else {
+    return "nessuna copertura trovata";
+  }
 };
 
 let symbolicAsLogicFormula = _.curry((vars, i) => {
@@ -303,9 +307,11 @@ let symbolicAsLogicFormula = _.curry((vars, i) => {
   return val;
 });
 
-let symbolicSolution = _.curry((vars, res) =>
-  _.join(_.map(res.coverSymbolic, symbolicAsLogicFormula(vars)), "+")
-);
+let symbolicSolution = _.curry((vars, res) => {
+  if (res.coverSymbolic.length === 0) return "0";
+  else
+    return _.join(_.map(res.coverSymbolic, symbolicAsLogicFormula(vars)), "+");
+});
 
 let quickSynth = (data, vars) => {
   let s = synthesize(data, vars);

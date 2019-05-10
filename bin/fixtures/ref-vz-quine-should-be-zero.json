@@ -1,0 +1,975 @@
+{
+    "primeImplicants": [],
+    "funcdata": [
+        2,
+        2,
+        0,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+    ],
+    "implicantsTables": [
+        [
+            {
+                "values": [
+                    0
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "0",
+                    "0",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    1
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "1",
+                    "0",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    5
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "1",
+                    "0",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    6
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "1",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    7
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "0",
+                    "1",
+                    "1",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    8
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "0",
+                    "0",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    9
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    10
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "0",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    11
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "0",
+                    "1",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    12
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "1",
+                    "0",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    13
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "1",
+                    "0",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    14
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "1",
+                    "1",
+                    "0"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    15
+                ],
+                "prime": false,
+                "mask": 0,
+                "string": [
+                    "1",
+                    "1",
+                    "1",
+                    "1"
+                ],
+                "ones": 4
+            }
+        ],
+        [
+            {
+                "values": [
+                    0,
+                    1
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "0",
+                    "0",
+                    "0",
+                    "-"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    0,
+                    4
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "0",
+                    "-",
+                    "0",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    0,
+                    8
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "0",
+                    "0",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    1,
+                    5
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "0",
+                    "-",
+                    "0",
+                    "1"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    1,
+                    9
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    5
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "0",
+                    "1",
+                    "0",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    6
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "0",
+                    "1",
+                    "-",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    12
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "1",
+                    "0",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    5,
+                    7
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "0",
+                    "1",
+                    "-",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    5,
+                    13
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "1",
+                    "0",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    6,
+                    7
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "0",
+                    "1",
+                    "1",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    6,
+                    14
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "1",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    7,
+                    15
+                ],
+                "prime": false,
+                "mask": 8,
+                "string": [
+                    "-",
+                    "1",
+                    "1",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    8,
+                    9
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "1",
+                    "0",
+                    "0",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    8,
+                    10
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "1",
+                    "0",
+                    "-",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    8,
+                    12
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "1",
+                    "-",
+                    "0",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    9,
+                    11
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "1",
+                    "0",
+                    "-",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    9,
+                    13
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "1",
+                    "-",
+                    "0",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    10,
+                    11
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "1",
+                    "0",
+                    "1",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    10,
+                    14
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "1",
+                    "-",
+                    "1",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    11,
+                    15
+                ],
+                "prime": false,
+                "mask": 4,
+                "string": [
+                    "1",
+                    "-",
+                    "1",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    12,
+                    13
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "1",
+                    "1",
+                    "0",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    12,
+                    14
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "1",
+                    "1",
+                    "-",
+                    "0"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    13,
+                    15
+                ],
+                "prime": false,
+                "mask": 2,
+                "string": [
+                    "1",
+                    "1",
+                    "-",
+                    "1"
+                ],
+                "ones": 3
+            },
+            {
+                "values": [
+                    14,
+                    15
+                ],
+                "prime": false,
+                "mask": 1,
+                "string": [
+                    "1",
+                    "1",
+                    "1",
+                    "-"
+                ],
+                "ones": 3
+            }
+        ],
+        [
+            {
+                "values": [
+                    0,
+                    1,
+                    4,
+                    5
+                ],
+                "prime": false,
+                "mask": 5,
+                "string": [
+                    "0",
+                    "-",
+                    "0",
+                    "-"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    0,
+                    1,
+                    8,
+                    9
+                ],
+                "prime": false,
+                "mask": 9,
+                "string": [
+                    "-",
+                    "0",
+                    "0",
+                    "-"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    0,
+                    4,
+                    8,
+                    12
+                ],
+                "prime": false,
+                "mask": 12,
+                "string": [
+                    "-",
+                    "-",
+                    "0",
+                    "0"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    1,
+                    5,
+                    9,
+                    13
+                ],
+                "prime": false,
+                "mask": 12,
+                "string": [
+                    "-",
+                    "-",
+                    "0",
+                    "1"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "prime": false,
+                "mask": 3,
+                "string": [
+                    "0",
+                    "1",
+                    "-",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    5,
+                    12,
+                    13
+                ],
+                "prime": false,
+                "mask": 9,
+                "string": [
+                    "-",
+                    "1",
+                    "0",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    4,
+                    6,
+                    12,
+                    14
+                ],
+                "prime": false,
+                "mask": 10,
+                "string": [
+                    "-",
+                    "1",
+                    "-",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    5,
+                    7,
+                    13,
+                    15
+                ],
+                "prime": false,
+                "mask": 10,
+                "string": [
+                    "-",
+                    "1",
+                    "-",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    6,
+                    7,
+                    14,
+                    15
+                ],
+                "prime": false,
+                "mask": 9,
+                "string": [
+                    "-",
+                    "1",
+                    "1",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    8,
+                    9,
+                    10,
+                    11
+                ],
+                "prime": false,
+                "mask": 3,
+                "string": [
+                    "1",
+                    "0",
+                    "-",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    8,
+                    9,
+                    12,
+                    13
+                ],
+                "prime": false,
+                "mask": 5,
+                "string": [
+                    "1",
+                    "-",
+                    "0",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    8,
+                    10,
+                    12,
+                    14
+                ],
+                "prime": false,
+                "mask": 6,
+                "string": [
+                    "1",
+                    "-",
+                    "-",
+                    "0"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    9,
+                    11,
+                    13,
+                    15
+                ],
+                "prime": false,
+                "mask": 6,
+                "string": [
+                    "1",
+                    "-",
+                    "-",
+                    "1"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    10,
+                    11,
+                    14,
+                    15
+                ],
+                "prime": false,
+                "mask": 5,
+                "string": [
+                    "1",
+                    "-",
+                    "1",
+                    "-"
+                ],
+                "ones": 2
+            },
+            {
+                "values": [
+                    12,
+                    13,
+                    14,
+                    15
+                ],
+                "prime": false,
+                "mask": 3,
+                "string": [
+                    "1",
+                    "1",
+                    "-",
+                    "-"
+                ],
+                "ones": 2
+            }
+        ],
+        [
+            {
+                "values": [
+                    0,
+                    1,
+                    4,
+                    5,
+                    8,
+                    9,
+                    12,
+                    13
+                ],
+                "prime": true,
+                "mask": 13,
+                "string": [
+                    "-",
+                    "-",
+                    "0",
+                    "-"
+                ],
+                "ones": 0
+            },
+            {
+                "values": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    12,
+                    13,
+                    14,
+                    15
+                ],
+                "prime": true,
+                "mask": 11,
+                "string": [
+                    "-",
+                    "1",
+                    "-",
+                    "-"
+                ],
+                "ones": 1
+            },
+            {
+                "values": [
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ],
+                "prime": true,
+                "mask": 7,
+                "string": [
+                    "1",
+                    "-",
+                    "-",
+                    "-"
+                ],
+                "ones": 1
+            }
+        ]
+    ],
+    "implicantsCharts": [],
+    "cover": [],
+    "coverSymbolic": [],
+    "quicksynth": "0",
+    "quicksynthk": "\n \\begin{center}\n    \\begin{karnaugh-map}[4][4][1][$x_2x_3$][$x_0x_1$]\n    \\manualterms{x,x,0,0,x,x,x,x,x,x,x,x,x,x,x,x}\n    \n    \\end{karnaugh-map}\n\\end{center}\n",
+    "latex": [
+        {
+            "code": "\n\\begin{table}[h]\n                \\begin{tabular}{rrrr}\n{Imp. Ord. 0} & {Imp. Ord. 1} & {Imp. Ord. 2} & {Imp. Ord. 3} \\\\\n (0) \\texttt{0000}  &  (0,1) \\texttt{000-}  &  (0,1,4,5) \\texttt{0-0-}  & $\\bullet$ (0,1,4,5,8,9,12,13) \\texttt{--0-} \\\\ \n (1) \\texttt{0001}  &  (0,4) \\texttt{0-00}  &  (0,1,8,9) \\texttt{-00-}  & $\\bullet$ (4,5,6,7,12,13,14,15) \\texttt{-1--} \\\\ \n (4) \\texttt{0100}  &  (0,8) \\texttt{-000}  &  (0,4,8,12) \\texttt{--00}  & $\\bullet$ (8,9,10,11,12,13,14,15) \\texttt{1---} \\\\ \n (8) \\texttt{1000}  &  (1,5) \\texttt{0-01}  &  (1,5,9,13) \\texttt{--01}  & \\\\ \n (5) \\texttt{0101}  &  (1,9) \\texttt{-001}  &  (4,5,6,7) \\texttt{01--}  & \\\\ \n (6) \\texttt{0110}  &  (4,5) \\texttt{010-}  &  (4,5,12,13) \\texttt{-10-}  & \\\\ \n (9) \\texttt{1001}  &  (4,6) \\texttt{01-0}  &  (4,6,12,14) \\texttt{-1-0}  & \\\\ \n (10) \\texttt{1010}  &  (4,12) \\texttt{-100}  &  (8,9,10,11) \\texttt{10--}  & \\\\ \n (12) \\texttt{1100}  &  (8,9) \\texttt{100-}  &  (8,9,12,13) \\texttt{1-0-}  & \\\\ \n (7) \\texttt{0111}  &  (8,10) \\texttt{10-0}  &  (8,10,12,14) \\texttt{1--0}  & \\\\ \n (11) \\texttt{1011}  &  (8,12) \\texttt{1-00}  &  (5,7,13,15) \\texttt{-1-1}  & \\\\ \n (13) \\texttt{1101}  &  (5,7) \\texttt{01-1}  &  (6,7,14,15) \\texttt{-11-}  & \\\\ \n (14) \\texttt{1110}  &  (5,13) \\texttt{-101}  &  (9,11,13,15) \\texttt{1--1}  & \\\\ \n (15) \\texttt{1111}  &  (6,7) \\texttt{011-}  &  (10,11,14,15) \\texttt{1-1-}  & \\\\ \n &  (6,14) \\texttt{-110}  &  (12,13,14,15) \\texttt{11--}  & \\\\ \n &  (9,11) \\texttt{10-1}  &  & \\\\ \n &  (9,13) \\texttt{1-01}  &  & \\\\ \n &  (10,11) \\texttt{101-}  &  & \\\\ \n &  (10,14) \\texttt{1-10}  &  & \\\\ \n &  (12,13) \\texttt{110-}  &  & \\\\ \n &  (12,14) \\texttt{11-0}  &  & \\\\ \n &  (7,15) \\texttt{-111}  &  & \\\\ \n &  (11,15) \\texttt{1-11}  &  & \\\\ \n &  (13,15) \\texttt{11-1}  &  & \\\\ \n &  (14,15) \\texttt{111-}  &  & \n        \\end{tabular}\n\\end{table}\n",
+            "clss": "standalone",
+            "name": "implicants tables",
+            "sfx": "implicants-tables",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
+        },
+        {
+            "code": "\\begin{equation}\\mathrm{on} = \\sum (), \\mathrm{dc} = \\sum (0, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15) \\end{equation}",
+            "clss": "standalone",
+            "name": "sop form",
+            "sfx": "sop-form",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
+        },
+        {
+            "code": "",
+            "clss": "standalone",
+            "name": "implicant charts complete",
+            "sfx": "implicant-charts-complete",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
+        },
+        {
+            "code": "\\noindent La soluzione ricavata con 0 passaggi è la seguente: nessuna copertura trovata ovvero \\[ 0 \\]",
+            "clss": "standalone",
+            "name": "solution detailed",
+            "sfx": "solution-detailed",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
+        },
+        {
+            "code": "$0$",
+            "clss": "standalone",
+            "name": "solution expression",
+            "sfx": "solution-expression",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
+        },
+        {
+            "code": "\n \\begin{center}\n    \\begin{karnaugh-map}[4][4][1][$x_2x_3$][$x_0x_1$]\n    \\manualterms{x,x,0,0,x,x,x,x,x,x,x,x,x,x,x,x}\n    \n    \\end{karnaugh-map}\n\\end{center}\n",
+            "clss": "standalone",
+            "name": "karnaugh maps",
+            "sfx": "karnaugh-maps",
+            "engine": "pdflatex",
+            "addoptions": "--usepackage karnaugh-map -r varwidth"
+        }
+    ]
+}

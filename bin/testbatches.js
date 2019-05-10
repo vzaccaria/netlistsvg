@@ -14,7 +14,7 @@ let fsmTestBatch = {
       cmd: (s, fd) => `${s} ${fd}/moore20160504.json`
     },
     {
-      msg: "seven states moore machine (te 20150504)", 
+      msg: "seven states moore machine (te 20150504)",
       cmd: (s, fd) => `${s} ${fd}/moore20150504.json`
     },
     {
@@ -32,6 +32,10 @@ let quineTestBatch = {
     {
       msg: `with dont cares`,
       cmd: s => `${s} "101011100x111111"`
+    },
+    {
+      msg: `should be zero`,
+      cmd: s => `${s} "xx00xxxxxxxxxxxx"`
     }
   ]
 };
