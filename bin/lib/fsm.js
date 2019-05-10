@@ -165,7 +165,11 @@ let getTransition = (fsm, t) => {
       fsm.type === "mealy" ? parseName(_.keys(e)[0]) : parseName(e);
     return name;
   });
-  return { curState, nextStates };
+  if (fsm.type === "moore") return { curState, nextStates };
+  else {
+    let outputs = _.map(ls, e => _.values(e)[0]);
+    return { curState, nextStates, outputs };
+  }
 };
 
 let getTransitionTable = fsm => {
@@ -222,6 +226,31 @@ let outfunmoore = (fsm, s) => {
   if (_.isUndefined(stateName)) return undef;
   let idx = stateIndexFromName(fsm, stateName);
   return fsm.output[idx];
+};
+
+let getOutputsTable = fsm => {
+  return Object.assign(
+    ..._.map(fsm.transitions, t => {
+      let { curState, outputs } = getTransition(fsm, t);
+      let o = {};
+      o[curState] = outputs;
+      return o;
+    })
+  );
+};
+
+let outfunmealy = (fsm, s, i) => {
+  if (i.length !== fsm.inputSize) throw "wrong input size!";
+  let stateName = _.findKey(fsm.encoding, v => {
+    return _.isEqual(v, s);
+  });
+  let undef = _.map(_.repeat("x", fsm.outputSize));
+  if (_.isUndefined(stateName)) return undef;
+  else {
+    let inputEncoding = parseInt(_.join(i, ""), 2);
+    let ttable = getOutputsTable(fsm);
+    return ttable[stateName][inputEncoding];
+  }
 };
 
 let trans = (fsm, s, i) => {
@@ -281,168 +310,114 @@ let transSR = (fsm, s, i) => {
   );
 };
 
-let produceTransitionTables = fsm => {
-  let inoutcomb = cartesian(
-    codeWords(fsm.encodingSize),
-    codeWords(fsm.inputSize)
+let latexTable = (data, heads, name) => {
+  return latexArtifact(
+    latexTruth(data, heads),
+    name,
+    "standalone",
+    "pdflatex",
+    "-r varwidth"
+  );
+};
+
+let exprOf = (n, e) =>
+  latexArtifact(
+    `$${n} = ${e}$`,
+    `${n} expression`,
+    "standalone",
+    "pdflatex",
+    "-r varwidth"
   );
 
-  let genTable = f => {
-    return _.map(inoutcomb, vs => {
-      let ss = _.take(vs, fsm.encodingSize);
-      let ii = _.takeRight(vs, fsm.inputSize);
-      return _.concat(ss, ii, _.flatten(f(fsm, ss, ii)));
+let karnaughOf = (n, karnaugh) =>
+  latexArtifact(
+    karnaugh,
+    `${n} karnaugh map`,
+    "standalone",
+    "pdflatex",
+    "--usepackage karnaugh-map -r varwidth"
+  );
+
+let genLatexTables = (fsm, name, ins, outs, f) => {
+  /* each element in ins and outs is { size: x, prefix: 'Q' } */
+  let insvect = _.map(ins, ({ size }) => codeWords(size));
+  let inspace = insvect[0];
+  _.forEach(_.slice(insvect, 1), x => {
+    inspace = cartesian(inspace, x);
+  });
+  let inssize = _.reduce(ins, (a, { size }) => a + size, 0);
+  let outsize = _.reduce(outs, (a, { size }) => a + size, 0);
+  let minsize = outs[0].size;
+  let genTable = m =>
+    _.map(inspace, vs => {
+      let pars = [];
+      _.forEach(ins, ({ size }) => {
+        pars.push(_.take(vs, size));
+        vs = _.slice(vs, size);
+      });
+      return _.concat(...pars, _.flatten(m(fsm, ...pars)));
+    });
+  let headings = [];
+  let invars = [];
+  let outvars = [];
+  _.forEach(ins, ({ size, prefix }) => {
+    let h = _.map(_.range(0, size), i => `${prefix}_${i}`);
+    headings.push(h);
+    invars.push(h);
+  });
+  _.forEach(_.range(0, minsize), i => {
+    let h = _.map(outs, ({ prefix }) => `${prefix}_${i}`);
+    headings.push(h);
+    outvars.push(h);
+  });
+  headings = _.flatten(headings);
+  invars = _.flatten(invars);
+  outvars = _.flatten(outvars);
+  let dataTable = genTable(f);
+  let blankTable = genTable(() => _rep("", outsize));
+
+  let column = i => {
+    return _.map(inspace, (v, row) => {
+      return dataTable[row][inssize + i];
     });
   };
-  let column = (f, i) => {
-    return _.map(inoutcomb, vs => {
-      let ss = _.take(vs, fsm.encodingSize);
-      let ii = _.takeRight(vs, fsm.inputSize);
-      return _.flatten(f(fsm, ss, ii))[i];
-    });
-  };
 
-  let genTableHeadings = f =>
-    _.concat(
-      _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
-      _.map(_.range(0, fsm.inputSize), i => `I_${i}`),
-      _.flatten(_.map(_.range(0, fsm.encodingSize), i => f(i)))
-    );
-
-  let produceOTLatexMoore = (name, outputf) => {
-    let genOTTable = f => {
-      return _.map(codeWords(fsm.encodingSize), ss => {
-        return _.concat(ss, f(fsm, ss));
-      });
-    };
-    let otcolumn = (f, kk) => {
-      return _.map(codeWords(fsm.encodingSize), ss => {
-        return f(fsm, ss)[kk];
-      });
-    };
-    let dta = genOTTable(outputf);
-    let blk = genOTTable(() => _rep("", fsm.outputSize));
-    let tableheadings = _.concat(
-      _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
-      _.map(_.range(0, fsm.outputSize), i => `O_${i}`)
-    );
-    let invars = _.concat(_.map(_.range(0, fsm.encodingSize), i => `Q_${i}`));
-    let outvars = _.concat(_.map(_.range(0, fsm.outputSize), i => `O_${i}`));
-    let expressions = _.flatten(
-      _.map(_.range(0, fsm.outputSize), kk => {
-        let { solution, karnaugh } = quickSynth(
-          _.join(otcolumn(outputf, kk), ""),
-          invars
-        );
-        return [
-          latexArtifact(
-            `$${outvars[kk]} = ${solution}$`,
-            `${outvars[kk]} expression`,
-            "standalone",
-            "pdflatex",
-            "-r varwidth"
-          ),
-          latexArtifact(
-            karnaugh,
-            `${outvars[kk]} karnaugh map`,
-            "standalone",
-            "pdflatex",
-            "--usepackage karnaugh-map -r varwidth"
-          )
-        ];
-      })
-    );
-    return _.concat(
-      [
-        latexArtifact(
-          latexTruth(dta, tableheadings),
-          name,
-          "standalone",
-          "pdflatex",
-          "-r varwidth"
-        ),
-        latexArtifact(
-          latexTruth(blk, tableheadings),
-          `${name} blank`,
-          "standalone",
-          "pdflatex",
-          "-r varwidth"
-        )
-      ],
-      expressions
-    );
-  };
-
-  let produceTTLatex = (name, transf, size, headings) => {
-    let dta = genTable(transf);
-    let blk = genTable(() => _rep("", fsm.encodingSize * size));
-    let thevars = _.concat(
-      _.map(_.range(0, fsm.encodingSize), i => `Q_${i}`),
-      _.map(_.range(0, fsm.inputSize), i => `I_${i}`)
-    );
-
-    let fhdgs = _.flatten(_.map(_.range(0, fsm.encodingSize), headings));
-    let expressions = _.flatten(
-      _.map(_.range(0, fsm.encodingSize * size), kk => {
-        let { solution, karnaugh } = quickSynth(
-          _.join(column(transf, kk), ""),
-          thevars
-        );
-        return [
-          latexArtifact(
-            `$${fhdgs[kk]} = ${solution}$`,
-            `${fhdgs[kk]} expression`,
-            "standalone",
-            "pdflatex",
-            "-r varwidth"
-          ),
-          latexArtifact(
-            karnaugh,
-            `${fhdgs[kk]} karnaugh map`,
-            "standalone",
-            "pdflatex",
-            "--usepackage karnaugh-map -r varwidth"
-          )
-        ];
-      })
-    );
-
-    return _.concat(
-      [
-        latexArtifact(
-          latexTruth(dta, genTableHeadings(headings)),
-          name,
-          "standalone",
-          "pdflatex",
-          "-r varwidth"
-        ),
-        latexArtifact(
-          latexTruth(blk, genTableHeadings(headings)),
-          `${name} blank`,
-          "standalone",
-          "pdflatex",
-          "-r varwidth"
-        )
-      ],
-      expressions
-    );
-  };
-
-  let tt = produceTTLatex("transition table", trans, 1, i => `Q^*_${i}`);
-  let dt = produceTTLatex("D excitation table", trans, 1, i => `D_${i}`);
-  let jkt = produceTTLatex("JK excitation table", transJK, 2, i => [
-    `J_${i}`,
-    `K_${i}`
+  let expressionsAndKarnaugh = _.flatten(
+    _.map(outvars, (c, i) => {
+      let { solution, karnaugh } = quickSynth(_.join(column(i), ""), invars);
+      return [exprOf(c, solution), karnaughOf(c, karnaugh)];
+    })
+  );
+  let result = _.flatten([
+    latexTable(dataTable, headings, name),
+    latexTable(blankTable, headings, `${name} blank`),
+    expressionsAndKarnaugh
   ]);
-  let srt = produceTTLatex("SR excitation table", transSR, 2, i => [
-    `S_${i}`,
-    `R_${i}`
-  ]);
-  let ttt = produceTTLatex("T excitation table", transT, 1, i => `T_${i}`);
-  if (fsm.type !== "moore") {
+  return result;
+};
+
+let produceTransitionTables = fsm => {
+  let ssi = s => {
+    return { prefix: s, size: fsm.encodingSize };
+  };
+  let ii = { prefix: "I", size: fsm.inputSize };
+  let ins = [ssi("Q"), ii];
+  let oi = { prefix: "O", size: fsm.outputSize };
+  let _ttn = "transition table";
+  let _otn = "Output table";
+  let _etn = s => `${s} excitation table`;
+  let tt = genLatexTables(fsm, _ttn, ins, [ssi("Q^*")], trans);
+  let dt = genLatexTables(fsm, _etn("D"), ins, [ssi("D")], trans);
+  let jkt = genLatexTables(fsm, _etn("JK"), ins, [ssi("J"), ssi("K")], transJK);
+  let srt = genLatexTables(fsm, _etn("SR"), ins, [ssi("S"), ssi("R")], transSR);
+  let ttt = genLatexTables(fsm, _etn("T"), ins, [ssi("T")], transT);
+  let ot;
+  if (fsm.type === "mealy") {
+    ot = genLatexTables(fsm, _otn, ins, [oi], outfunmealy);
+    //return _.flatten([ot]);
     return _.flatten([tt, dt, jkt, srt, ttt]);
   } else {
-    let ot = produceOTLatexMoore("Output table", outfunmoore);
+    ot = genLatexTables(fsm, _otn, [ssi("Q")], [oi], outfunmoore);
     return _.flatten([tt, dt, jkt, srt, ttt, ot]);
   }
 };
