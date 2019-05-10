@@ -414,8 +414,7 @@ let produceTransitionTables = fsm => {
   let ot;
   if (fsm.type === "mealy") {
     ot = genLatexTables(fsm, _otn, ins, [oi], outfunmealy);
-    //return _.flatten([ot]);
-    return _.flatten([tt, dt, jkt, srt, ttt]);
+    return _.flatten([tt, dt, jkt, srt, ttt, ot]);
   } else {
     ot = genLatexTables(fsm, _otn, [ssi("Q")], [oi], outfunmoore);
     return _.flatten([tt, dt, jkt, srt, ttt, ot]);

@@ -20,6 +20,10 @@ let fsmTestBatch = {
     {
       msg: `three states mealy machine`,
       cmd: (s, fd) => `${s} ${fd}/mealy.json`
+    },
+    {
+      msg: `three states mealy machine (te 20180726)`,
+      cmd: (s, fd) => `${s} ${fd}/mealy20180726.json`
     }
   ]
 };
