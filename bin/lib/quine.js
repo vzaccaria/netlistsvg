@@ -309,8 +309,18 @@ let symbolicAsLogicFormula = _.curry((vars, i) => {
 
 let symbolicSolution = _.curry((vars, res) => {
   if (res.coverSymbolic.length === 0) return "0";
-  else
-    return _.join(_.map(res.coverSymbolic, symbolicAsLogicFormula(vars)), "+");
+  else {
+    if (
+      res.coverSymbolic.length === 1 &&
+      _.every(res.coverSymbolic[0].implicantSymbol, x => x === "-")
+    ) {
+      return "1";
+    } else
+      return _.join(
+        _.map(res.coverSymbolic, symbolicAsLogicFormula(vars)),
+        "+"
+      );
+  }
 });
 
 let quickSynth = (data, vars) => {

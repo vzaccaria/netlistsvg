@@ -36,6 +36,10 @@ let quineTestBatch = {
     {
       msg: `should be zero`,
       cmd: s => `${s} "xx00xxxxxxxxxxxx"`
+    },
+    {
+      msg: `should be one`,
+      cmd: s => `${s} "xx11xxxxxxxxxxxx"`
     }
   ]
 };
