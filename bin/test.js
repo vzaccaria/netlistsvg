@@ -16,6 +16,15 @@ const batches = require("./testbatches");
 
 /*global describe, it */
 
+let parse = x => {
+  x = JSON.parse(x);
+  x.latex = _.map(x.latex, i => {
+    delete i.addoptions;
+    return i;
+  });
+  return x;
+};
+
 let testBatch = b => {
   describe(b.name, () => {
     // The following line is temporary, remove it!!!
@@ -32,8 +41,8 @@ let testBatch = b => {
         let f = $fs.readFileSync(expected, "utf8");
         return exec(q.cmd(s, fd))
           .then(a => a[0])
-          .then(JSON.parse)
-          .should.eventually.deep.equal(JSON.parse(f));
+          .then(parse)
+          .should.eventually.deep.equal(parse(f));
       });
     });
   });
