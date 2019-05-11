@@ -23,12 +23,6 @@ let main = () => {
       1
     )
     .option(
-      "-d, --node-distance <value>",
-      "random seed to use for force directed layout",
-      prog.STRING,
-      "2cm"
-    )
-    .option(
       "-e, --example <string>",
       "dump example for <string> = (moore|mealy)"
     )

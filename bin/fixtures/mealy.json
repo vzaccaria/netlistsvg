@@ -13,5 +13,8 @@
     "s_1": [0, 0, 1],
     "s_2": [0, 1, 0],
     "s_3": [1, 0, 0]
+  },
+  "graphics": {
+    "graphOptions": "spring layout, node distance=3cm"
   }
 }

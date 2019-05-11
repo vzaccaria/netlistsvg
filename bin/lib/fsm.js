@@ -3,15 +3,24 @@ let $fs = require("mz/fs");
 let { latexArtifact, saveArtifacts } = require("./artifacts");
 let { quickSynth } = require("./quine");
 
-let wrap = (c, options) => `
+let edgespec = `{nodes={inner sep=1pt, anchor=mid, circle, fill=white}}`;
+
+let wrap = (c, options, fsm) => {
+  let layout = _.get(
+    fsm,
+    "graphics.graphOptions",
+    "spring layout, node distance=2cm"
+  );
+  return `
 \\begin{tikzpicture}[>=stealth', initial text=$ $]
-\\graph[spring layout,
+\\graph[${layout},
        random seed=${options.randomSeed},
-       node distance=${options.nodeDistance}]{
+       edges=${edgespec}]{
        ${c}
 };
 \\end{tikzpicture} 
 `;
+};
 
 let getTransStateName = q => _.keys(q)[0];
 
@@ -21,14 +30,15 @@ let parseName = n => {
     let match = n.match(regexp).groups;
     if (!_.isUndefined(match)) {
       let r = { name: match.name };
-      r.lab = match.lab !== "" ? match.lab : "u";
+      r.lab = match.lab;
       r.angle = match.angle ? match.angle : "30";
       return r;
     } else {
-      return { name: n, lab: "u", angle: "30" };
+      throw "invalid specified nodes";
+      // return { name: n, lab: "u", angle: "30" };
     }
   } else {
-    return { name: n, lab: "u", angle: "30" };
+    return { name: n, lab: "", angle: "30" };
   }
 };
 
@@ -41,19 +51,25 @@ let getSrcOpts = (fsm, n1) => {
   let ops = ["state"];
   if (fsm.initial === n1) {
     ops = _.concat(ops, ["initial"]);
-    if (!_.isUndefined(fsm.initialLabPos))
-      ops = _.concat(ops, ["initial where=" + fsm.initialLabPos]);
+    if (_.get(fsm, "graphics.initialLabPos"))
+      ops = _.concat(ops, [
+        "initial where=" + _.get(fsm, "graphics.initialLabPos")
+      ]);
   }
   return _.join(ops, ",");
 };
 
-let labelcmd = (lab, label) => {
-  if (lab === "c") {
-    return `edge node={node [] {\\tiny ${label}}}`;
+let labelcmd = (lab, label, isLoop) => {
+  if (isLoop) {
+    return `edge node={node [auto, fill=none] {\\tiny${label}}}`;
   } else {
-    if (lab === "d") {
-      return `edge node={node [auto] {\\tiny${label}}}`;
-    } else return `edge node={node [auto, swap] {\\tiny${label}}}`;
+    if (lab === "") {
+      return `edge node={node [] {\\tiny ${label}}}`;
+    } else {
+      if (lab === "d") {
+        return `edge node={node [auto,fill=none] {\\tiny${label}}}`;
+      } else return `edge node={node [auto, swap,fill=none] {\\tiny${label}}}`;
+    }
   }
 };
 
@@ -71,14 +87,15 @@ let connectMealy = (fsm, o1, o2, input) => {
   let label = `$${_.join(input, "")}/${_out(o2)}$`;
   return `"$${n1}$" [${getSrcOpts(fsm, n1)}] -> [${type}, ${labelcmd(
     lab,
-    label
+    label,
+    n1 === n2
   )}] "$${n2}$" [state]`;
 };
 
 let getMooreTransLabel = (fsm, n1, n2, input) => {
-  let f = fsm.transLabels;
-  if (!_.isUndefined(f) && !_.isUndefined(f[`${n1}/${n2}`])) {
-    return f[`${n1}/${n2}`];
+  let l;
+  if ((l = _.get(fsm, `graphics.transLabels[${n1}/${n2}]`))) {
+    return l;
   } else {
     return _.join(input, "");
   }
@@ -103,7 +120,8 @@ let connectMoore = (fsm, o1, o2, input, output) => {
   let label = `$${tl}$`;
   return `"$${n1}$" [${getSrcOpts(fsm, n1)},as=$${l1}$] -> [${type}, ${labelcmd(
     lab,
-    label
+    label,
+    n1 === n2
   )} ] "$${n2}$" [state, as=$${l2}$]`;
 };
 
@@ -130,11 +148,11 @@ let moore = fsm => {
 };
 
 let produceMoore = (fsm, options) => {
-  return wrap(_.join(moore(fsm), ",\n"), options);
+  return wrap(_.join(moore(fsm), ",\n"), options, fsm);
 };
 
 let produceMealy = (fsm, options) => {
-  return wrap(_.join(mealy(fsm), ",\n"), options);
+  return wrap(_.join(mealy(fsm), ",\n"), options, fsm);
 };
 
 let drawFSM = (fsm, options) => {
