@@ -10,14 +10,11 @@
     "$ref/findaddr": {
       "isLeaf": true,
       "parameters": ["addr/$a0"],
-      "localvars": [
-        "i/$s0",
-        "vect[3]/4",
-        "vect[2]/4",
-        "vect[1]/4",
-        "vect[0]/4",
-        "lett[0..3]/4"
-      ]
+      "localvars": ["i/$s0", "vect/4w", "lett/4b"]
     }
+  },
+  "defaultCall": {
+    "caller": "main",
+    "callee": "findaddr"
   }
 }

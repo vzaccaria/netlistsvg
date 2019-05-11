@@ -1,5 +1,5 @@
 {
-  "omitFramePointer": true,
+  "omitFramePointer": false,
   "stackgrows": "below",
   "functions": {
     "$ref/f": {
@@ -7,8 +7,12 @@
       "localvars": ["a/$s0", "b/$s1", "c/$s2", "d/$s3", "e/$s4", "f/$s5"]
     },
     "$ref/g": {
-      "parameters": ["u/$a0", "v/$a1", "w/$a2", "x/$a3", "y/4", "z/4"],
-      "localvars": ["q/$s0", "v[1..4]/4"]
+      "parameters": ["u/$a0", "v/$a1", "w/$a2", "x/$a3", "y/6b", "z/4"],
+      "localvars": ["q/$s0", "v/4w"]
     }
+  },
+  "defaultCall": {
+    "caller": "f",
+    "callee": "g"
   }
 }
