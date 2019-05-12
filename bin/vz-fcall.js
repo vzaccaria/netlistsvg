@@ -5,6 +5,7 @@ const prog = require("caporal");
 // const { execWithStringStdErr } = require("./lib/common");
 let $gstd = require("get-stdin");
 const _ = require("lodash");
+const { beautifyString } = require("./lib/spim");
 
 let $fs = require("mz/fs");
 
@@ -61,7 +62,8 @@ let unfoldVariable = (cells, { size, name, arrayof, type }) => {
         type,
         name: `${name}[${i}]`,
         size: 4,
-        base: i === 0
+        base: i === 0,
+        baseOf: name
       };
     });
     _.map(_.reverse(rgs), r => cells.push(r));
@@ -78,7 +80,8 @@ let unfoldVariable = (cells, { size, name, arrayof, type }) => {
           type,
           name: `${name}[${ub}..${lb}]`,
           size: 4,
-          base
+          base,
+          baseOf: name
         });
       });
     } else {
@@ -94,7 +97,6 @@ let unfoldVariable = (cells, { size, name, arrayof, type }) => {
 
 let gpstate = (data, { callee, caller }) => {
   callee = `$ref/${callee}`;
-  let ncaller = `$ref/${caller}`;
   let fs = data.functions;
   let cee = fs[callee];
   let cells = [];
@@ -148,21 +150,91 @@ let gpstate = (data, { callee, caller }) => {
   return cells;
 };
 
+let developCall = async args => {
+  let data = await (args.json ? $fs.readFile(args.json, "utf8") : $gstd());
+  data = JSON.parse(data);
+  let state = gpstate(data, data.defaultCall);
+  let stackAlloc = _.sum(
+    _.map(
+      _.filter(state, c => c.type === "savedreg" || c.type === "localvar"),
+      "size"
+    )
+  );
+  return { state, data, stackAlloc };
+};
+
+let produceAsm = ({ data, state, stackAlloc }) => {
+  let labels = _.join(
+    _.filter(
+      _.map(state, c => {
+        if (!_.isUndefined(c.base) && c.base)
+          return `.eqv ${_.toUpper(c.baseOf)}, ${c.offset}`;
+        if (c.type === "savedreg") {
+          return `.eqv ${_.toUpper(c.name.slice(1))}, ${c.offset}`;
+        }
+        return null;
+      })
+    ),
+    "\n"
+  );
+  let saveregs = _.join(
+    _.filter(
+      _.map(state, c => {
+        if (c.type === "savedreg") {
+          return `sw ${c.name}, ${_.toUpper(c.name.slice(1))}($sp)`;
+        }
+        return null;
+      })
+    ),
+    "\n"
+  );
+  let restoreregs = _.join(
+    _.filter(
+      _.map(state, c => {
+        if (c.type === "savedreg") {
+          return `lw ${c.name}, ${_.toUpper(c.name.slice(1))}($sp)`;
+        }
+        return null;
+      })
+    ),
+    "\n"
+  );
+  let prog = `
+# ${data.defaultCall.callee} prologue
+${_.toUpper(data.defaultCall.callee)}: addiu $sp, $sp, -${stackAlloc}
+${labels}
+${saveregs}
+
+# ${data.defaultCall.callee} body
+
+# ${data.defaultCall.callee} epilogue
+${_.toUpper(data.defaultCall.callee + "EPI")}:
+${restoreregs}
+addiu $sp, $sp, -${stackAlloc}
+jr $ra
+`;
+  console.log(beautifyString(prog));
+};
+
 let main = () => {
   prog
     .description("Function call utils")
-    .command("prologue", "generates stack and register usage for a call")
+    .command("diagram", "generates stack and register usage for a call")
     .argument("<json>", `File describing the call sequence`)
     .option("-j, --json", `print sequence of cells instead of tikz diagram`)
     .action(async (args, options) => {
-      let data = await (args.json ? $fs.readFile(args.json, "utf8") : $gstd());
-      data = JSON.parse(data);
-      let r = gpstate(data, data.defaultCall);
+      let { state, data, stackAlloc } = await developCall(args, options);
       if (options.json) {
-        console.log(r);
+        console.log({ state, stackAlloc });
       } else {
-        console.log(gpdiag(data, r));
+        console.log(gpdiag(data, state));
       }
+    })
+    .command("asm", "generates asm prologue for callee")
+    .argument("<json>", `File describing the call sequence`)
+    .action(async (args, options) => {
+      let { state, data, stackAlloc } = await developCall(args, options);
+      produceAsm({ data, state, stackAlloc });
     });
   prog.parse(process.argv);
 };
