@@ -2,17 +2,17 @@
   "omitFramePointer": false,
   "stackgrows": "below",
   "functions": {
-    "$ref/f": {
-      "parameters": [],
-      "localvars": ["a/$s0", "b/$s1", "c/$s2", "d/$s3", "e/$s4", "f/$s5"]
-    },
     "$ref/g": {
       "parameters": ["u/$a0", "v/$a1", "w/$a2", "x/$a3", "y/6b", "z/4"],
       "localvars": ["q/$s0", "v/4w"]
     }
   },
+  "data": [{ "test1/6c": "1,2,3,4,5,6" }],
   "defaultCall": {
-    "caller": "f",
-    "callee": "g"
+    "callee": "g",
+    "tests": [
+      { "parvalues": ["1", "2", "3", "4", "*test1", "&test1"], "result": "2" },
+      { "parvalues": ["1", "2", "3", "4", "*test1", "&test1"], "result": "2" }
+    ]
   }
 }

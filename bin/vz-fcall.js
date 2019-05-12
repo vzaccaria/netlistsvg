@@ -89,19 +89,25 @@ let unfoldVariable = (cells, { size, name, arrayof, type }) => {
         type,
         name,
         size,
-        base: true
+        base: true,
+        baseOf: name
       });
     }
   }
 };
 
-let gpstate = (data, { callee, caller }) => {
+let gpstate = (data, { callee }) => {
   callee = `$ref/${callee}`;
   let fs = data.functions;
   let cee = fs[callee];
   let cells = [];
 
-  cells.push({ type: "zone", name: caller, size: 0, cause: "previous frame" });
+  cells.push({
+    type: "zone",
+    name: "caller",
+    size: 0,
+    cause: "previous frame"
+  });
 
   _.map(cee.parameters, l => {
     let { name, register, size, arrayof } = _getvarreg(l);
@@ -164,13 +170,32 @@ let developCall = async args => {
 };
 
 let produceAsm = ({ data, state, stackAlloc }) => {
+  let callee = `$ref/${data.defaultCall.callee}`;
+  let fs = data.functions;
+  let cee = fs[callee];
+  let parameters = _.join(
+    _.filter(
+      _.map(cee.parameters, l => {
+        let { name, register, size } = _getvarreg(l);
+        if (register) {
+          return `# - register ${register} contains ${name} (${size})`;
+        }
+      })
+    ),
+    "\n"
+  );
   let labels = _.join(
     _.filter(
       _.map(state, c => {
         if (!_.isUndefined(c.base) && c.base)
-          return `.eqv ${_.toUpper(c.baseOf)}, ${c.offset}`;
+          return `# - local var ${_.toUpper(c.baseOf)} at stack offset: ${
+            c.offset
+          }`;
         if (c.type === "savedreg") {
-          return `.eqv ${_.toUpper(c.name.slice(1))}, ${c.offset}`;
+          return `# - saved reg ${c.name} at stack offset: ${c.offset}`;
+        }
+        if (c.type === "parameter") {
+          return `# - saved reg ${c.name} at stack offset: ${c.offset}`;
         }
         return null;
       })
@@ -181,7 +206,7 @@ let produceAsm = ({ data, state, stackAlloc }) => {
     _.filter(
       _.map(state, c => {
         if (c.type === "savedreg") {
-          return `sw ${c.name}, ${_.toUpper(c.name.slice(1))}($sp)`;
+          return `sw ${c.name}, ${c.offset}($sp)`;
         }
         return null;
       })
@@ -192,25 +217,33 @@ let produceAsm = ({ data, state, stackAlloc }) => {
     _.filter(
       _.map(state, c => {
         if (c.type === "savedreg") {
-          return `lw ${c.name}, ${_.toUpper(c.name.slice(1))}($sp)`;
+          return `lw ${c.name}, ${c.offset}($sp)`;
         }
         return null;
       })
     ),
     "\n"
   );
+  let enlargeStack = stackAlloc > 0 ? `addiu $sp, $sp, -${stackAlloc}` : "";
+  let shrinkStack = stackAlloc > 0 ? `addiu $sp, $sp, ${stackAlloc}` : "";
   let prog = `
-# ${data.defaultCall.callee} prologue
-${_.toUpper(data.defaultCall.callee)}: addiu $sp, $sp, -${stackAlloc}
+# Stack frame information for function '${data.defaultCall.callee}':
+${parameters}
 ${labels}
+
+# function prologue
+.text
+.globl ${_.toUpper(data.defaultCall.callee)}
+${_.toUpper(data.defaultCall.callee)}: 
+${enlargeStack}
 ${saveregs}
 
-# ${data.defaultCall.callee} body
+# function body
 
-# ${data.defaultCall.callee} epilogue
+# function epilogue
 ${_.toUpper(data.defaultCall.callee + "EPI")}:
 ${restoreregs}
-addiu $sp, $sp, -${stackAlloc}
+${shrinkStack}
 jr $ra
 `;
   console.log(beautifyString(prog));

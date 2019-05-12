@@ -1,0 +1,18 @@
+{
+  "omitFramePointer": true,
+  "stackgrows": "below",
+  "functions": {
+    "$ref/g": {
+      "parameters": ["p/$a0", "n/$a1"],
+      "localvars": [],
+      "isLeaf": false,
+      "cref": "$selfdir/rec.c",
+      "body": "$selfdir/recbody.s"
+    }
+  },
+  "data": [{ "test1/6c": "prova" }],
+  "defaultCall": {
+    "callee": "g",
+    "tests": [{ "parvalues": ["&test1", "0"], "result": "5" }]
+  }
+}

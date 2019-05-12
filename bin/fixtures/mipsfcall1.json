@@ -3,10 +3,6 @@
   "omitFramePointer": true,
   "stackgrows": "below",
   "functions": {
-    "$ref/main": {
-      "parameters": [],
-      "localvars": []
-    },
     "$ref/findaddr": {
       "isLeaf": true,
       "parameters": ["addr/$a0"],
@@ -14,7 +10,6 @@
     }
   },
   "defaultCall": {
-    "caller": "main",
     "callee": "findaddr"
   }
 }
