@@ -253,7 +253,7 @@ let main = () => {
   prog
     .description("Function call utils")
     .command("diagram", "generates stack and register usage for a call")
-    .argument("<json>", `File describing the call sequence`)
+    .argument("[json]", `File describing the call sequence`)
     .option("-j, --json", `print sequence of cells instead of tikz diagram`)
     .action(async (args, options) => {
       let { state, data, stackAlloc } = await developCall(args, options);
