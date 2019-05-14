@@ -6,6 +6,36 @@ let directive = "\\.(?<directive>[\\w]+)(\\s)*(?<parameters>[^#]*)";
 let contents = `(${directive}|${instruction})`;
 let regexps = `${label}?(\\s)*${contents}?${comment}?`;
 
+const { execWithStringStdErr } = require("./common");
+
+let testReg = output => {
+  let extrreg = /(?<reg>[\w]+)\s+(\((?<alt>[\w]+)\))?\s+=\s(?<value>[a-f0-9]{8})/g;
+  let array1;
+  let results = {};
+  while ((array1 = extrreg.exec(output)) !== null) {
+    let { reg, alt, value } = array1.groups;
+    if (!_.isUndefined(alt)) {
+      results[alt] = value;
+    } else results[reg] = value;
+  }
+  return results;
+};
+
+let run = async filename => {
+  let script = `
+   load "${filename}"
+   run
+   print_all_regs hex
+   exit
+`;
+  return execWithStringStdErr(path => `cat ${path} | spim `, script, {
+    postfix: ".script",
+    cleanup: false
+  }).then(([stdout]) => {
+    return testReg(stdout);
+  });
+};
+
 let parseLine = line => {
   let r = line.match(regexps).groups;
   if (r.operands) {
@@ -98,4 +128,4 @@ let beautifyProg = prog => {
   console.log(beautifyString(prog));
 };
 
-module.exports = { beautifyProg, beautifyString };
+module.exports = { beautifyProg, beautifyString, run };

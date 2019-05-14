@@ -2,10 +2,10 @@
 "use strict";
 
 const prog = require("caporal");
-const { execWithStringStdErr } = require("./lib/common");
+const { execWithStringStdErr } = require("./lib/common.js");
 let $gstd = require("get-stdin");
 const _ = require("lodash");
-const { beautifyProg } = require("./lib/spim");
+const { beautifyProg, run } = require("./lib/spim");
 
 let parseError = line => {
   let regexp = /spim: \(parser\) (?<error>[\w\s]+) on line (?<line>\d+) of file (?<file>[\/\-\.\w\s]+)/;
@@ -42,6 +42,7 @@ let assemble = (filename, options, logger, program) => {
   )
     .then(([stdout, stderr]) => {
       logger.debug(stderr);
+      logger.debug(stdout);
       return wrap(
         filename,
         _.join(
@@ -49,25 +50,6 @@ let assemble = (filename, options, logger, program) => {
           "\n"
         )
       );
-    })
-    .then(console.log);
-};
-
-let run = async (options, logger, filename) => {
-  let script = `
-   load "${filename}"
-   run
-   print_all_regs hex
-   exit
-`;
-  return execWithStringStdErr(
-    path => `cat ${path} | ${options.spimBinary}  -noexception`,
-    script,
-    { postfix: ".script", cleanup: false, logger: logger }
-  )
-    .then(([stdout, stderr]) => {
-      logger.debug(stderr);
-      console.log(stdout);
     })
     .then(console.log);
 };
@@ -105,14 +87,8 @@ let main = () => {
     })
     .command("run", "run a source file")
     .argument("<file>", `Source file`)
-    .option(
-      "-b, --spim-binary <string>",
-      "absolute path of spim executable",
-      prog.STRING,
-      "spim -delayed_branches -delayed_loads"
-    )
-    .action(async (args, options, logger) => {
-      run(options, logger, args.file);
+    .action(async args => {
+      console.log(await run(args.file));
     });
   prog.parse(process.argv);
 };

@@ -26,7 +26,7 @@ let execWithStringStdErr = (cmd, string, options) => {
       .writeFile(o.path, string, "utf8")
       .then(() => {
         let cc = cmd(o.path);
-        options.logger.debug(cc);
+        if (!_.isUndefined(options.logger)) options.logger.debug(cc);
         return exec(cc);
       })
       .then(a => {
