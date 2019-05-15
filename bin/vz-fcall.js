@@ -210,7 +210,8 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
   let sdata = _.join(
     _.map(data.data, d => {
       if (d.type === "string") return `${d.name}: .asciiz "${d.value}"`;
-    })
+    }),
+    "\n"
   );
   let parameters = _.join(
     _.filter(

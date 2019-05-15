@@ -9,9 +9,12 @@
     "cref": "$selfdir/rec.c",
     "body": "$selfdir/recbody.s"
   },
-  "data": [{ "name": "test1", "type": "string", "value": "prova" }],
+  "data": [
+    { "name": "test1", "type": "string", "value": "prova" },
+    { "name": "test2", "type": "string", "value": "stringa piu lunga" }
+  ],
   "tests": [
     { "parvalues": ["test1/p", "#0"], "result": "00000005" },
-    { "parvalues": ["test1/p", "#10"], "result": "0000000f" }
+    { "parvalues": ["test2/p", "#0"], "result": "00000011" }
   ]
 }
