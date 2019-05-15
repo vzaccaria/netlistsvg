@@ -10,5 +10,8 @@
     "body": "$selfdir/recbody.s"
   },
   "data": [{ "name": "test1", "type": "string", "value": "prova" }],
-  "tests": [{ "parvalues": ["&test1", "0"], "result": "5" }]
+  "tests": [
+    { "parvalues": ["test1/p", "#0"], "result": "00000005" },
+    { "parvalues": ["test1/p", "#10"], "result": "0000000f" }
+  ]
 }

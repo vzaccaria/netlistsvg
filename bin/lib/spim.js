@@ -1,4 +1,6 @@
 const _ = require("lodash");
+let tmp = require("tmp-promise");
+let $fs = require("mz/fs");
 let label = "((?<label>[\\w]+):)";
 let comment = "(?<comment>#[\\w\\W]+)";
 let instruction = "(?<instruction>[\\w]+)(\\s)*(?<operands>[^#]*)";
@@ -26,6 +28,14 @@ let checkIfErrors = stdout => {
     console.log(stdout);
     throw "--- There were undefined symbols in the program ---";
   }
+};
+
+let runString = async program => {
+  let o = await tmp.file({ postfix: ".s", keep: false });
+  await $fs.writeFile(o.path, program, "utf8");
+  let res = await run(o.path);
+  o.cleanup();
+  return res;
 };
 
 let run = async filename => {
@@ -140,4 +150,4 @@ let beautifyProg = prog => {
   console.log(beautifyString(prog));
 };
 
-module.exports = { beautifyProg, beautifyString, run };
+module.exports = { beautifyProg, beautifyString, run, runString };

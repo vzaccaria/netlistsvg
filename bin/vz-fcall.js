@@ -5,15 +5,26 @@ const prog = require("caporal");
 // const { execWithStringStdErr } = require("./lib/common");
 let $gstd = require("get-stdin");
 const _ = require("lodash");
-const { beautifyString } = require("./lib/spim");
+const { beautifyString, runString } = require("./lib/spim");
 const path = require("path");
 
 let $fs = require("mz/fs");
 
-let vrre = /(?<name>[\w\[\.\]]+)\/((?<register>\$[\w]+)|(?<size>[\d]+))(?<arrayof>[bw])?/;
+let name = "(?<name>[\\w[\\.\\]]+)";
+let registername = "(?<register>\\$[\\w]+)";
+let size = "(?<size>[\\d]+)";
+let arrayspec = "(?<arrayof>[bw])";
+let pointer = "(?<ispointer>[p])";
+let arrayof = `${size}${arrayspec}`;
+
+let formalparspec = `${name}/(${registername}|${arrayof}|4)`;
+
+let labelspec = `${name}/(${arrayof}|${pointer})`;
+let valuespec = `#(?<value>[\\d]+)`;
+let actualparspec = `(${labelspec}|${valuespec})`;
 
 let _getvarreg = s => {
-  let gg = s.match(vrre).groups;
+  let gg = s.match(formalparspec).groups;
   if (_.isUndefined(gg.size)) gg.size = 4;
   else gg.size = parseInt(gg.size);
   if (gg.arrayof === "w") gg.size = gg.size * 4;
@@ -168,6 +179,25 @@ let developCall = async args => {
   return { state, data, stackAlloc };
 };
 
+let addMain = (data, prog, { parvalues }) => {
+  let v = _.map(parvalues, (p, i) => {
+    let { ispointer, name, value } = p.match(actualparspec).groups;
+    if (ispointer) return `la $a${i}, ${name}`;
+    else {
+      return `li $a${i}, ${value}`;
+    }
+  });
+  let prepare = _.join(v, "\n");
+  let newprog = `${prog}
+
+# main test
+main: 
+${prepare}
+jal ${_.toUpper(data.functionData.name)}
+`;
+  return beautifyString(newprog);
+};
+
 let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
   let cee = data.functionData;
   if (data.functionData.body) {
@@ -260,7 +290,7 @@ ${restoreregs}
 ${shrinkStack}
 jr $ra
 `;
-  console.log(beautifyString(prog));
+  return beautifyString(prog);
 };
 
 let main = () => {
@@ -282,7 +312,26 @@ let main = () => {
     .action(async (args, options) => {
       let dirname = path.dirname(path.resolve(args.json));
       let { state, data, stackAlloc } = await developCall(args, options);
-      produceAsm({ data, state, stackAlloc, dirname });
+      console.log(await produceAsm({ data, state, stackAlloc, dirname }));
+    })
+    .command("test", "invokes function with tests")
+    .argument("<json>", `File describing the call sequence`)
+    .action(async (args, options) => {
+      let dirname = path.dirname(path.resolve(args.json));
+      let { state, data, stackAlloc } = await developCall(args, options);
+      let asm = await produceAsm({ data, state, stackAlloc, dirname });
+      let results = await Promise.all(
+        _.map(data.tests, t => {
+          return runString(addMain(data, asm, t));
+        })
+      );
+      _.forEach(data.tests, (t, i) => {
+        if (results[i].v0 === t.result) {
+          console.log("ok!");
+        } else {
+          console.log(`Expected ${t.result}, got ${results[i].v0}`);
+        }
+      });
     });
   prog.parse(process.argv);
 };
