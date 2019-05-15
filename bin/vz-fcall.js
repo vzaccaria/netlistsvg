@@ -7,6 +7,7 @@ let $gstd = require("get-stdin");
 const _ = require("lodash");
 const { beautifyString, runString } = require("./lib/spim");
 const path = require("path");
+const chalk = require("chalk");
 
 let $fs = require("mz/fs");
 
@@ -327,9 +328,13 @@ let main = () => {
       );
       _.forEach(data.tests, (t, i) => {
         if (results[i].v0 === t.result) {
-          console.log("ok!");
+          console.log(
+            chalk.green("OK") + `: Expected ${t.result}, got ${results[i].v0}`
+          );
         } else {
-          console.log(`Expected ${t.result}, got ${results[i].v0}`);
+          console.log(
+            chalk.red("KO") + `: Expected ${t.result}, got ${results[i].v0}`
+          );
         }
       });
     });
