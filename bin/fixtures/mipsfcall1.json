@@ -2,14 +2,10 @@
   "note": "see https://drive.google.com/open?id=1y9ZCh6EEaFh740wEqmXzD9Y9PAxg3i05",
   "omitFramePointer": true,
   "stackgrows": "below",
-  "functions": {
-    "$ref/findaddr": {
-      "isLeaf": true,
-      "parameters": ["addr/$a0"],
-      "localvars": ["i/$s0", "vect/4w", "lett/4b"]
-    }
-  },
-  "defaultCall": {
-    "callee": "findaddr"
+  "functionData": {
+    "name": "findaddr",
+    "isLeaf": true,
+    "parameters": ["addr/$a0"],
+    "localvars": ["i/$s0", "vect/4w", "lett/4b"]
   }
 }

@@ -21,6 +21,13 @@ let testReg = output => {
   return results;
 };
 
+let checkIfErrors = stdout => {
+  if (/symbols are undefined/g.exec(stdout) !== null) {
+    console.log(stdout);
+    throw "--- There were undefined symbols in the program ---";
+  }
+};
+
 let run = async filename => {
   let script = `
    load "${filename}"
@@ -32,6 +39,7 @@ let run = async filename => {
     postfix: ".script",
     cleanup: false
   }).then(([stdout]) => {
+    checkIfErrors(stdout);
     return testReg(stdout);
   });
 };
@@ -102,7 +110,8 @@ let maxSize = (instr, name) => {
 
 let beautifyString = prog => {
   fakeConsole = "";
-  let instrs = _.map(prog.split("\n"), parseLine);
+  let instrs = prog.split("\n");
+  instrs = _.map(instrs, parseLine);
   let maxLabelSize = maxSize(instrs, "label");
   let maxInstructionSize = maxSize(instrs, "instruction");
   let maxOperandsSize = maxSize(instrs, "operands");
@@ -121,7 +130,10 @@ let beautifyString = prog => {
       lastidx: instrs.length - 1
     })
   );
-  return fakeConsole;
+  instrs = fakeConsole.split("\n");
+  let idx = _.findLastIndex(instrs, l => _.trim(l) !== "");
+  instrs = _.slice(instrs, 0, idx + 1);
+  return _.join(instrs, "\n");
 };
 
 let beautifyProg = prog => {

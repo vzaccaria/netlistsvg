@@ -6,6 +6,7 @@ const prog = require("caporal");
 let $gstd = require("get-stdin");
 const _ = require("lodash");
 const { beautifyString } = require("./lib/spim");
+const path = require("path");
 
 let $fs = require("mz/fs");
 
@@ -96,10 +97,8 @@ let unfoldVariable = (cells, { size, name, arrayof, type }) => {
   }
 };
 
-let gpstate = (data, { callee }) => {
-  callee = `$ref/${callee}`;
-  let fs = data.functions;
-  let cee = fs[callee];
+let gpstate = data => {
+  let cee = data.functionData;
   let cells = [];
 
   cells.push({
@@ -159,7 +158,7 @@ let gpstate = (data, { callee }) => {
 let developCall = async args => {
   let data = await (args.json ? $fs.readFile(args.json, "utf8") : $gstd());
   data = JSON.parse(data);
-  let state = gpstate(data, data.defaultCall);
+  let state = gpstate(data);
   let stackAlloc = _.sum(
     _.map(
       _.filter(state, c => c.type === "savedreg" || c.type === "localvar"),
@@ -169,10 +168,19 @@ let developCall = async args => {
   return { state, data, stackAlloc };
 };
 
-let produceAsm = ({ data, state, stackAlloc }) => {
-  let callee = `$ref/${data.defaultCall.callee}`;
-  let fs = data.functions;
-  let cee = fs[callee];
+let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
+  let cee = data.functionData;
+  if (data.functionData.body) {
+    let nname = data.functionData.body.replace("$selfdir", dirname);
+    data.functionData.body = await $fs.readFile(nname, "utf8");
+  } else {
+    data.functionData.body = "";
+  }
+  let sdata = _.join(
+    _.map(data.data, d => {
+      if (d.type === "string") return `${d.name}: .asciiz "${d.value}"`;
+    })
+  );
   let parameters = _.join(
     _.filter(
       _.map(cee.parameters, l => {
@@ -226,22 +234,28 @@ let produceAsm = ({ data, state, stackAlloc }) => {
   );
   let enlargeStack = stackAlloc > 0 ? `addiu $sp, $sp, -${stackAlloc}` : "";
   let shrinkStack = stackAlloc > 0 ? `addiu $sp, $sp, ${stackAlloc}` : "";
+  let fname = data.functionData.name;
   let prog = `
-# Stack frame information for function '${data.defaultCall.callee}':
+# Stack frame information for function '${fname}':
 ${parameters}
 ${labels}
 
+# static data 
+.data
+${sdata}
+
 # function prologue
 .text
-.globl ${_.toUpper(data.defaultCall.callee)}
-${_.toUpper(data.defaultCall.callee)}: 
+.globl ${_.toUpper(fname)}
+${_.toUpper(fname)}: 
 ${enlargeStack}
 ${saveregs}
 
 # function body
+${data.functionData.body}
 
 # function epilogue
-${_.toUpper(data.defaultCall.callee + "EPI")}:
+${_.toUpper(fname + "EPI")}:
 ${restoreregs}
 ${shrinkStack}
 jr $ra
@@ -266,8 +280,9 @@ let main = () => {
     .command("asm", "generates asm prologue for callee")
     .argument("<json>", `File describing the call sequence`)
     .action(async (args, options) => {
+      let dirname = path.dirname(path.resolve(args.json));
       let { state, data, stackAlloc } = await developCall(args, options);
-      produceAsm({ data, state, stackAlloc });
+      produceAsm({ data, state, stackAlloc, dirname });
     });
   prog.parse(process.argv);
 };

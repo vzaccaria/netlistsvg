@@ -8,7 +8,3 @@ THEN:
 ELSE:
       move  $v0, $a1
       j     GEPI
-
-
-
-

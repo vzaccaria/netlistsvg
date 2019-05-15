@@ -8,7 +8,7 @@ const _ = require("lodash");
 const { beautifyProg, run } = require("./lib/spim");
 
 let parseError = line => {
-  let regexp = /spim: \(parser\) (?<error>[\w\s]+) on line (?<line>\d+) of file (?<file>[\/\-\.\w\s]+)/;
+  let regexp = /spim: \(parser\) (?<error>[\w\s\']+) on line (?<line>\d+) of file (?<file>[\/\-\.\w\s]+)/;
   let x = line.match(regexp);
   if (!_.isNull(x)) {
     return x.groups;

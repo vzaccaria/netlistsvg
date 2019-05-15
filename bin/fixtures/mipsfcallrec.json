@@ -1,18 +1,14 @@
 {
   "omitFramePointer": true,
   "stackgrows": "below",
-  "functions": {
-    "$ref/g": {
-      "parameters": ["p/$a0", "n/$a1"],
-      "localvars": [],
-      "isLeaf": false,
-      "cref": "$selfdir/rec.c",
-      "body": "$selfdir/recbody.s"
-    }
+  "functionData": {
+    "name": "g",
+    "parameters": ["p/$a0", "n/$a1"],
+    "localvars": [],
+    "isLeaf": false,
+    "cref": "$selfdir/rec.c",
+    "body": "$selfdir/recbody.s"
   },
-  "data": [{ "test1/6c": "prova" }],
-  "defaultCall": {
-    "callee": "g",
-    "tests": [{ "parvalues": ["&test1", "0"], "result": "5" }]
-  }
+  "data": [{ "name": "test1", "type": "string", "value": "prova" }],
+  "tests": [{ "parvalues": ["&test1", "0"], "result": "5" }]
 }
