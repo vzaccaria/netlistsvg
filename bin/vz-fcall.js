@@ -46,7 +46,7 @@ ${c}
 
 let _n = s => s.replace("$", "\\$");
 
-let gpdiag = (data, cells) => {
+let gpdiag = (data, cells, stackAlloc) => {
   let txt = _.join(
     _.map(cells, i => {
       let lab = "";
@@ -55,12 +55,52 @@ let gpdiag = (data, cells) => {
         cause = `(${i.cause})`;
       }
       if (!_.isUndefined(i.offset) && i.type !== "zone") {
-        lab = `,label=right:{${i.offset}}`;
+        if (i.offset === 0) lab = `,label=right:{\\$sp + ${i.offset}}`;
+        else lab = `,label=right:{${i.offset}}`;
+      } else {
+        if (i.type === "zone") {
+          lab = `,label=right:{\\$sp offset $\\downarrow$}`;
+          if (!data.omitFramePointer) {
+            lab = lab + `,label=left:{\\$fp offset $\\downarrow$}`;
+          }
+        }
       }
-      if (!_.isUndefined(i.pointedBy)) {
-        lab = `${lab},label=left:${_n(i.pointedBy)}$\\rightarrow$`;
+      if (!data.omitFramePointer && i.type !== "zone") {
+        if (i.offset === 0)
+          lab = lab + `,label=left:{\\$fp + ${i.offset - stackAlloc + 4}}`;
+        else lab = lab + `,label=left:{${i.offset - stackAlloc + 4}}`;
       }
       return `\\node [${i.type}${lab}] {${_n(i.name)} ${cause}};`;
+    }),
+    "\n"
+  );
+  return wrap(data, txt);
+};
+
+let gpblank = (data, cells) => {
+  let txt = _.join(
+    _.map(cells, i => {
+      let cause = "";
+      if (!_.isUndefined(i.cause)) {
+        cause = `(${i.cause})`;
+      }
+      let lab = "";
+      if (!_.isUndefined(i.offset) && i.type !== "zone") {
+        lab = `,label=right:{[\\ldots\\ldots]}`;
+      } else {
+        if (i.type === "zone") {
+          lab = `,label=right:{\\$sp offset $\\downarrow$}`;
+          if (!data.omitFramePointer) {
+            lab = lab + `,label=left:{\\$fp offset $\\downarrow$}`;
+          }
+        }
+      }
+      if (!data.omitFramePointer && i.type !== "zone") {
+        lab = lab + `,label=left:{[\\ldots\\ldots]}`;
+      }
+      if (i.type === "zone")
+        return `\\node [${i.type}${lab}] {${_n(i.name)} ${cause}};`;
+      else return `\\node [savedreg${lab}] {};`;
     }),
     "\n"
   );
@@ -301,12 +341,14 @@ let main = () => {
     .command("diagram", "generates stack and register usage for a call")
     .argument("[json]", `File describing the call sequence`)
     .option("-j, --json", `print sequence of cells instead of tikz diagram`)
+    .option("-b, --blank", `blank diagram`)
     .action(async (args, options) => {
       let { state, data, stackAlloc } = await developCall(args, options);
       if (options.json) {
         console.log({ state, stackAlloc });
       } else {
-        console.log(gpdiag(data, state));
+        if (!options.blank) console.log(gpdiag(data, state, stackAlloc));
+        else console.log(gpblank(data, state, stackAlloc));
       }
     })
     .command("asm", "generates asm prologue for callee")
