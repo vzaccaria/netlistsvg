@@ -8,6 +8,7 @@ const _ = require("lodash");
 const { beautifyString, runString } = require("./lib/spim");
 const path = require("path");
 const chalk = require("chalk");
+let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 
 let $fs = require("mz/fs");
 
@@ -86,7 +87,7 @@ let gpblank = (data, cells) => {
       }
       let lab = "";
       if (!_.isUndefined(i.offset) && i.type !== "zone") {
-        lab = `,label=right:{[\\ldots\\ldots]}`;
+        lab = `,label=right:{\\ldots\\ldots}`;
       } else {
         if (i.type === "zone") {
           lab = `,label=right:{\\$sp offset $\\downarrow$}`;
@@ -96,7 +97,7 @@ let gpblank = (data, cells) => {
         }
       }
       if (!data.omitFramePointer && i.type !== "zone") {
-        lab = lab + `,label=left:{[\\ldots\\ldots]}`;
+        lab = lab + `,label=left:{\\ldots\\ldots}`;
       }
       if (i.type === "zone")
         return `\\node [${i.type}${lab}] {${_n(i.name)} ${cause}};`;
@@ -247,6 +248,12 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
   } else {
     data.functionData.body = "";
   }
+  if (data.functionData.cref) {
+    let nname = data.functionData.cref.replace("$selfdir", dirname);
+    data.functionData.cref = await $fs.readFile(nname, "utf8");
+  } else {
+    data.functionData.cref = "no source given";
+  }
   let sdata = _.join(
     _.map(data.data, d => {
       if (d.type === "string") return `${d.name}: .asciiz "${d.value}"`;
@@ -335,6 +342,46 @@ jr $ra
   return beautifyString(prog);
 };
 
+let produceAndSaveArtifacts = async (args, options) => {
+  let { state, data, stackAlloc } = await developCall(args, options);
+  let diag = gpdiag(data, state, stackAlloc);
+  let diagb = gpblank(data, state, stackAlloc);
+  let dirname = path.dirname(path.resolve(args.json));
+  let asm = await produceAsm({ data, state, stackAlloc, dirname });
+  let source = data.functionData.cref;
+  let result = {
+    latex: [
+      latexArtifact(diag, "complete diagram", "standalone", "pdflatex"),
+      latexArtifact(diagb, "blank diagram", "standalone", "pdflatex"),
+      latexArtifact(
+        `
+\\begin{minted}{asm}
+${asm}
+\\end{minted}`,
+        "asm source",
+        "standalone",
+        "pdflatex",
+        "--usepackage minted -r varwidth"
+      ),
+      latexArtifact(
+        `
+\\begin{minted}{c}
+${source}
+\\end{minted}`,
+        "c source",
+        "standalone",
+        "pdflatex",
+        "--usepackage minted -r varwidth"
+      )
+    ]
+  };
+  if (options.save) {
+    return saveArtifacts(result, options.save);
+  } else {
+    console.log(JSON.stringify(result));
+  }
+};
+
 let main = () => {
   prog
     .description("Function call utils")
@@ -380,7 +427,14 @@ let main = () => {
           );
         }
       });
-    });
+    })
+    .command("artifact", "generates stack and register usage for a call")
+    .argument("[json]", `File describing the call sequence`)
+    .option(
+      "-s, --save <string>",
+      "save data with in files with prefix <string>"
+    )
+    .action(produceAndSaveArtifacts);
   prog.parse(process.argv);
 };
 

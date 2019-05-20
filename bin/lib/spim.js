@@ -45,10 +45,17 @@ let run = async filename => {
    print_all_regs hex
    exit
 `;
-  return execWithStringStdErr(path => `cat ${path} | spim `, script, {
-    postfix: ".script",
-    cleanup: false
-  }).then(([stdout]) => {
+  let spimException = !_.isUndefined(process.env.SPIMEXFILE)
+    ? `-exception_file '${process.env.SPIMEXFILE}'`
+    : "";
+  return execWithStringStdErr(
+    path => `cat ${path} | spim ${spimException}`,
+    script,
+    {
+      postfix: ".script",
+      cleanup: false
+    }
+  ).then(([stdout]) => {
     checkIfErrors(stdout);
     return testReg(stdout);
   });
