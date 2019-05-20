@@ -48,6 +48,26 @@ let quineTestBatch = {
   ]
 };
 
+let fcallTestBatch = {
+  name: "vz-fcall",
+  scriptname: `${__dirname}/vz-fcall.js`,
+  fixtures: `${__dirname}/fixtures`,
+  tests: [
+    {
+      msg: `array parameters`,
+      cmd: (s, fd) => `${s} artifact ${fd}/mipsfcall.json`
+    },
+    {
+      msg: `tema esame 1`,
+      cmd: (s, fd) => `${s} artifact ${fd}/mipsfcall1.json`
+    },
+    {
+      msg: `ricorsiva`,
+      cmd: (s, fd) => `${s} artifact ${fd}/mipsfcallrec.json`
+    }
+  ]
+};
+
 let pipeTestBatch = {
   name: "vz-pipe",
   scriptname: `${__dirname}/vz-pipe.js`,
@@ -77,4 +97,10 @@ let waveTestBatch = {
   ]
 };
 
-module.exports = [fsmTestBatch, quineTestBatch, pipeTestBatch, waveTestBatch];
+module.exports = [
+  fsmTestBatch,
+  quineTestBatch,
+  pipeTestBatch,
+  waveTestBatch,
+  fcallTestBatch
+];
