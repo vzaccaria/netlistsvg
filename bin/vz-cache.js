@@ -2,16 +2,11 @@
 "use strict";
 
 const prog = require("caporal");
-const { execWithStringStdErr } = require("./lib/common.js");
-let $gstd = require("get-stdin");
 const _ = require("lodash");
-const { beautifyProg, run } = require("./lib/spim");
 
 let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 
 // check
-
-let $fs = require("mz/fs");
 
 /* Each block might have the following data: 
    - valid: bool,
@@ -24,12 +19,49 @@ let asTableLine = a => {
   return _.join(a, " & ") + "\\\\";
 };
 
-let getCacheBlock = ({ valid, tag, data }) => {
-  return [valid ? "$\\checkmark$" : "$\\times$", `\\texttt{${tag}}`, data];
+let getCacheBlock = _.curry((i, { valid, tag, data, highlight }) => {
+  if (highlight || i === 0) {
+    return [valid ? "$\\checkmark$" : "$\\times$", `\\texttt{${tag}}`, data];
+  } else {
+    return _.map(
+      [valid ? "$\\checkmark$" : "$\\times$", `\\texttt{${tag}}`, data],
+      i => `{\\color{lightgray}${i}}`
+    );
+  }
+});
+
+let encodeAddr = (opts, a) => {
+  if (opts.blank) return a;
+  else {
+    let { tag, bindex, boffset } = daddr(opts, a);
+    return `{\\color{olive} ${tag}} {\\color{teal} ${bindex}} {\\color{gray} ${boffset}} `;
+  }
+};
+
+const numeral = require("numeral");
+
+let produceCacheBadge = opts => {
+  let b = `
+\\begin{itemize}
+\\setlength\\itemsep{-.5em}
+\\item Indirizzamento cache: ${
+    opts.cacheways === 0 ? "diretto" : Math.pow(2, opts.cacheways) + " vie"
+  }
+\\item Dimensioni memoria di lavoro: ${numeral(
+    Math.pow(2, opts.membits)
+  ).format("0 ib")}
+\\item Dimensioni cache: ${numeral(Math.pow(2, opts.cachesizebits)).format(
+    "0 ib"
+  )}
+\\item Dimensioni blocco cache: ${numeral(Math.pow(2, opts.blockbits)).format(
+    "0 ib"
+  )}
+\\end{itemize}`;
+  return b;
 };
 
 let produceLine = _.curry((opts, t, i) => {
-  let acc = t.access ? `\\texttt{${_.trim(t.access)}}` : "";
+  let acc = t.access ? `\\texttt{${_.trim(encodeAddr(opts, t.access))}}` : "";
   let ttype = t.type ? (t.type === "hit" ? "\\textsc{H}" : "\\textsc{M}") : "";
   if (!opts.blank || i === 0) {
     return asTableLine(
@@ -37,7 +69,7 @@ let produceLine = _.curry((opts, t, i) => {
         i,
         acc,
         ttype,
-        _.map(t.state, getCacheBlock),
+        _.map(t.state, getCacheBlock(i)),
         t.description
       ])
     );
@@ -102,14 +134,21 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
   let result = {
     latex: [
       latexArtifact(
-        getCompleteTrace(trace, { blank: false }),
+        produceCacheBadge(options),
+        "badge",
+        "standalone",
+        "pdflatex",
+        "-r varwidth=10cm"
+      ),
+      latexArtifact(
+        getCompleteTrace(trace, _.merge({}, { blank: false }, options)),
         "Complete trace",
         "standalone",
         "pdflatex",
-        "-r varwidth=20cm --usepackage amssymb"
+        "-r varwidth=20cm --usepackage amssymb,xcolor"
       ),
       latexArtifact(
-        getCompleteTrace(trace, { blank: true }),
+        getCompleteTrace(trace, _.merge({}, { blank: true }, options)),
         "Blank trace",
         "standalone",
         "pdflatex",
@@ -124,12 +163,12 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
   }
 };
 
-let defaultConfig = {
-  membits: 14,
-  cacheways: 0, // 0=direct or n=2^n-way
-  blockbits: 9,
-  cachesizebits: 11
-};
+// let defaultConfig = {
+//   membits: 14,
+//   cacheways: 0, // 0=direct or n=2^n-way
+//   blockbits: 9,
+//   cachesizebits: 11
+// };
 
 let getMemSize = ({ membits, cacheways, blockbits, cachesizebits }) => {
   let blockindexbits = cachesizebits - blockbits - cacheways;
@@ -169,6 +208,10 @@ let emptyCache = [
 
 let nextCache = _.curry((config, { cache, actions }, access) => {
   cache = _.cloneDeep(cache);
+  cache = _.map(cache, c => {
+    delete c.highlight;
+    return c;
+  });
   actions = _.cloneDeep(actions);
   let { tag, ibindex, iwkbnumber, desc } = daddr(config, access);
   if (config.cacheways === 0) {
@@ -179,6 +222,7 @@ let nextCache = _.curry((config, { cache, actions }, access) => {
       cache[ibindex].valid = true;
       cache[ibindex].tag = tag;
       cache[ibindex].data = iwkbnumber;
+      cache[ibindex].highlight = true;
       actions.push({
         type: "miss",
         state: cache,
@@ -186,6 +230,7 @@ let nextCache = _.curry((config, { cache, actions }, access) => {
         access
       });
     } else {
+      cache[ibindex].highlight = true;
       actions.push({
         type: "hit",
         state: cache,
@@ -231,6 +276,7 @@ let main = () => {
     .option("-m, --membits <num>", "main address size", prog.INT, 14)
     .option("-w, --cacheways <num>", "log2 of cache ways", prog.INT, 0)
     .option("-b, --blockbits <num>", "log2 of block size ", prog.INT, 9)
+    .option("-j, --json", "produce trace in JSON format")
     .option(
       "-s, --cachesizebits <num>",
       "log2 of cache size (bits)",
@@ -246,7 +292,13 @@ let main = () => {
       if (options.empty) {
         e = getEmptyConfig(options.empty);
       }
-      produceAndSaveArtifacts(args, options, simulate(options, e, args.alist));
+      if (!options.json)
+        produceAndSaveArtifacts(
+          args,
+          options,
+          simulate(options, e, args.alist)
+        );
+      else console.log(JSON.stringify(simulate(options, e, args.alist), 0, 4));
     });
   prog.parse(process.argv);
 };
