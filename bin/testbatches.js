@@ -97,10 +97,24 @@ let waveTestBatch = {
   ]
 };
 
+let cacheTestBatch = {
+  name: "vz-cache",
+  scriptname: `${__dirname}/vz-cache.js`,
+  fixtures: `${__dirname}/fixtures`,
+  tests: [
+    {
+      msg: `test raw trace generation`,
+      cmd: s =>
+        `${s} sim '100110 0101 0010, 101101 0000 0001, 000011 1010 0100, 101101 1100 1101, 101001 1110 0111, 001100 0101 1100' -e '1,101,20,0,000,1,0,100,18,1,001,7'`
+    }
+  ]
+};
+
 module.exports = [
   fsmTestBatch,
   quineTestBatch,
   pipeTestBatch,
   waveTestBatch,
-  fcallTestBatch
+  fcallTestBatch,
+  cacheTestBatch
 ];
