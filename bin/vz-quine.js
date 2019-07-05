@@ -22,7 +22,7 @@ let main = () => {
     .action((args, options) => {
       let nvars = Math.ceil(Math.log2(args.table.length));
       let vars = _.map(_.range(0, nvars), v => `${options.var}_${v}`);
-      if (options.vars) vars = _.concat(options.vars.split(","), vars);
+      if (options.vars) vars = options.vars.split(",");
       let s = synthesize(args.table, vars);
       if (!options.save) {
         console.log(JSON.stringify(s, 0, 4));

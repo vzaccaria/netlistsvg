@@ -51,7 +51,13 @@ let sopForm = res => {
     x => x !== undefined
   );
   let dcs = _.join(dc, ", ");
-  return `\\begin{equation}\\mathrm{on} = \\sum (${ons}), \\mathrm{dc} = \\sum (${dcs}) \\end{equation}`;
+  if (!_.isUndefined(res.funcname)) {
+    return `\\begin{equation}${
+      res.funcname
+    } = (\\textsc{ON}_{\\textsc{set}}(${ons}), \\textsc{DC}_{\\textsc{set}} (${dcs})) \\end{equation}`;
+  } else {
+    return `\\begin{equation}(\\textsc{ON}_{\\textsc{set}}(${ons}), \\textsc{DC}_{\\textsc{set}} (${dcs})) \\end{equation}`;
+  }
 };
 
 let table = c => `
@@ -185,6 +191,12 @@ let tt2qm = (n, tt) => {
   returned.funcdata = data.funcdata;
   returned.implicantsTables = _.map(data.implicantGroups, getImplicantGroup);
   returned.implicantsCharts = _.map(data.primTermTables, implicantChart);
+  returned.allCoveringImplicants = _.map(returned.primeImplicants, k => {
+    let kk = _.find(_.flatten(returned.implicantsTables), j => {
+      return _.isEqual(j.values, k.values);
+    });
+    return { implicantValue: k.values, implicantSymbol: kk.string };
+  });
   returned.cover = _.map(data.minimalTermPrims, i => {
     return _.map(i.implicant.imp);
   });
@@ -262,14 +274,14 @@ let karnaughImp = ({ implicantSymbol, implicantValue }) => {
   return `\\implicant{${tl}}{${br}}`;
 };
 
-let karnaugh = ({ funcdata, coverSymbolic }, vars) => {
+let karnaugh = ({ funcdata, allCoveringImplicants }, vars) => {
   let vab = `$${vars[0]}${vars[1]}$`;
   let vcd = `$${vars[2]}${vars[3]}$`;
   return `
  \\begin{center}
     \\begin{karnaugh-map}[4][4][1][${vcd}][${vab}]
     \\manualterms{${_.join(_.map(funcdata, f => (f === 2 ? "x" : f)), ",")}}
-    ${_.join(_.map(coverSymbolic, karnaughImp), "\n")}
+    ${_.join(_.map(allCoveringImplicants, karnaughImp), "\n")}
     \\end{karnaugh-map}
 \\end{center}
 `;
@@ -299,10 +311,10 @@ let symbolicAsLogicFormula = _.curry((vars, i) => {
   let val = _.join(
     _.filter(
       _.map(i.implicantSymbol, (s, n) =>
-        s === "1" ? vars[n] : s === "0" ? `\\overline{${vars[n]}}` : undefined
+        s === "1" ? vars[n] : s === "0" ? `\\bar{${vars[n]}}` : undefined
       )
     ),
-    " \\cdot "
+    " "
   );
   return val;
 });
@@ -315,11 +327,18 @@ let symbolicSolution = _.curry((vars, res) => {
       _.every(res.coverSymbolic[0].implicantSymbol, x => x === "-")
     ) {
       return "1";
-    } else
-      return _.join(
-        _.map(res.coverSymbolic, symbolicAsLogicFormula(vars)),
-        "+"
-      );
+    } else {
+      if (!_.isUndefined(res.funcname))
+        return `${res.funcname} = ${_.join(
+          _.map(res.coverSymbolic, symbolicAsLogicFormula(vars)),
+          "+"
+        )}`;
+      else
+        return `${_.join(
+          _.map(res.coverSymbolic, symbolicAsLogicFormula(vars)),
+          "+"
+        )}`;
+    }
   }
 });
 
@@ -350,6 +369,7 @@ let synthesize = (data, vars) => {
 
   s.quicksynth = `${symbolicSolution(vars, s)}`;
   s.quicksynthk = kmap;
+  s.funcname = `f(${_.join(vars, ",")})`;
 
   s.latex = _.concat(
     [
