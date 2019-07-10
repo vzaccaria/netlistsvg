@@ -21,10 +21,18 @@ let asTableLine = a => {
 
 let getCacheBlock = _.curry((i, { valid, tag, data, highlight }) => {
   if (highlight || i === 0) {
-    return [valid ? "$\\checkmark$" : "$\\times$", `\\texttt{${tag}}`, data];
+    return [
+      valid ? "$\\checkmark$" : "$\\times$",
+      tag ? `\\texttt{${tag}}` : "",
+      data ? data : ""
+    ];
   } else {
     return _.map(
-      [valid ? "$\\checkmark$" : "$\\times$", `\\texttt{${tag}}`, data],
+      [
+        valid ? "$\\checkmark$" : "$\\times$",
+        tag ? `\\texttt{${tag}}` : "",
+        data ? data : ""
+      ],
       i => `{\\color{lightgray}${i}}`
     );
   }
@@ -80,54 +88,52 @@ let produceLine = _.curry((opts, t, i) => {
   }
 });
 
-let l0 = [
-  "",
-  "",
-  "",
-  "\\multicolumn{3}{c|}{Block 0}",
-  "\\multicolumn{3}{c|}{Block 1}",
-  "\\multicolumn{3}{c|}{Block 2}",
-  "\\multicolumn{3}{c|}{Block 3}",
-  ""
-];
+let nblocks = opts => getMemSize(opts).numberOfBlocks;
 
-let l1 = [
-  "",
-  "address",
-  "result",
-  "V",
-  "T",
-  "M",
-  "V",
-  "T",
-  "M",
-  "V",
-  "T",
-  "M",
-  "V",
-  "T",
-  "M",
-  "action"
-];
+let replArray = (n, f) => _.map(_.range(0, n), f);
 
-let tableWrap = _.curry((n, data) => {
+let l0 = opts =>
+  _.flattenDeep([
+    "",
+    "",
+    "",
+    replArray(nblocks(opts), i => `\\multicolumn{3}{c|}{Block ${i}}`),
+    ""
+  ]);
+
+let l1 = opts =>
+  _.flattenDeep([
+    "",
+    "address",
+    "result",
+    replArray(nblocks(opts), () => ["V", "T", "M"]),
+    "action"
+  ]);
+
+let tableWrap = _.curry((n, data, opts) => {
   let hd = _.join(_.fill(Array(n), "c"), "|");
   return `
 \\begin{table}
  \\footnotesize
   \\begin{tabular}{|${hd}|}
-  ${asTableLine(l0)} 
-  ${asTableLine(l1)} 
+  ${asTableLine(l0(opts))} 
+  ${asTableLine(l1(opts))} 
   \\hline
   ${data}
   \\end{tabular}
 \\end{table}`;
 });
 
+let getCols = opts => {
+  let { numberOfBlocks } = getMemSize(opts);
+  return 2 + 3 * numberOfBlocks + 2;
+};
+
 let getCompleteTrace = (t, opts) =>
   tableWrap(
-    16,
-    _.join(_.map(t.results.actions, produceLine(opts)), "\n\\hline")
+    getCols(opts),
+    _.join(_.map(t.results.actions, produceLine(opts)), "\n\\hline"),
+    opts
   );
 
 let produceAndSaveArtifacts = async (args, options, trace) => {
@@ -176,7 +182,8 @@ let getMemSize = ({ membits, cacheways, blockbits, cachesizebits }) => {
     tagbits: membits - blockindexbits - blockbits,
     blockbits,
     membits,
-    blockindexbits
+    blockindexbits,
+    numberOfBlocks: Math.pow(2, blockindexbits) * Math.pow(2, cacheways)
   };
 };
 
@@ -199,12 +206,12 @@ let daddr = (config, numeric) => {
   return { tag, bindex, boffset, wkbnumber, desc, ibindex, iwkbnumber };
 };
 
-let emptyCache = [
-  { valid: false },
-  { valid: false },
-  { valid: false },
-  { valid: false }
-];
+let emptyCache = opts =>
+  replArray(nblocks(opts), () => {
+    return {
+      valid: false
+    };
+  });
 
 let nextCache = _.curry((config, { cache, actions }, access) => {
   cache = _.cloneDeep(cache);
@@ -255,7 +262,8 @@ let simulate = (config, emptyc, accesslist) => {
   };
 };
 
-let getEmptyConfig = s => {
+let getEmptyConfig = options => {
+  let s = options.empty;
   s = s.split(",");
   s = _.chunk(s, 3);
   let e = _.map(s, ([v, e, d]) => {
@@ -288,9 +296,9 @@ let main = () => {
       "sequence of triplets for initializing cache"
     )
     .action(async (args, options) => {
-      let e = emptyCache;
+      let e = emptyCache(options);
       if (options.empty) {
-        e = getEmptyConfig(options.empty);
+        e = getEmptyConfig(options);
       }
       if (!options.json)
         produceAndSaveArtifacts(
