@@ -61,9 +61,9 @@ let sopForm = res => {
 };
 
 let table = c => `
-\\begin{table}[h]
+\\begin{center}
                 ${c}
-\\end{table}
+\\end{center}
 `;
 
 let reduceToChartTable = chart => {
