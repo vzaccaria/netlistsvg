@@ -5,6 +5,7 @@ const prog = require("caporal");
 const _ = require("lodash");
 
 let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+let { lab } = require("./lib/common");
 
 // check
 
@@ -24,14 +25,14 @@ let getCacheBlock = _.curry((i, { valid, tag, data, highlight }) => {
     return [
       valid ? "$\\checkmark$" : "$\\times$",
       tag ? `\\texttt{${tag}}` : "",
-      data ? data : ""
+      !_.isUndefined(data) ? data : ""
     ];
   } else {
     return _.map(
       [
         valid ? "$\\checkmark$" : "$\\times$",
         tag ? `\\texttt{${tag}}` : "",
-        data ? data : ""
+        !_.isUndefined(data) ? data : ""
       ],
       i => `{\\color{lightgray}${i}}`
     );
@@ -90,6 +91,16 @@ let produceLine = _.curry((opts, t, i) => {
 
 let nblocks = opts => getMemSize(opts).numberOfBlocks;
 
+let encodeBlockIndex = _.curry((opts, i) => {
+  if (opts.cacheways === 0) return i;
+  else {
+    let bsize = Math.pow(2, opts.cacheways);
+    let setNum = Math.floor(i / bsize);
+    let blockNum = i % bsize;
+    return `${setNum}.${lab("", blockNum)}`;
+  }
+});
+
 let replArray = (n, f) => _.map(_.range(0, n), f);
 
 let l0 = opts =>
@@ -97,7 +108,10 @@ let l0 = opts =>
     "",
     "",
     "",
-    replArray(nblocks(opts), i => `\\multicolumn{3}{c|}{Block ${i}}`),
+    replArray(
+      nblocks(opts),
+      i => `\\multicolumn{3}{c|}{Block ${encodeBlockIndex(opts, i)}}`
+    ),
     ""
   ]);
 
@@ -213,7 +227,7 @@ let emptyCache = opts =>
     };
   });
 
-let nextCache = _.curry((config, { cache, actions }, access) => {
+let nextCache = _.curry((config, { cache, actions }, access, stepnum) => {
   cache = _.cloneDeep(cache);
   cache = _.map(cache, c => {
     delete c.highlight;
@@ -221,32 +235,64 @@ let nextCache = _.curry((config, { cache, actions }, access) => {
   });
   actions = _.cloneDeep(actions);
   let { tag, ibindex, iwkbnumber, desc } = daddr(config, access);
+  let markMiss = idx => {
+    cache[idx] = {
+      valid: true,
+      tag,
+      data: iwkbnumber,
+      highlight: true,
+      lastaccess: stepnum
+    };
+    actions.push({
+      type: "miss",
+      state: cache,
+      description: `carico ${desc}`,
+      access
+    });
+  };
+  let markHit = idx => {
+    cache[idx].highlight = true;
+    cache[idx].lastaccess = stepnum;
+    actions.push({
+      type: "hit",
+      state: cache,
+      description: `leggo ${desc}`,
+      access
+    });
+  };
   if (config.cacheways === 0) {
     if (
       !cache[ibindex].valid ||
       (cache[ibindex].valid && cache[ibindex].tag !== tag)
-    ) {
-      cache[ibindex].valid = true;
-      cache[ibindex].tag = tag;
-      cache[ibindex].data = iwkbnumber;
-      cache[ibindex].highlight = true;
-      actions.push({
-        type: "miss",
-        state: cache,
-        description: `carico ${desc}`,
-        access
-      });
-    } else {
-      cache[ibindex].highlight = true;
-      actions.push({
-        type: "hit",
-        state: cache,
-        description: `leggo ${desc}`,
-        access
-      });
-    }
+    )
+      markMiss(ibindex);
+    else markHit(ibindex);
   } else {
-    /* multiway tbd */
+    /* multiway */
+    let findBlockAmong = (blocks, pred) =>
+      _.findIndex(cache, (c, i) => _.includes(blocks, i) && pred(i));
+
+    let setSize = Math.pow(2, config.cacheways);
+    let blocksToCheck = _.map(_.range(0, setSize), i => i + ibindex * setSize);
+    let resHit = findBlockAmong(
+      blocksToCheck,
+      i => cache[i].valid && cache[i].tag === tag
+    );
+    if (resHit !== -1) markHit(resHit);
+    else {
+      /* miss */
+      let notused = findBlockAmong(blocksToCheck, i => !cache[i].valid);
+      if (notused !== -1) markMiss(notused);
+      else {
+        let annotedBlocks = _.map(blocksToCheck, i => {
+          cache[i].num = i;
+          if (_.isUndefined(cache[i].lastaccess)) cache[i].lastaccess = 0;
+          return cache[i];
+        });
+        let victim = _.minBy(annotedBlocks, b => b.lastaccess).num;
+        markMiss(victim);
+      }
+    }
   }
   return { cache, actions };
 });
