@@ -89,7 +89,7 @@ let produceWave = _.curry((args, options, vcd) => {
 });
 
 let readWavedrom = (args, options) => {
-  let file_p = $fs.readFile(args.file, "utf-8");
+  let file_p = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
   let wavedrom = options.isVcd
     ? file_p
         .then(vcdParser.parse)
@@ -117,7 +117,7 @@ let processWhitelist = (wavedrom, options) => {
 let main = () => {
   prog
     .description("Produce a wave diagram")
-    .argument("<file>", "source Wavedrom/VCD file")
+    .argument("[file]", "source Wavedrom/VCD file")
     .option("--end <integer>", "time ends at", prog.INTEGER, 10)
     .option("-s, --signals <string>", "comma separated list of signals")
     .option("-a, --save <prefix>", "save with prefix")
