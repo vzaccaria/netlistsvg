@@ -202,9 +202,7 @@ let getTransitionTable = fsm => {
 };
 
 let tableWrap = c => `
-\\begin{table}
                 ${c}
-\\end{table}
 `;
 
 let tableHead = headings => `\\begin{tabular}{${_.repeat("c", headings.length)}}
