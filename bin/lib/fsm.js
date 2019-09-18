@@ -203,13 +203,12 @@ let getTransitionTable = fsm => {
 
 let tableWrap = c => `
 \\begin{table}
-        \\newcommand{\\head}[1]{{\\textbf{#1}}}
                 ${c}
 \\end{table}
 `;
 
 let tableHead = headings => `\\begin{tabular}{${_.repeat("c", headings.length)}}
-${_.join(_.map(headings, t => "\\head{$" + t + "$}"), " & ")} \\\\
+${_.join(_.map(headings, t => "$" + t + "$"), " & ")} \\\\
 `;
 
 let tail = `
