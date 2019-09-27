@@ -59,7 +59,7 @@ let $fs = require("mz/fs");
 let main = () => {
   prog
     .description("SPIM utils")
-    .command("check", "decorate a source file")
+    .command("check", "Checks a source file for errors")
     .argument("[file]", `Source file`)
     .option(
       "-b, --spim-binary <string>",
