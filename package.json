@@ -6,6 +6,7 @@
   "author": "Neil Turley",
   "license": "MIT",
   "dependencies": {
+    "bit-field": "1.1.0",
     "caporal": "0.8.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",

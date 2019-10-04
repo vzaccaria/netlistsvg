@@ -21,6 +21,25 @@ let wave2tikz = (options, wavedata) => {
   );
 };
 
+let reg2pdf = (options, regdata) => {
+  return tmp.file({ postfix: ".svg" }).then(tmpsvg => {
+    return execWithString(
+      path =>
+        `${__dirname}/../node_modules/bit-field/bin/bitfield.js --lanes 1 -i ${path} > ${
+          tmpsvg.path
+        }`,
+      regdata,
+      { postfix: ".js", cleanup: false, logger: options.logger }
+    )
+      .then(() => {
+        return exec(`svg2pdf ${tmpsvg.path} ${options.dumpClassicPdf}`);
+      })
+      .then(() => {
+        if (!options.keep) tmpsvg.cleanup();
+      });
+  });
+};
+
 let wave2pdf = (options, wavedata) => {
   return tmp.file({ postfix: ".svg" }).then(tmpsvg => {
     return execWithString(
@@ -133,50 +152,60 @@ let main = () => {
       "-d, --dump-classic-pdf <file>",
       "Produce the wave from the classic wavedrom cli"
     )
+    .option("-r, --regformat", "Use wavedrom register")
     .action((args, options, logger) => {
       options.logger = logger;
-      readWavedrom(args, options)
-        .then(wavedrom => {
-          let whitelisted = processWhitelist(wavedrom, options);
-          Promise.all([
-            wave2tikz(options, wavedrom),
-            wave2tikz(options, whitelisted)
-          ]).then(([complete, whitel]) => {
-            let artifacts = [
-              latexArtifact(
-                complete,
-                "wave",
-                "standalone",
-                "pdflatex",
-                `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
-              ),
-              latexArtifact(
-                whitel,
-                "wave whitelisted",
-                "standalone",
-                "pdflatex",
-                `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
-              )
-            ];
-            let result = { latex: artifacts };
-            if (options.save) {
-              saveArtifacts(result.latex, options.save);
-            } else {
-              if (options.dumpTikz) {
-                console.log(complete);
+      if (!options.regformat) {
+        readWavedrom(args, options)
+          .then(wavedrom => {
+            let whitelisted = processWhitelist(wavedrom, options);
+            Promise.all([
+              wave2tikz(options, wavedrom),
+              wave2tikz(options, whitelisted)
+            ]).then(([complete, whitel]) => {
+              let artifacts = [
+                latexArtifact(
+                  complete,
+                  "wave",
+                  "standalone",
+                  "pdflatex",
+                  `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+                ),
+                latexArtifact(
+                  whitel,
+                  "wave whitelisted",
+                  "standalone",
+                  "pdflatex",
+                  `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+                )
+              ];
+              let result = { latex: artifacts };
+              if (options.save) {
+                saveArtifacts(result.latex, options.save);
               } else {
-                if (options.dumpClassicPdf) {
-                  return wave2pdf(options, wavedrom);
+                if (options.dumpTikz) {
+                  console.log(complete);
                 } else {
-                  console.log(JSON.stringify(result, 0, 4));
+                  if (options.dumpClassicPdf) {
+                    return wave2pdf(options, wavedrom);
+                  } else {
+                    console.log(JSON.stringify(result, 0, 4));
+                  }
                 }
               }
-            }
+            });
+          })
+          .catch(e => {
+            logger.error(e);
           });
-        })
-        .catch(e => {
-          logger.error(e);
+      } else {
+        readWavedrom(args, options).then(wavedrom => {
+          if (!options.dumpClassicPdf) {
+            throw "You must use -d option when printing register format";
+          }
+          return reg2pdf(options, wavedrom);
         });
+      }
     });
   prog.parse(process.argv);
 };
