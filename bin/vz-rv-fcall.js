@@ -3,11 +3,12 @@
 
 const prog = require("caporal");
 // const { execWithStringStdErr } = require("./lib/common");
+const sprintf = require("sprintf-js").sprintf;
+let { exec } = require("mz/child_process");
 let $gstd = require("get-stdin");
 const _ = require("lodash");
-const { beautifyString, runString } = require("./lib/spim");
+const { beautifyString } = require("./lib/spim");
 const path = require("path");
-const chalk = require("chalk");
 let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 
 let $fs = require("mz/fs");
@@ -16,14 +17,9 @@ let name = "(?<name>[\\w[\\.\\]]+)";
 let registername = "(?<register>\\$[\\w]+)";
 let size = "(?<size>[\\d]+)";
 let arrayspec = "(?<arrayof>[bw])";
-let pointer = "(?<ispointer>[p])";
 let arrayof = `${size}${arrayspec}`;
 
 let formalparspec = `${name}/(${registername}|${arrayof}|w)`;
-
-let labelspec = `${name}/(${arrayof}|${pointer})`;
-let valuespec = `#(?<value>[\\d]+)`;
-let actualparspec = `(${labelspec}|${valuespec})`;
 
 let _getvarreg = s => {
   let gg = s.match(formalparspec).groups;
@@ -221,25 +217,6 @@ let developCall = async args => {
   return { state, data, stackAlloc };
 };
 
-let addMain = (data, prog, { parvalues }) => {
-  let v = _.map(parvalues, (p, i) => {
-    let { ispointer, name, value } = p.match(actualparspec).groups;
-    if (ispointer) return `la $a${i}, ${name}`;
-    else {
-      return `li $a${i}, ${value}`;
-    }
-  });
-  let prepare = _.join(v, "\n");
-  let newprog = `${prog}
-
-# main test
-main: 
-${prepare}
-jal ${_.toUpper(data.functionData.name)}
-`;
-  return beautifyString(newprog);
-};
-
 let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
   let cee = data.functionData;
   if (data.functionData.body) {
@@ -254,12 +231,6 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
   } else {
     data.functionData.cref = "no source given";
   }
-  let sdata = _.join(
-    _.map(data.data, d => {
-      if (d.type === "string") return `${d.name}: .asciiz "${d.value}"`;
-    }),
-    "\n"
-  );
   let parameters = _.join(
     _.filter(
       _.map(cee.parameters, l => {
@@ -319,9 +290,6 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
 ${parameters}
 ${labels}
 
-# static data 
-.data
-${sdata}
 
 # function prologue
 .text
@@ -407,26 +375,44 @@ let main = () => {
     })
     .command("test", "invokes function with tests")
     .argument("<json>", `File describing the call sequence`)
-    .action(async (args, options) => {
+    .option(
+      "--cc <format>",
+      "Format string to compile test",
+      prog.STRING,
+      "docker run -v %s:/root/local -w /root/local --rm --entrypoint '/opt/riscv/toolchain/bin/riscv64-unknown-elf-gcc' riscenv-latest %s"
+    )
+    .option(
+      "--run <format>",
+      "Format string to invoke test",
+      prog.STRING,
+      "docker run -v %s:/root/local -w /root/local --rm --entrypoint '/usr/local/bin/rv-sim' riscenv-latest %s"
+    )
+
+    .action(async (args, options, logger) => {
       let dirname = path.dirname(path.resolve(args.json));
+      let volume = dirname;
       let { state, data, stackAlloc } = await developCall(args, options);
       let asm = await produceAsm({ data, state, stackAlloc, dirname });
-      let results = await Promise.all(
-        _.map(data.tests, t => {
-          return runString(addMain(data, asm, t));
-        })
+      let remoteSuffix = data.functionData.suffix.replace(
+        "$selfdir",
+        "/root/local"
       );
-      _.forEach(data.tests, (t, i) => {
-        if (results[i].v0 === t.result) {
-          console.log(
-            chalk.green("OK") + `: Expected ${t.result}, got ${results[i].v0}`
-          );
-        } else {
-          console.log(
-            chalk.red("KO") + `: Expected ${t.result}, got ${results[i].v0}`
-          );
-        }
-      });
+      let localSuffix = data.functionData.suffix.replace("$selfdir", dirname);
+      let fullName = `${remoteSuffix}-full.s`;
+      let fullLocalName = `${localSuffix}-full.s`;
+      let fullTestName = `${remoteSuffix}-test.c`;
+      let fullOutputName = `${remoteSuffix}-test.exe`;
+      await $fs.writeFile(fullLocalName, asm, "utf8");
+      let compileExe = sprintf(
+        options.cc,
+        volume,
+        `${fullName} ${fullTestName} -o ${fullOutputName}`
+      );
+      let runExe = sprintf(options.run, volume, fullOutputName);
+      logger.debug(compileExe);
+      console.log(_.join(await exec(compileExe), ""));
+      logger.debug(runExe);
+      console.log(_.join(await exec(runExe), ""));
     })
     .command("artifact", "generates stack and register usage for a call")
     .argument("[json]", `File describing the call sequence`)

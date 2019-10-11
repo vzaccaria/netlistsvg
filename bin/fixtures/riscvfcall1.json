@@ -6,15 +6,8 @@
     "parameters": ["p/$a0", "n/$a1"],
     "localvars": [],
     "isLeaf": false,
-    "cref": "$selfdir/rec.c",
-    "body": "$selfdir/recbody.s"
-  },
-  "data": [
-    { "name": "test1", "type": "string", "value": "prova" },
-    { "name": "test2", "type": "string", "value": "stringa piu lunga" }
-  ],
-  "tests": [
-    { "parvalues": ["test1/p", "#0"], "result": "00000005" },
-    { "parvalues": ["test2/p", "#0"], "result": "00000011" }
-  ]
+    "cref": "$selfdir/rv-recbody-ref.c",
+    "body": "$selfdir/rv-recbody.s",
+    "suffix": "$selfdir/rv-recbody"
+  }
 }
