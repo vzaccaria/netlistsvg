@@ -293,8 +293,8 @@ ${labels}
 
 # function prologue
 .text
-.globl ${_.toUpper(fname)}
-${_.toUpper(fname)}: 
+.globl ${fname}
+${fname}: 
 ${enlargeStack}
 ${saveregs}
 
@@ -302,7 +302,7 @@ ${saveregs}
 ${data.functionData.body}
 
 # function epilogue
-${_.toUpper(fname + "EPI")}:
+${fname + "EPI"}:
 ${restoreregs}
 ${shrinkStack}
 ret
