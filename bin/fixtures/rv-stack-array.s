@@ -1,10 +1,11 @@
+
         li t0, 0
         sd t0, 0(sp)
 for:    li t1, 4 
         bge t0, t1, exitFor
         slli t2, t0, 3
-        addi t2, t2, 8    # account for offset of i
-        ld t0, 0(sp)      # i
+        addi t2, t2, 8    
+        ld t0, 0(sp)     
         mul t1, t0, a1    # i * b 
         add t1, t1, a0    # a + i * b
         add t2, t2, sp    # &array[c]
@@ -17,7 +18,7 @@ exitFor:
         li t1, 4
         bge a2, t1, recCall
         slli a2, a2, 3
-        addi a2, a2, 8     # account for offset of i
+        addi a2, a2, 8     
         add a2, a2, sp
         ld a0, 0(a2)
         j fEPI
