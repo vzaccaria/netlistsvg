@@ -3,8 +3,8 @@
 THEN:
       addi a0, a0, 1
       addi a1, a1, 1
-      jal   G
-      j     GEPI
+      jal   g 
+      j     gEPI
 ELSE:
       mv  a0, a1
-      j   GEPI
+      j   gEPI

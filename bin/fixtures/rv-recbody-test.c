@@ -2,13 +2,18 @@
 #include <stdio.h>
 #include <string.h>
 
-extern int G(char *p, int n);
+#define assertEqual(a, b)                                                      \
+  if ((a) == (b)) {                                                            \
+    printf("\033[0;32m [ok] \033[0m\n");                                       \
+  } else {                                                                     \
+    printf("\033[0;31m [ko] \033[0m");                                         \
+  }
+
+extern int g(char *p, int n);
+
+#include "rv-recbody-ref.c"
 
 int main() {
   char test1[] = "prova";
-  uint64_t res = G(test1, 0);
-  if (res == strlen(test1))
-    printf("\033[0;32m [ok] \033[0m - returned %lld\n", res);
-  else
-    printf("\033[0;31m [ko] \033[0m - returned %lld\n", res);
+  assertEqual(g(test1, 0), gRef(test1, 0));
 }
