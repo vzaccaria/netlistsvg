@@ -1,7 +1,8 @@
+#include <stdint.h>
 
-int fRef(int a, int b, int c) {
-  int array[4];
-  int i;
+int64_t fRef(int64_t a, int64_t b, int64_t c) {
+  int64_t array[4];
+  int64_t i;
   for (i = 0; i < 4; i++)
     array[i] = a + i * b;
   if (c < 4)
