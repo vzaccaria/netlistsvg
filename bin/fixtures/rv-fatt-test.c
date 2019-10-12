@@ -4,14 +4,14 @@
 #include <string.h>
 
 #ifndef RV_LOCAL_TEST
-extern int fatt(int n);
+extern uint64_t fatt(uint64_t n);
 #endif
 
 #include "rv-fatt-ref.c"
 
 int main() {
-  expectedInt(fattRef(4));
 #ifndef RV_LOCAL_TEST
-  assertEqual(fattRef(4), fatt(4));
+  assertEqualLL(fattRef(3), fatt(3));
+  assertEqualLL(fattRef(6), fatt(6));
 #endif
 }

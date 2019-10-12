@@ -3,7 +3,7 @@
         blt s0, t0, exit1
         addi t0, s0, -1
         mv a0, t0
-        j fatt
+        call fatt
         mul a0, a0, s0
         j fattEPI
 
