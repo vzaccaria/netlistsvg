@@ -1,0 +1,13 @@
+{
+  "omitFramePointer": false,
+  "stackgrows": "below",
+  "functionData": {
+    "name": "f",
+    "parameters": ["a/$a0", "b/$a1", "c/$a2"],
+    "localvars": ["array/4w", "i/w"],
+    "isLeaf": false,
+    "cref": "$selfdir/rv-stack-array-ref.c",
+    "body": "$selfdir/rv-stack-array.s",
+    "suffix": "$selfdir/rv-stack-array"
+  }
+}

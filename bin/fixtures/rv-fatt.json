@@ -1,0 +1,13 @@
+{
+  "omitFramePointer": true,
+  "stackgrows": "below",
+  "functionData": {
+    "name": "fatt",
+    "parameters": ["n/$a0"],
+    "localvars": ["savedN/$s0"],
+    "isLeaf": false,
+    "cref": "$selfdir/rv-fatt-ref.c",
+    "body": "$selfdir/rv-fatt.s",
+    "suffix": "$selfdir/rv-fatt"
+  }
+}
