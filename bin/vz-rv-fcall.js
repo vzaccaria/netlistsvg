@@ -217,6 +217,41 @@ let developCall = async args => {
   return { state, data, stackAlloc };
 };
 
+let produceBlankTable = async ({ data, state, stackAlloc, dirname }) => {
+  let cee = data.functionData;
+  let parameters = _.join(
+    _.filter(
+      _.map(cee.parameters, l => {
+        let { name, register, size } = _getvarreg(l);
+        if (register) {
+          return `- parametro ${name} (dimensione ${size} bytes) nel registro: _____`;
+        }
+      })
+    ),
+    "\n"
+  );
+  let labels = _.join(
+    _.filter(
+      _.map(state, c => {
+        if (!_.isUndefined(c.base) && c.base)
+          return `- spiazzamento sp variabile locale ${c.baseOf} : _____ `;
+        if (c.type === "savedreg") {
+          return `- spiazzamento sp salvataggio di ${c.name}: _____`;
+        }
+        if (c.type === "parameter") {
+          return `- spiazzamento sp parametro ${c.name} : _____`;
+        }
+        return null;
+      })
+    ),
+    "\n"
+  );
+  return `
+${parameters}
+${labels}
+  `;
+};
+
 let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
   let cee = data.functionData;
   if (data.functionData.body) {
@@ -236,7 +271,9 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
       _.map(cee.parameters, l => {
         let { name, register, size } = _getvarreg(l);
         if (register) {
-          return `# - register ${register} contains ${name} (${size})`;
+          return `# - register ${register.substr(
+            1
+          )} contains ${name} (${size})`;
         }
       })
     ),
@@ -246,9 +283,7 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
     _.filter(
       _.map(state, c => {
         if (!_.isUndefined(c.base) && c.base)
-          return `# - local var ${_.toUpper(c.baseOf)} at stack offset: ${
-            c.offset
-          }`;
+          return `# - local var ${c.baseOf} at stack offset: ${c.offset}`;
         if (c.type === "savedreg") {
           return `# - saved reg ${c.name} at stack offset: ${c.offset}`;
         }
@@ -316,6 +351,12 @@ let produceAndSaveArtifacts = async (args, options) => {
   let diagb = gpblank(data, state, stackAlloc);
   let dirname = path.dirname(path.resolve(args.json));
   let asm = await produceAsm({ data, state, stackAlloc, dirname });
+  let blankTable = await produceBlankTable({
+    data,
+    state,
+    stackAlloc,
+    dirname
+  });
   let source = data.functionData.cref;
   let result = {
     latex: [
@@ -330,6 +371,16 @@ ${asm}
         "standalone",
         "pdflatex",
         "--usepackage minted -r varwidth"
+      ),
+      latexArtifact(
+        `
+\\begin{verbatim}
+${blankTable}
+\\end{verbatim}`,
+        "blank table",
+        "standalone",
+        "pdflatex",
+        "-r varwidth"
       ),
       latexArtifact(
         `

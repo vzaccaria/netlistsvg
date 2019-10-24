@@ -1,5 +1,5 @@
 {
-  "omitFramePointer": false,
+  "omitFramePointer": true,
   "stackgrows": "below",
   "functionData": {
     "name": "f",
