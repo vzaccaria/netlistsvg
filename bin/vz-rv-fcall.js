@@ -45,30 +45,40 @@ let _n = s => s.replace("$", "\\$");
 
 let gpdiag = (data, cells, stackAlloc) => {
   let txt = _.join(
-    _.map(cells, i => {
-      let lab = "";
-      let cause = "";
-      if (!_.isUndefined(i.cause)) {
-        cause = `(${i.cause})`;
-      }
-      if (!_.isUndefined(i.offset) && i.type !== "zone") {
-        if (i.offset === 0) lab = `,label=right:{sp + ${i.offset}}`;
-        else lab = `,label=right:{${i.offset}}`;
-      } else {
-        if (i.type === "zone") {
-          lab = `,label=right:{sp offset $\\downarrow$}`;
-          if (!data.omitFramePointer) {
-            lab = lab + `,label=left:{fp offset $\\downarrow$}`;
+    _.filter(
+      _.flatten(
+        _.map(cells, (i, x) => {
+          let lab = "";
+          let cause = "";
+          let labfp = undefined;
+          if (!_.isUndefined(i.cause)) {
+            cause = `(${i.cause})`;
           }
-        }
-      }
-      if (!data.omitFramePointer && i.type !== "zone") {
-        if (i.offset === 0)
-          lab = lab + `,label=left:{fp + ${i.offset - stackAlloc + 8}}`;
-        else lab = lab + `,label=left:{${i.offset - stackAlloc + 8}}`;
-      }
-      return `\\node [${i.type}${lab}] {${_n(i.name)} ${cause}};`;
-    }),
+          if (!_.isUndefined(i.offset) && i.type !== "zone") {
+            if (i.offset === 0) lab = `sp + ${i.offset}`;
+            else lab = `${i.offset}`;
+          } else {
+            if (i.type === "zone") {
+              lab = `sp offset`;
+              if (!data.omitFramePointer) {
+                labfp = `fp offset`;
+              }
+            }
+          }
+          if (!data.omitFramePointer && i.type !== "zone") {
+            if (i.offset === 0) labfp = `fp + ${i.offset - stackAlloc + 8}`;
+            else labfp = `${i.offset - stackAlloc + 8}`;
+          }
+          return [
+            `\\node (dd${x}) [${i.type}] {${_n(i.name)} ${cause}};`,
+            `\\node at ($ (dd${x}) + (1.7,0) $) [anchor=west] {${lab}};`,
+            labfp
+              ? `\\node at ($ (dd${x}) + (-1.7,0) $) [anchor=east] {${labfp}};`
+              : undefined
+          ];
+        })
+      )
+    ),
     "\n"
   );
   return wrap(data, txt);
@@ -252,19 +262,19 @@ ${labels}
   `;
 };
 
-let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
+let produceAsm = async ({ data, state, stackAlloc, dirname }, withBody) => {
   let cee = data.functionData;
-  if (data.functionData.body) {
+  if (data.functionData.body && withBody) {
     let nname = data.functionData.body.replace("$selfdir", dirname);
-    data.functionData.body = await $fs.readFile(nname, "utf8");
+    data.functionData.bodycontent = await $fs.readFile(nname, "utf8");
   } else {
-    data.functionData.body = "";
+    data.functionData.bodycontent = "";
   }
   if (data.functionData.cref) {
     let nname = data.functionData.cref.replace("$selfdir", dirname);
-    data.functionData.cref = await $fs.readFile(nname, "utf8");
+    data.functionData.crefcontent = await $fs.readFile(nname, "utf8");
   } else {
-    data.functionData.cref = "no source given";
+    data.functionData.crefcontent = "no source given";
   }
   let parameters = _.join(
     _.filter(
@@ -273,7 +283,7 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }) => {
         if (register) {
           return `# - register ${register.substr(
             1
-          )} contains ${name} (${size})`;
+          )} contains ${name} (size: ${size} bytes)`;
         }
       })
     ),
@@ -334,7 +344,7 @@ ${enlargeStack}
 ${saveregs}
 
 # function body
-${data.functionData.body}
+${data.functionData.bodycontent}
 
 # function epilogue
 ${fname + "EPI"}:
@@ -350,24 +360,35 @@ let produceAndSaveArtifacts = async (args, options) => {
   let diag = gpdiag(data, state, stackAlloc);
   let diagb = gpblank(data, state, stackAlloc);
   let dirname = path.dirname(path.resolve(args.json));
-  let asm = await produceAsm({ data, state, stackAlloc, dirname });
+  let asmFull = await produceAsm({ data, state, stackAlloc, dirname }, true);
+  let asmEmpty = await produceAsm({ data, state, stackAlloc, dirname }, false);
   let blankTable = await produceBlankTable({
     data,
     state,
     stackAlloc,
     dirname
   });
-  let source = data.functionData.cref;
+  let source = data.functionData.crefcontent;
   let result = {
     latex: [
       latexArtifact(diag, "complete diagram", "standalone", "pdflatex"),
       latexArtifact(diagb, "blank diagram", "standalone", "pdflatex"),
       latexArtifact(
         `
-\\begin{minted}{asm}
-${asm}
+\\begin{minted}[obeytabs=true,autogobble,baselinestretch=0.95,linenos=true]{asm}
+${asmFull}
 \\end{minted}`,
-        "asm source",
+        "asm source full",
+        "standalone",
+        "pdflatex",
+        "--usepackage minted -r varwidth"
+      ),
+      latexArtifact(
+        `
+\\begin{minted}[obeytabs=true,autogobble,baselinestretch=0.95,linenos=true]{asm}
+${asmEmpty}
+\\end{minted}`,
+        "asm source empty",
         "standalone",
         "pdflatex",
         "--usepackage minted -r varwidth"
@@ -384,7 +405,7 @@ ${blankTable}
       ),
       latexArtifact(
         `
-\\begin{minted}{c}
+\\begin{minted}[obeytabs=true,autogobble,baselinestretch=0.95,linenos=true]{c}
 ${source}
 \\end{minted}`,
         "c source",
@@ -422,7 +443,7 @@ let main = () => {
     .action(async (args, options) => {
       let dirname = path.dirname(path.resolve(args.json));
       let { state, data, stackAlloc } = await developCall(args, options);
-      console.log(await produceAsm({ data, state, stackAlloc, dirname }));
+      console.log(await produceAsm({ data, state, stackAlloc, dirname }, true));
     })
     .command("test", "invokes function with tests")
     .argument("<json>", `File describing the call sequence`)
@@ -443,7 +464,7 @@ let main = () => {
       let dirname = path.dirname(path.resolve(args.json));
       let volume = dirname;
       let { state, data, stackAlloc } = await developCall(args, options);
-      let asm = await produceAsm({ data, state, stackAlloc, dirname });
+      let asm = await produceAsm({ data, state, stackAlloc, dirname }, true);
       let remoteSuffix = data.functionData.suffix.replace(
         "$selfdir",
         "/root/local"
