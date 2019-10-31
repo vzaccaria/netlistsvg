@@ -217,7 +217,7 @@ let developCall = async args => {
   return { state, data, stackAlloc };
 };
 
-let produceBlankTable = async ({ data, state, stackAlloc, dirname }) => {
+let produceBlankTable = async ({ data, state }) => {
   let cee = data.functionData;
   let parameters = _.join(
     _.filter(
@@ -395,7 +395,7 @@ ${source}
     ]
   };
   if (options.save) {
-    return saveArtifacts(result, options.save);
+    return saveArtifacts(result.latex, options.save);
   } else {
     console.log(JSON.stringify(result));
   }
