@@ -43,35 +43,46 @@ ${c}
 
 let _n = s => s.replace("$", "\\$");
 
-let gpdiag = (data, cells, stackAlloc) => {
+let gpdiag = (data, cells, stackAlloc, full) => {
   let txt = _.join(
     _.filter(
       _.flatten(
         _.map(cells, (i, x) => {
           let lab = "";
+          let labsp = "";
           let cause = "";
           let labfp = undefined;
+          let type = i.type;
           if (!_.isUndefined(i.cause)) {
             cause = `(${i.cause})`;
           }
-          if (!_.isUndefined(i.offset) && i.type !== "zone") {
-            if (i.offset === 0) lab = `sp + ${i.offset}`;
-            else lab = `${i.offset}`;
-          } else {
-            if (i.type === "zone") {
-              lab = `sp offset`;
-              if (!data.omitFramePointer) {
-                labfp = `fp offset`;
+          if (full) {
+            if (!_.isUndefined(i.offset) && i.type !== "zone") {
+              if (i.offset === 0) labsp = `sp + ${i.offset}`;
+              else labsp = `${i.offset}`;
+            } else {
+              if (i.type === "zone") {
+                labsp = `sp offset`;
+                if (!data.omitFramePointer) {
+                  labfp = `fp offset`;
+                }
               }
             }
-          }
-          if (!data.omitFramePointer && i.type !== "zone") {
-            if (i.offset === 0) labfp = `fp + ${i.offset - stackAlloc + 8}`;
-            else labfp = `${i.offset - stackAlloc + 8}`;
+            if (!data.omitFramePointer && i.type !== "zone") {
+              if (i.offset === 0) labfp = `fp + ${i.offset - stackAlloc + 8}`;
+              else labfp = `${i.offset - stackAlloc + 8}`;
+            }
+            lab = `${_n(i.name)} ${cause}`;
+          } else {
+            cause = i.type === "zone" ? i.cause : "";
+            type = i.type === "zone" ? "zone" : "savedreg";
+            labsp = "\\ldots";
+            labfp = !data.omitFramePointer ? "\\ldots" : undefined;
+            lab = i.type === "zone" ? `${_n(i.name)} ${cause}` : "";
           }
           return [
-            `\\node (dd${x}) [${i.type}] {${_n(i.name)} ${cause}};`,
-            `\\node at ($ (dd${x}) + (1.7,0) $) [anchor=west] {${lab}};`,
+            `\\node (dd${x}) [${type}] {${lab}};`,
+            `\\node at ($ (dd${x}) + (1.7,0) $) [anchor=west] {${labsp}};`,
             labfp
               ? `\\node at ($ (dd${x}) + (-1.7,0) $) [anchor=east] {${labfp}};`
               : undefined
@@ -79,36 +90,6 @@ let gpdiag = (data, cells, stackAlloc) => {
         })
       )
     ),
-    "\n"
-  );
-  return wrap(data, txt);
-};
-
-let gpblank = (data, cells) => {
-  let txt = _.join(
-    _.map(cells, i => {
-      let cause = "";
-      if (!_.isUndefined(i.cause)) {
-        cause = `(${i.cause})`;
-      }
-      let lab = "";
-      if (!_.isUndefined(i.offset) && i.type !== "zone") {
-        lab = `,label=right:{\\ldots\\ldots}`;
-      } else {
-        if (i.type === "zone") {
-          lab = `,label=right:{sp offset $\\downarrow$}`;
-          if (!data.omitFramePointer) {
-            lab = lab + `,label=left:{fp offset $\\downarrow$}`;
-          }
-        }
-      }
-      if (!data.omitFramePointer && i.type !== "zone") {
-        lab = lab + `,label=left:{\\ldots\\ldots}`;
-      }
-      if (i.type === "zone")
-        return `\\node [${i.type}${lab}] {${_n(i.name)} ${cause}};`;
-      else return `\\node [savedreg${lab}] {};`;
-    }),
     "\n"
   );
   return wrap(data, txt);
@@ -162,9 +143,9 @@ let gpstate = data => {
 
   cells.push({
     type: "zone",
-    name: "caller",
+    name: "chiamante",
     size: 0,
-    cause: "previous frame"
+    cause: "record precedente"
   });
 
   _.map(cee.parameters, l => {
@@ -180,7 +161,7 @@ let gpstate = data => {
       name: "fp",
       pointedBy: "fp",
       size: 8,
-      cause: "previous"
+      cause: "valore precedente"
     });
   }
 
@@ -195,7 +176,7 @@ let gpstate = data => {
       cells.push({
         type: "savedreg",
         name: register.substr(1),
-        cause: `needed for ${name}`,
+        cause: `reclamato per ${name}`,
         size: 8
       });
     } else {
@@ -357,8 +338,8 @@ ret
 
 let produceAndSaveArtifacts = async (args, options) => {
   let { state, data, stackAlloc } = await developCall(args, options);
-  let diag = gpdiag(data, state, stackAlloc);
-  let diagb = gpblank(data, state, stackAlloc);
+  let diag = gpdiag(data, state, stackAlloc, true);
+  let diagb = gpdiag(data, state, stackAlloc, false);
   let dirname = path.dirname(path.resolve(args.json));
   let asmFull = await produceAsm({ data, state, stackAlloc, dirname }, true);
   let asmEmpty = await produceAsm({ data, state, stackAlloc, dirname }, false);
@@ -434,8 +415,8 @@ let main = () => {
       if (options.json) {
         console.log({ state, stackAlloc });
       } else {
-        if (!options.blank) console.log(gpdiag(data, state, stackAlloc));
-        else console.log(gpblank(data, state, stackAlloc));
+        if (!options.blank) console.log(gpdiag(data, state, stackAlloc), true);
+        else console.log(gpdiag(data, state, stackAlloc, false));
       }
     })
     .command("asm", "generates asm prologue for callee")
