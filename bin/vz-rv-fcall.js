@@ -224,7 +224,7 @@ let produceBlankTable = async ({ data, state }) => {
   let labels = _.join(
     _.filter(
       _.map(state, c => {
-        if (!_.isUndefined(c.base) && c.base)
+        if (!_.isUndefined(c.base) && c.base && c.type !== "parameter")
           return `- spiazzamento sp variabile locale ${c.baseOf} : _____ `;
         if (c.type === "savedreg") {
           return `- spiazzamento sp salvataggio di ${c.name}: _____`;
@@ -273,13 +273,13 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }, withBody) => {
   let labels = _.join(
     _.filter(
       _.map(state, c => {
-        if (!_.isUndefined(c.base) && c.base)
+        if (!_.isUndefined(c.base) && c.base && c.type !== "parameter")
           return `# - local var ${c.baseOf} at stack offset: ${c.offset}`;
         if (c.type === "savedreg") {
           return `# - saved reg ${c.name} at stack offset: ${c.offset}`;
         }
         if (c.type === "parameter") {
-          return `# - saved reg ${c.name} at stack offset: ${c.offset}`;
+          return `# - parameter ${c.name} at stack offset: ${c.offset}`;
         }
         return null;
       })
