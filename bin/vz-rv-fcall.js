@@ -440,6 +440,7 @@ let main = () => {
       prog.STRING,
       "docker run -v %s:/root/local -w /root/local --rm --entrypoint '/usr/local/bin/rv-sim' riscenv-latest %s"
     )
+    .option("--log", "Log instructions and operands")
 
     .action(async (args, options, logger) => {
       let dirname = path.dirname(path.resolve(args.json));
@@ -465,6 +466,9 @@ let main = () => {
       logger.debug(compileExe);
       console.log(_.join(await exec(compileExe), ""));
       logger.debug(runExe);
+      if (options.log) {
+        runExe = `${runExe} --log-instructions --log-operands`;
+      }
       console.log(_.join(await exec(runExe), ""));
     })
     .command("artifact", "generates stack and register usage for a call")
