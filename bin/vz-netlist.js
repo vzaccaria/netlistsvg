@@ -48,10 +48,20 @@ let verilog2svg = (args, options) => {
     let command = `yosys -q -p "${
       options.script
     }; write_json ${jsonfile}" -f verilog`;
-    return execWithString(tmpfile => `${command} -S ${tmpfile}`, verilogdata, {
-      cleanup: !options.keep,
-      logger: options.logger
-    })
+    let loadopts;
+    if (options.ilang) {
+      loadopts = `-f ilang -S`;
+    } else {
+      loadopts = `-S`;
+    }
+    return execWithString(
+      tmpfile => `${command} ${loadopts} ${tmpfile}`,
+      verilogdata,
+      {
+        cleanup: !options.keep,
+        logger: options.logger
+      }
+    )
       .then(() => jsonfile)
       .catch(e => {
         options.logger.info(`ignoring error ${e}`);
@@ -101,6 +111,7 @@ let main = () => {
     .option("-w, --watch", "Watch for input file to change")
     .option("-k, --keep", "Dont cleanup")
     .option("-p, --open", "Open file")
+    .option("-i, --ilang", "If input file is ilang instead of verilog")
     .action((args, options, logger) => {
       options.logger = logger;
       if (options.aig) options.script = "prep -flatten -auto-top; aigmap";

@@ -69,8 +69,8 @@ let gpdiag = (data, cells, stackAlloc, full) => {
               }
             }
             if (!data.omitFramePointer && i.type !== "zone") {
-              if (i.offset === 0) labfp = `fp + ${i.offset - stackAlloc + 8}`;
-              else labfp = `${i.offset - stackAlloc + 8}`;
+              if (i.offset === 0) labfp = `fp + ${i.offset - stackAlloc}`;
+              else labfp = `${i.offset - stackAlloc}`;
             }
             lab = `${_n(i.name)} ${cause}`;
           } else {
@@ -308,14 +308,24 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }, withBody) => {
     ),
     "\n"
   );
+  let fpSet = data.omitFramePointer ? "" : `addi fp, sp, ${stackAlloc}`;
   let enlargeStack = stackAlloc > 0 ? `addi sp, sp, -${stackAlloc}` : "";
   let shrinkStack = stackAlloc > 0 ? `addi sp, sp, ${stackAlloc}` : "";
   let fname = data.functionData.name;
+  let additionalStrings = _.join(
+    _.map(data.functionData.strings, (v, k) => `${k}:\n .string "${v}"`),
+    "\n"
+  );
+  let rodata = !_.isUndefined(data.functionData.strings)
+    ? `.section .rodata\n${additionalStrings}`
+    : "";
+
   let prog = `
 # Stack frame information for function '${fname}':
 ${parameters}
 ${labels}
 
+${rodata}
 
 # function prologue
 .text
@@ -323,6 +333,7 @@ ${labels}
 ${fname}: 
 ${enlargeStack}
 ${saveregs}
+${fpSet}
 
 # function body
 ${data.functionData.bodycontent}
