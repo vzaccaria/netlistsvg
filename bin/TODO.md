@@ -1,0 +1,2 @@
+- 20191223 - Add tests for RV function call
+- 20191223 - Remove unneded tests
