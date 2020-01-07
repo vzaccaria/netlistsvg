@@ -1,0 +1,17 @@
+{
+  "omitFramePointer": true,
+  "stackgrows": "below",
+  "functionData": {
+    "name": "f",
+    "parameters": ["s.voti/32b", "s.nome/16b"],
+    "localvars": ["i/w", "s/$s0"],
+    "isLeaf": false,
+    "cref": "$selfdir/rv-fun-ref.c",
+    "body": "$selfdir/rv-fun.s",
+    "suffix": "$selfdir/rv-fun",
+    "strings": {
+      "LC0": "Nome: %s\\nVoti: ",
+      "LC1": "%lld "
+    }
+  }
+}

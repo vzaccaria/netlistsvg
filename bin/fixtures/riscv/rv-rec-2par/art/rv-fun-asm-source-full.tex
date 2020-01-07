@@ -1,0 +1,42 @@
+
+\begin{minted}[obeytabs=true,autogobble,baselinestretch=0.95,linenos=true]{asm}
+
+# Stack frame information for function 'f':
+# - register a0 contains x (size: 8 bytes)
+# - register a1 contains y (size: 8 bytes)
+# - saved reg ra at stack offset: 8
+# - saved reg s0 at stack offset: 0
+
+
+# function prologue
+          .text
+          .globl f
+f:
+          addi sp, sp, -16
+          sd   ra, 8(sp)
+          sd   s0, 0(sp)
+
+# function body
+          li   t0, 0
+          beq  a1, t0, ramoThen
+ramoElse:
+          mv   s0, a1
+          call __umoddi3
+          mv   a1, a0
+          mv   a0, s0
+          call f
+          j    fEPI
+
+ramoThen:
+          j    fEPI
+
+
+
+
+# function epilogue
+fEPI:
+          ld   ra, 8(sp)
+          ld   s0, 0(sp)
+          addi sp, sp, 16
+          ret
+\end{minted}

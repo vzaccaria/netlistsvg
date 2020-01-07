@@ -1,0 +1,40 @@
+
+\begin{minted}[obeytabs=true,autogobble,baselinestretch=0.95,linenos=true]{asm}
+
+# Stack frame information for function 'f':
+
+# - parameter s.voti[31..24] at stack offset: 64
+# - parameter s.voti[23..16] at stack offset: 56
+# - parameter s.voti[15..8] at stack offset: 48
+# - parameter s.voti[7..0] at stack offset: 40
+# - parameter s.nome[15..8] at stack offset: 32
+# - parameter s.nome[7..0] at stack offset: 24
+# - saved reg ra at stack offset: 16
+# - local var i at stack offset: 8
+# - saved reg s0 at stack offset: 0
+
+      .section .rodata
+LC0:
+      .string  "Nome: %s\nVoti: "
+LC1:
+      .string  "%lld "
+
+# function prologue
+      .text
+      .globl   f
+f:
+      addi sp, sp, -24
+      sd   ra, 16(sp)
+      sd   s0, 0(sp)
+
+
+# function body
+
+
+# function epilogue
+fEPI:
+      ld   ra, 16(sp)
+      ld   s0, 0(sp)
+      addi sp, sp, 24
+      ret
+\end{minted}

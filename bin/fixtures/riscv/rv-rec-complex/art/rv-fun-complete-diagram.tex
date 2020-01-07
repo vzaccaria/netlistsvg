@@ -1,0 +1,27 @@
+
+\begin{tikzpicture}[start chain=1 going below, node distance=0mm,
+zone/.style={on chain=1, dashed, draw=gray, text centered, text width=3cm, minimum height = 30mm, text=gray},
+parameter/.style={on chain=1, dashed, draw=gray, text centered, text width=3cm, minimum height = 10mm, text=gray},
+savedreg/.style={on chain=1, draw=black, text centered, text width=3cm, minimum height = 10mm},
+localvar/.style={on chain=1, draw=black, text centered, text width=3cm, minimum height = 10mm, fill=blue!10}]
+\node (dd0) [zone] {chiamante (record precedente)};
+\node at ($ (dd0) + (1.7,0) $) [anchor=west] {sp offset};
+\node (dd1) [parameter] {s.voti[31..24] };
+\node at ($ (dd1) + (1.7,0) $) [anchor=west] {64};
+\node (dd2) [parameter] {s.voti[23..16] };
+\node at ($ (dd2) + (1.7,0) $) [anchor=west] {56};
+\node (dd3) [parameter] {s.voti[15..8] };
+\node at ($ (dd3) + (1.7,0) $) [anchor=west] {48};
+\node (dd4) [parameter] {s.voti[7..0] };
+\node at ($ (dd4) + (1.7,0) $) [anchor=west] {40};
+\node (dd5) [parameter] {s.nome[15..8] };
+\node at ($ (dd5) + (1.7,0) $) [anchor=west] {32};
+\node (dd6) [parameter] {s.nome[7..0] };
+\node at ($ (dd6) + (1.7,0) $) [anchor=west] {24};
+\node (dd7) [savedreg] {ra };
+\node at ($ (dd7) + (1.7,0) $) [anchor=west] {16};
+\node (dd8) [localvar] {i };
+\node at ($ (dd8) + (1.7,0) $) [anchor=west] {8};
+\node (dd9) [savedreg] {s0 (reclamato per s)};
+\node at ($ (dd9) + (1.7,0) $) [anchor=west] {sp + 0};
+\end{tikzpicture}

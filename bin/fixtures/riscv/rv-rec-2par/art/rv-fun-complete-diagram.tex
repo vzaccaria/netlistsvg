@@ -1,0 +1,13 @@
+
+\begin{tikzpicture}[start chain=1 going below, node distance=0mm,
+zone/.style={on chain=1, dashed, draw=gray, text centered, text width=3cm, minimum height = 30mm, text=gray},
+parameter/.style={on chain=1, dashed, draw=gray, text centered, text width=3cm, minimum height = 10mm, text=gray},
+savedreg/.style={on chain=1, draw=black, text centered, text width=3cm, minimum height = 10mm},
+localvar/.style={on chain=1, draw=black, text centered, text width=3cm, minimum height = 10mm, fill=blue!10}]
+\node (dd0) [zone] {chiamante (record precedente)};
+\node at ($ (dd0) + (1.7,0) $) [anchor=west] {sp offset};
+\node (dd1) [savedreg] {ra };
+\node at ($ (dd1) + (1.7,0) $) [anchor=west] {8};
+\node (dd2) [savedreg] {s0 (reclamato per y)};
+\node at ($ (dd2) + (1.7,0) $) [anchor=west] {sp + 0};
+\end{tikzpicture}

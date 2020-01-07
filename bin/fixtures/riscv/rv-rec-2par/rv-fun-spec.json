@@ -1,0 +1,13 @@
+{
+  "omitFramePointer": true,
+  "stackgrows": "below",
+  "functionData": {
+    "name": "f",
+    "parameters": ["x/$a0", "y/$a1"],
+    "localvars": ["y/$s0"],
+    "isLeaf": false,
+    "cref": "$selfdir/rv-fun-ref.c",
+    "body": "$selfdir/rv-fun.s",
+    "suffix": "$selfdir/rv-fun"
+  }
+}
