@@ -48,6 +48,22 @@ let quineTestBatch = {
   ]
 };
 
+let rvfcallTestBatch = {
+  name: "vz-rv-fcall",
+  scriptname: `${__dirname}/vz-rv-fcall.js`,
+  fixtures: `${__dirname}/fixtures/riscv`,
+  tests: [
+    {
+      msg: `two parameters`,
+      cmd: (s, fd) => `${s} artifact ${fd}/rv-rec-2par/rv-fun-spec.json`
+    },
+    {
+      msg: `complex parameters`,
+      cmd: (s, fd) => `${s} artifact ${fd}/rv-rec-complex/rv-fun-spec.json`
+    }
+  ]
+};
+
 let fcallTestBatch = {
   name: "vz-fcall",
   scriptname: `${__dirname}/vz-fcall.js`,
@@ -135,6 +151,6 @@ module.exports = [
   quineTestBatch,
   pipeTestBatch,
   waveTestBatch,
-  fcallTestBatch,
+  rvfcallTestBatch,
   cacheTestBatch
 ];
