@@ -31,7 +31,7 @@ let hazardsToTikz = (sim, options) => {
     let pi = 2 + n * 1.5;
     let pj = -1 * n * options.hrowsep;
     let ii = [
-      `\\node at (0, ${pj}) [align=left, text width=25mm] {\\texttt{${
+      `\\node at (0, ${pj}) [align=left, text width=25mm] {\\footnotesize\\texttt{${
         i.ins
       }}};`,
       `\\pic (i${n}) at (${pi}, ${pj}) {pipe};`
@@ -106,7 +106,7 @@ let load = _.curry((name, d, s1) => {
     let rdy = _.clone(ready);
     let tbl = _.clone(table);
     tbl.push({
-      ins: `${name} r${d}, lab(r${s1})`,
+      ins: `${name} x${d}, lab(x${s1})`,
       pipe: pipe(
         readypc,
         canDecodeAt
@@ -151,7 +151,7 @@ let branch = _.curry((name, s1, s2) => {
     let rdy = _.clone(ready);
     let tbl = _.clone(table);
     tbl.push({
-      ins: `${name} r${s1}, r${s2}, offset`,
+      ins: `${name} x${s1}, x${s2}, offset`,
       pipe: pipe(
         readypc,
         canDecodeAt
@@ -176,7 +176,7 @@ let alu = _.curry((name, d, s1, s2) => {
     let rdy = _.clone(ready);
     let tbl = _.clone(table);
     tbl.push({
-      ins: `${name} r${d}, r${s1}, r${s2}`,
+      ins: `${name} x${d}, x${s1}, x${s2}`,
       pipe: pipe(
         readypc,
         canDecodeAt
