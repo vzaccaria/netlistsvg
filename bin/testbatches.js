@@ -144,6 +144,5 @@ module.exports = [
   pipeTestBatch,
   waveTestBatch,
   rvfcallTestBatch,
-  cacheTestBatch,
-  mmapTestBatch
+  cacheTestBatch
 ];
