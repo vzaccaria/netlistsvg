@@ -1,0 +1,13 @@
+node, reserved,        0,              0x555555554000, begin, reserved
+node, regular,         0x555555554000, 0x555555555000, sx,    code
+node, regular,         0x555555754000, 0x555555756000, sd,    data
+node, grow up heap,    0x555555c04000, 0x555555c18000, heap,  heap
+node, grow down stack, 0x7ffffffde000, 0x7ffffffff000, stack, stack
+node, reserved,        0x7ffffffff000, 0xffffffffffff, end,   reserved
+
+multiregionlabel, sx,   sd, data and code
+regionlabel,      stack, Record di attivazione\\per chiamate a funzione
+
+config,height,10
+config,width,10
+
