@@ -64,6 +64,18 @@ let rvfcallTestBatch = {
   ]
 };
 
+let mmapTestBatch = {
+  name: "vz-memmap",
+  scriptname: `${__dirname}/vz-memmap.js`,
+  fixtures: `${__dirname}/fixtures/memmap`,
+  tests: [
+    {
+      msg: `simple memmap`,
+      cmd: (s, fd) => `${s} generate ${fd}/src/memmap.csv`
+    }
+  ]
+};
+
 let pipeTestBatch = {
   name: "vz-pipe",
   scriptname: `${__dirname}/vz-pipe.js`,
@@ -132,5 +144,6 @@ module.exports = [
   pipeTestBatch,
   waveTestBatch,
   rvfcallTestBatch,
-  cacheTestBatch
+  cacheTestBatch,
+  mmapTestBatch
 ];
