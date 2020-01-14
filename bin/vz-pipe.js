@@ -100,6 +100,28 @@ let pipeSimulatorTikz = (sim, options) => {
   return result;
 };
 
+let store = _.curry((name, s1, s2) => {
+  return ({ config, readypc, ready, table }) => {
+    let canDecodeAt = Math.max(ready[s1], ready[s2], readypc + 1);
+    let rdy = _.clone(ready);
+    let tbl = _.clone(table);
+    tbl.push({
+      ins: `${name} x${s1}, lab(x${s2})`,
+      pipe: pipe(
+        readypc,
+        canDecodeAt
+      )
+    });
+    let nextState = {
+      readypc: canDecodeAt,
+      ready: rdy,
+      table: tbl,
+      config
+    };
+    return nextState;
+  };
+});
+
 let load = _.curry((name, d, s1) => {
   return ({ config, readypc, ready, table }) => {
     let canDecodeAt = Math.max(ready[s1], readypc + 1);
@@ -123,13 +145,13 @@ let load = _.curry((name, d, s1) => {
   };
 });
 
-let nop = () => {
+let other = name => () => {
   return ({ config, readypc, ready, table }) => {
     let canDecodeAt = Math.max(readypc + 1);
     let rdy = _.clone(ready);
     let tbl = _.clone(table);
     tbl.push({
-      ins: `nop`,
+      ins: name,
       pipe: pipe(
         readypc,
         canDecodeAt
@@ -145,13 +167,22 @@ let nop = () => {
   };
 };
 
+let nop = other("nop");
+
+let anything = other("...");
+
 let branch = _.curry((name, s1, s2) => {
   return ({ config, readypc, ready, table }) => {
-    let canDecodeAt = Math.max(ready[s1], ready[s2], readypc + 1);
+    let o = config.hasBranchOptimization;
+    let canDecodeAt = Math.max(
+      o ? ready[s1] + 1 : ready[s1],
+      o ? ready[s2] + 1 : ready[s2],
+      readypc + 1
+    );
     let rdy = _.clone(ready);
     let tbl = _.clone(table);
     tbl.push({
-      ins: `${name} x${s1}, x${s2}, offset`,
+      ins: `${name} x${s1}, x${s2}, lab`,
       pipe: pipe(
         readypc,
         canDecodeAt
@@ -211,6 +242,7 @@ let add = alu("add");
 let sub = alu("sub");
 let or = alu("or");
 let lw = load("lw");
+let sw = store("sw");
 let beq = branch("beq");
 
 let main = () => {
