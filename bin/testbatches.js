@@ -84,6 +84,11 @@ let pipeTestBatch = {
     {
       msg: `load and add`,
       cmd: s => `${s} pipesim 'lw(2)(1),add(4)(2)(5)' -c cw0d1,fe0e1`
+    },
+    {
+      msg: "branch",
+      cmd: s =>
+        `${s} pipesim 'add(2)(9)(10),anything(),beq(2)(1),anything(),anything()' -c cw0d2,cm2i3 --alufw --branchopt`
     }
   ]
 };

@@ -52,7 +52,7 @@ let hazardsToTikz = (sim, options) => {
 };
 
 let insttikz = _.curry((blank, i) => {
-  let ii = [`|[text width=25mm]|{\\texttt{${i.ins}}}`];
+  let ii = [`|[text width=25mm]|{\\footnotesize\\texttt{${i.ins}}}`];
   let remaining = _.map(i.pipe, c => {
     if (!blank) {
       if (c === "-") return `|[draw,fill=gray!20]|`;
@@ -110,7 +110,8 @@ let store = _.curry((name, s1, s2) => {
       pipe: pipe(
         readypc,
         canDecodeAt
-      )
+      ),
+      canDecodeAt
     });
     let nextState = {
       readypc: canDecodeAt,
@@ -132,7 +133,8 @@ let load = _.curry((name, d, s1) => {
       pipe: pipe(
         readypc,
         canDecodeAt
-      )
+      ),
+      canDecodeAt
     });
     rdy[d] = canDecodeAt + (config.hasMemForwarding ? 2 : 3);
     let nextState = {
@@ -155,7 +157,8 @@ let other = name => () => {
       pipe: pipe(
         readypc,
         canDecodeAt
-      )
+      ),
+      canDecodeAt
     });
     let nextState = {
       readypc: canDecodeAt,
@@ -186,7 +189,8 @@ let branch = _.curry((name, s1, s2) => {
       pipe: pipe(
         readypc,
         canDecodeAt
-      )
+      ),
+      canDecodeAt
     });
     readypc =
       canDecodeAt +
@@ -211,7 +215,8 @@ let alu = _.curry((name, d, s1, s2) => {
       pipe: pipe(
         readypc,
         canDecodeAt
-      )
+      ),
+      canDecodeAt
     });
     rdy[d] = canDecodeAt + (config.hasAluForwarding ? 1 : 3);
     let nextState = {
@@ -226,7 +231,32 @@ let alu = _.curry((name, d, s1, s2) => {
 
 let simulate = config => {
   let initialState = {
-    ready: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // registrers
+    ready: [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ], // registrers
     readypc: 0,
     table: [],
     config
