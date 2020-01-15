@@ -176,7 +176,7 @@ let anything = other("...");
 
 let branch = _.curry((name, s1, s2) => {
   return ({ config, readypc, ready, table }) => {
-    let o = config.hasBranchOptimization;
+    let o = config.hasBranchOptimization && config.hasAluForwarding;
     let canDecodeAt = Math.max(
       o ? ready[s1] + 1 : ready[s1],
       o ? ready[s2] + 1 : ready[s2],

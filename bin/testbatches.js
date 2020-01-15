@@ -82,13 +82,28 @@ let pipeTestBatch = {
   fixtures: `${__dirname}/fixtures/pipe`,
   tests: [
     {
+      msg: "alu",
+      cmd: s => `${s} pipesim 'add(1)(10)(12),add(2)(1)(3)'`
+    },
+    {
       msg: `load and add`,
       cmd: s => `${s} pipesim 'lw(2)(1),add(4)(2)(5)' -c cw0d1,fe0e1`
     },
+
     {
       msg: "branch",
       cmd: s =>
         `${s} pipesim 'add(2)(9)(10),anything(),beq(2)(1),anything(),anything()' -c cw0d2,cm2i3 --alufw --branchopt`
+    },
+    {
+      msg: "branch opt",
+      cmd: s =>
+        `${s} pipesim 'add(2)(9)(10),beq(2)(1),anything(),anything()' -c cw0d2,cm2i3 --alufw --branchopt`
+    },
+    {
+      msg: "branch opt no fw",
+      cmd: s =>
+        `${s} pipesim 'add(1)(10)(12),beq(1)(2),add(3)(1)(2)' --branchopt`
     }
   ]
 };

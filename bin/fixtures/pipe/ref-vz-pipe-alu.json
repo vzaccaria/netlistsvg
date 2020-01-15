@@ -1,0 +1,79 @@
+{
+    "state": {
+        "readypc": 4,
+        "ready": [
+            0,
+            4,
+            7,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "table": [
+            {
+                "ins": "add x1, x10, x12",
+                "pipe": "FDEMW---",
+                "canDecodeAt": 1
+            },
+            {
+                "ins": "add x2, x1, x3",
+                "pipe": "-F**DEMW",
+                "canDecodeAt": 4
+            }
+        ],
+        "config": {}
+    },
+    "table": "FDEMW---\n-F**DEMW",
+    "latex": [
+        {
+            "code": "\n\\begin{tikzpicture}\n   \\matrix (m) [matrix of nodes,\n           row sep=.5mm, \n           column sep=.5mm,\n           nodes={minimum width=6mm, minimum height=6mm, anchor=center}]{|[align=right, text width=25mm]|  {\\tiny clock cycle $\\rightarrow$} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7\\\\\n|[text width=25mm]|{\\footnotesize\\texttt{add x1, x10, x12}} & |[draw]| F & |[draw]| D & |[draw]| E & |[draw]| M & |[draw]| W & |[draw,fill=gray!20]| & |[draw,fill=gray!20]| & |[draw,fill=gray!20]|\\\\\n|[text width=25mm]|{\\footnotesize\\texttt{add x2, x1, x3}} & |[draw,fill=gray!20]| & |[draw]| F & |[draw]| $\\bullet$ & |[draw]| $\\bullet$ & |[draw]| D & |[draw]| E & |[draw]| M & |[draw]| W\\\\\n};\n\\end{tikzpicture}\n",
+            "clss": "standalone",
+            "name": "pipe sim complete",
+            "sfx": "pipe-sim-complete",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
+        },
+        {
+            "code": "\n\\begin{tikzpicture}\n   \\matrix (m) [matrix of nodes,\n           row sep=.5mm, \n           column sep=.5mm,\n           nodes={minimum width=6mm, minimum height=6mm, anchor=center}]{|[align=right, text width=25mm]|  {\\tiny clock cycle $\\rightarrow$} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7\\\\\n|[text width=25mm]|{\\footnotesize\\texttt{add x1, x10, x12}} & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]|\\\\\n|[text width=25mm]|{\\footnotesize\\texttt{add x2, x1, x3}} & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]| & |[draw]|\\\\\n};\n\\end{tikzpicture}\n",
+            "clss": "standalone",
+            "name": "pipe sim blank",
+            "sfx": "pipe-sim-blank",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth"
+        },
+        {
+            "code": "\n\\begin{tikzpicture}\n\\node at (0, 0) [align=left, text width=25mm] {\\footnotesize\\texttt{add x1, x10, x12}};\n\\pic (i0) at (2, 0) {pipe};\n\\node at (0, -1.3) [align=left, text width=25mm] {\\footnotesize\\texttt{add x2, x1, x3}};\n\\pic (i1) at (3.5, -1.3) {pipe};\n\n\\end{tikzpicture}\n",
+            "clss": "standalone",
+            "name": "pipe hazards complete",
+            "sfx": "pipe-hazards-complete",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth -i /Users/zaccaria/development/github/org-writing/netlistsvg/bin/preambles/pipe.tex"
+        },
+        {
+            "code": "\n\\begin{tikzpicture}\n\\node at (0, 0) [align=left, text width=25mm] {\\footnotesize\\texttt{add x1, x10, x12}};\n\\pic (i0) at (2, 0) {pipe};\n\\node at (0, -1.3) [align=left, text width=25mm] {\\footnotesize\\texttt{add x2, x1, x3}};\n\\pic (i1) at (3.5, -1.3) {pipe};\n\\end{tikzpicture}\n",
+            "clss": "standalone",
+            "name": "pipe hazards blank",
+            "sfx": "pipe-hazards-blank",
+            "engine": "pdflatex",
+            "addoptions": "-r varwidth -i /Users/zaccaria/development/github/org-writing/netlistsvg/bin/preambles/pipe.tex"
+        }
+    ]
+}
