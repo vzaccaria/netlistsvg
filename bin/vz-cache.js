@@ -127,15 +127,12 @@ let l1 = opts =>
 let tableWrap = _.curry((n, data, opts) => {
   let hd = _.join(_.fill(Array(n), "c"), "|");
   return `
-\\begin{table}
- \\footnotesize
   \\begin{tabular}{|${hd}|}
   ${asTableLine(l0(opts))} 
   ${asTableLine(l1(opts))} 
   \\hline
   ${data}
-  \\end{tabular}
-\\end{table}`;
+  \\end{tabular}`;
 });
 
 let getCols = opts => {
@@ -177,7 +174,7 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
     ]
   };
   if (options.save) {
-    return saveArtifacts(result, options.save);
+    return saveArtifacts(result.latex, options.save);
   } else {
     console.log(JSON.stringify(result));
   }
