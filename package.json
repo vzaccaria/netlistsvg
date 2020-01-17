@@ -49,7 +49,8 @@
     "vz-memmap": "./bin/vz-memmap.js",
     "vz-spim": "./bin/vz-spim.js",
     "vz-nomnom": "./bin/vz-nomnom.js",
-    "vz-rv-fcall": "./bin/vz-rv-fcall.js"
+    "vz-rv-fcall": "./bin/vz-rv-fcall.js",
+    "vz-cache.js": "./bin/vz-cache.js"
   },
   "scripts": {
     "test": "eslint lib/**/*.js bin/**/*.js && eslint --global=document demo/**/*.js && node test/test-all.js",
