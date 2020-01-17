@@ -327,6 +327,7 @@ let main = () => {
     .description("Cache utils")
     .command("sim")
     .argument("<alist>", `comma sep. list of binary numbers (addresses)`)
+    .option("-x, --save <prefix>", "save with prefix or dump json")
     .option("-m, --membits <num>", "main address size", prog.INT, 14)
     .option("-w, --cacheways <num>", "log2 of cache ways", prog.INT, 0)
     .option("-b, --blockbits <num>", "log2 of block size ", prog.INT, 9)
