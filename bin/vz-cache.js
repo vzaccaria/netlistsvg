@@ -49,6 +49,21 @@ let encodeAddr = (opts, a) => {
 
 const numeral = require("numeral");
 
+let produceCacheData = (opts, blank) => {
+  let { membits, blockindexbits, tagbits, blockbits } = getMemSize(opts);
+  let _g = x => (!blank ? x : "\\ldots");
+  let b = `
+\\begin{itemize}
+\\setlength\\itemsep{-.5em}
+\\item dimensione di indirizzo (bits): ${_g(membits)}
+\\item dimensione byte offset nel blocco (bits): ${_g(blockbits)}
+\\item dimensione indice del blocco (bits): ${_g(blockindexbits)}
+\\item dimensione del tag (bits): ${_g(tagbits)}
+\\end{itemize}
+`;
+  return b;
+};
+
 let produceCacheBadge = opts => {
   let b = `
 \\begin{itemize}
@@ -153,6 +168,20 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
       latexArtifact(
         produceCacheBadge(options),
         "badge",
+        "standalone",
+        "pdflatex",
+        "-r varwidth=10cm"
+      ),
+      latexArtifact(
+        produceCacheData(options, false),
+        "Cache data",
+        "standalone",
+        "pdflatex",
+        "-r varwidth=10cm"
+      ),
+      latexArtifact(
+        produceCacheData(options, true),
+        "Cache data blank",
         "standalone",
         "pdflatex",
         "-r varwidth=10cm"
