@@ -242,7 +242,12 @@ let daddr = (config, numeric) => {
   let boffset = bits.slice(tagbits + blockindexbits, membits);
   let iwkbnumber = parseInt(wkbnumber, 2);
   let ibindex = parseInt(bindex, 2);
-  let desc = `mem[${iwkbnumber}] in cache[${ibindex}]`;
+  let desc;
+  if (!_.isNaN(ibindex)) {
+    desc = `mem[${iwkbnumber}] in cache[${ibindex}]`;
+  } else {
+    desc = `mem[${iwkbnumber}] in cache`;
+  }
   return { tag, bindex, boffset, wkbnumber, desc, ibindex, iwkbnumber };
 };
 
@@ -299,7 +304,13 @@ let nextCache = _.curry((config, { cache, actions }, access, stepnum) => {
       _.findIndex(cache, (c, i) => _.includes(blocks, i) && pred(i));
 
     let setSize = Math.pow(2, config.cacheways);
-    let blocksToCheck = _.map(_.range(0, setSize), i => i + ibindex * setSize);
+    let blocksToCheck;
+    if (!_.isNaN(ibindex)) {
+      blocksToCheck = _.map(_.range(0, setSize), i => i + ibindex * setSize);
+    } else {
+      // this is a completely set associative cache
+      blocksToCheck = _.range(0, setSize);
+    }
     let resHit = findBlockAmong(
       blocksToCheck,
       i => cache[i].valid && cache[i].tag === tag
