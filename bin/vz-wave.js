@@ -25,9 +25,9 @@ let reg2pdf = (options, regdata) => {
   return tmp.file({ postfix: ".svg" }).then(tmpsvg => {
     return execWithString(
       path =>
-        `${__dirname}/../node_modules/bit-field/bin/bitfield.js --lanes 1 -i ${path} > ${
-          tmpsvg.path
-        }`,
+        `${__dirname}/../node_modules/bit-field/bin/bitfield.js --lanes 1 -i ${path} --bits ${
+          options.bits
+        } > ${tmpsvg.path}`,
       regdata,
       { postfix: ".js", cleanup: false, logger: options.logger }
     )
@@ -153,6 +153,7 @@ let main = () => {
       "Produce the wave from the classic wavedrom cli"
     )
     .option("-r, --regformat", "Use wavedrom register")
+    .option("-b, --bits <num>", "Number of bits for register", prog.INT, 32)
     .action((args, options, logger) => {
       options.logger = logger;
       if (!options.regformat) {
