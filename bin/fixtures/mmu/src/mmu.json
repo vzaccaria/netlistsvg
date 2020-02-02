@@ -1,0 +1,13 @@
+{
+  "system": {
+    "npvbits": 4,
+    "npfbits": 3,
+    "wssize": 4,
+    "note": "assert(wssize * nprocess <= 2^npfbits)"
+  },
+  "processes": {
+    "p": "CCcc..DDd.0...S",
+    "q": "Ccc.DDd...1.0.S",
+    "r": "CCC....DDd1...S"
+  }
+}
