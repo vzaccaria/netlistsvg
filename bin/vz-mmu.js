@@ -4,99 +4,23 @@
 const prog = require("caporal");
 const _ = require("lodash");
 
-let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
-let { lab } = require("./lib/common");
+// let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+let { toLatexTable } = require("./lib/tex");
 
-let getSize = o => {
-  if (_.isObject(o)) {
-    return _.reduce(o, (r, a) => r + getSize(a), 0);
-  } else return 1;
-};
+// let testobj = {
+//   a: { d: 1, e: { f: 0, g: 1 } },
+//   b: 2,
+//   c: { h: 1, i: 2 }
+// };
 
-let testobj = {
-  a: { d: 0, e: { f: 0, g: 0 } },
-  b: 0,
-  c: { h: 0, i: 0 }
-};
+let scanl = (xs, f, ac) =>
+  _.concat(ac, xs.length == 0 ? [] : scanl(_.tail(xs), f, f(ac, _.first(xs))));
 
-let toMultiColumnHead = j => {
-  let printHead = s => {
-    return _.join(
-      _.map(s, ({ key, size, valid }) => {
-        if (valid) {
-          if (size === 1) return key;
-          else return `\\multicolumn{${size}}{c|}{${key}}`;
-        } else {
-          return "";
-        }
-      }),
-      " & "
-    );
-  };
-  let { list, maxDepth } = toList(j);
-  let hds = _.map(_.range(0, maxDepth + 1), extractDepth(list));
-  let maximumExtension = _.last(hds).length;
-  let mcheader = _.join(_.map(hds, printHead), "\\\\\n\\hline\n");
-  let tabheader = _.join(_.map(_.range(0, maximumExtension), () => "c"), "|");
-  return `\\begin{tabular}{|${tabheader}|}
-${mcheader}
-`;
-};
-
-let extractDepth = _.curry((list, d) => {
-  let s = [];
-  _.forEach(list, ({ key, depth, leaf, size }) => {
-    if (depth === d) s.push({ key, size, valid: true });
-    else {
-      if (depth < d && leaf) s.push({ valid: false });
-    }
-  });
-  return s;
-});
-
-const toList = j => {
-  const l = [];
-  traverse(x => l.push(x), j);
-  return { list: l, maxDepth: _.maxBy(l, "depth").depth };
-};
-
-const _traverse = _.curry((n, phi, obj) => {
-  for (let k in obj) {
-    if (obj[k] && typeof obj[k] === "object") {
-      _traverse(n + 1, phi, obj[k]);
-      phi({
-        key: k,
-        value: obj[k],
-        depth: n,
-        size: getSize(obj[k]),
-        leaf: false
-      });
-    } else {
-      phi({
-        key: k,
-        value: obj[k],
-        depth: n,
-        size: getSize(obj[k]),
-        leaf: true
-      });
-    }
-  }
-});
-
-let traverse = _traverse(0);
-
-let produceTableHead = j => {
-  _.join(
-    _.map(j, (value, key) => {
-      if (_.isObject(value)) {
-        return `\\multicolumn{${getSize(value)}{c|}{${key}}`;
-      } else {
-        return key;
-      }
-    }),
-    " & "
+let scanlp = (xs, f, proj, ac) =>
+  _.concat(
+    proj(ac),
+    xs.length == 0 ? [] : scanlp(_.tail(xs), f, proj, f(ac, _.first(xs)))
   );
-};
 
 let config = {
   system: {
@@ -153,10 +77,20 @@ let processSim = config => {
 
     pc: 0
   };
-  return _.reduce(config.accesses, access(config), initialState);
+  return toLatexTable(
+    scanlp(
+      config.accesses,
+      access(config),
+      ({ pc, stats }) => {
+        return { pc, stats };
+      },
+      initialState
+    )
+  );
 };
 
 let access = _.curry((config, state, action) => {
+  state = _.cloneDeep(state);
   let bringIn = (_process, _npv) => {
     let npf = _.findIndex(state.physical, p => !p.valid);
     if (npf === -1)
@@ -186,7 +120,7 @@ let access = _.curry((config, state, action) => {
 
   let choose = _process => {
     if (config.system.policy === "LRU") {
-      console.log(state);
+      // console.log(state);
       let page = _.minBy(state.pageTables[_process], "LRULastaccessed");
       return page.npv;
     } else throw "Method not implemented";
@@ -221,12 +155,13 @@ let main = () => {
     .description("Cache utils")
     .command("sim")
     .action(async args => {
-      checkConfig(config);
-      console.log(JSON.stringify(processSim(config), 0, 4));
+      // checkConfig(config);
+      console.log(processSim(config));
     })
     .command("test")
     .action(async args => {
-      console.log(toMultiColumnHead(testobj));
+      console.log(scanl([1, 2, 3], (a, e) => a + e, 1));
+      // console.log(toLatexTable([config]));
     });
   prog.parse(process.argv);
 };
