@@ -7,6 +7,97 @@ const _ = require("lodash");
 let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 let { lab } = require("./lib/common");
 
+let getSize = o => {
+  if (_.isObject(o)) {
+    return _.reduce(o, (r, a) => r + getSize(a), 0);
+  } else return 1;
+};
+
+let testobj = {
+  a: { d: 0, e: { f: 0, g: 0 } },
+  b: 0,
+  c: { h: 0, i: 0 }
+};
+
+let toMultiColumnHead = j => {
+  let printHead = s => {
+    return _.join(
+      _.map(s, ({ key, size, valid }) => {
+        if (valid) {
+          if (size === 1) return key;
+          else return `\\multicolumn{${size}}{c|}{${key}}`;
+        } else {
+          return "";
+        }
+      }),
+      " & "
+    );
+  };
+  let { list, maxDepth } = toList(j);
+  let hds = _.map(_.range(0, maxDepth + 1), extractDepth(list));
+  let maximumExtension = _.last(hds).length;
+  let mcheader = _.join(_.map(hds, printHead), "\\\\\n\\hline\n");
+  let tabheader = _.join(_.map(_.range(0, maximumExtension), () => "c"), "|");
+  return `\\begin{tabular}{|${tabheader}|}
+${mcheader}
+`;
+};
+
+let extractDepth = _.curry((list, d) => {
+  let s = [];
+  _.forEach(list, ({ key, depth, leaf, size }) => {
+    if (depth === d) s.push({ key, size, valid: true });
+    else {
+      if (depth < d && leaf) s.push({ valid: false });
+    }
+  });
+  return s;
+});
+
+const toList = j => {
+  const l = [];
+  traverse(x => l.push(x), j);
+  return { list: l, maxDepth: _.maxBy(l, "depth").depth };
+};
+
+const _traverse = _.curry((n, phi, obj) => {
+  for (let k in obj) {
+    if (obj[k] && typeof obj[k] === "object") {
+      _traverse(n + 1, phi, obj[k]);
+      phi({
+        key: k,
+        value: obj[k],
+        depth: n,
+        size: getSize(obj[k]),
+        leaf: false
+      });
+    } else {
+      phi({
+        key: k,
+        value: obj[k],
+        depth: n,
+        size: getSize(obj[k]),
+        leaf: true
+      });
+    }
+  }
+});
+
+let traverse = _traverse(0);
+
+let produceTableHead = j => {
+  _.join(
+    _.map(j, (value, key) => {
+      if (_.isObject(value)) {
+        return `\\multicolumn{${getSize(value)}{c|}{${key}}`;
+      } else {
+        return key;
+      }
+    }),
+    " & "
+  );
+};
+
 let config = {
   system: {
     npvbits: 2,
@@ -129,9 +220,13 @@ let main = () => {
   prog
     .description("Cache utils")
     .command("sim")
-    .action(async (args, options) => {
+    .action(async args => {
       checkConfig(config);
       console.log(JSON.stringify(processSim(config), 0, 4));
+    })
+    .command("test")
+    .action(async args => {
+      console.log(toMultiColumnHead(testobj));
     });
   prog.parse(process.argv);
 };
