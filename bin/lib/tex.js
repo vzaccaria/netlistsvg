@@ -9,7 +9,7 @@ let getSize = o => {
 let showField = ({ value }) => {
   if (_.isBoolean(value)) {
     if (value) return "$\\checkmark$";
-    else "$return \\times$";
+    else return "$\\times$";
   } else {
     if (_.isNumber(value)) {
       return `\\texttt{${value}}`;
@@ -43,7 +43,7 @@ let toMultiColumnHead = j => {
   let mcheader = _.join(_.map(hds, printHead), "\\\\\n\\hline\n");
   let tabheader = _.join(_.map(_.range(0, maximumExtension), () => "c"), "|");
   return `\\begin{tabular}{|${tabheader}|}
-${mcheader}\\\\
+${mcheader}\\\\ \\hline
 `;
 };
 

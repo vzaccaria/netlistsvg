@@ -16,12 +16,6 @@ let { toLatexTable } = require("./lib/tex");
 let scanl = (xs, f, ac) =>
   _.concat(ac, xs.length == 0 ? [] : scanl(_.tail(xs), f, f(ac, _.first(xs))));
 
-let scanlp = (xs, f, proj, ac) =>
-  _.concat(
-    proj(ac),
-    xs.length == 0 ? [] : scanlp(_.tail(xs), f, proj, f(ac, _.first(xs)))
-  );
-
 let config = {
   system: {
     npvbits: 2,
@@ -41,6 +35,32 @@ let config = {
     { process: "p", npv: "0" },
     { process: "p", npv: "2" }
   ]
+};
+
+let preprocess = (config, j) => {
+  let showPageTable = p => {
+    return _.map(p, entry => {
+      if (entry.valid)
+        return `${entry.npf}{\\color{gray}/${entry.LRULastaccessed}}`;
+      else return "-";
+    });
+  };
+  let showPhysical = a => {
+    if (a.valid) {
+      return `${a.process}${a.npv}`;
+    } else {
+      return "-";
+    }
+  };
+  return _.map(j, d => {
+    return {
+      time: d.time,
+      action: d.action ? d.action : "init",
+      faults: d.stats,
+      physical: _.map(d.physical, showPhysical),
+      pageTables: _.mapValues(d.pageTables, showPageTable)
+    };
+  });
 };
 
 let checkConfig = config => {
@@ -72,21 +92,14 @@ let processSim = config => {
       });
     }),
     stats: _.mapValues(config.processes, () => {
-      return { pageFaults: 0 };
+      return 0;
     }),
 
-    pc: 0
+    time: 0
   };
-  return toLatexTable(
-    scanlp(
-      config.accesses,
-      access(config),
-      ({ pc, stats }) => {
-        return { pc, stats };
-      },
-      initialState
-    )
-  );
+  let res = scanl(config.accesses, access(config), initialState);
+  res = preprocess(config, res);
+  return toLatexTable(res);
 };
 
 let access = _.curry((config, state, action) => {
@@ -99,9 +112,9 @@ let access = _.curry((config, state, action) => {
       valid: true,
       npv: _npv,
       npf: npf,
-      FIFOloaded: state.pc,
+      FIFOloaded: state.time,
       NFUAccesses: 1,
-      LRULastaccessed: state.pc
+      LRULastaccessed: state.time
     };
     state.physical[npf] = { process: _process, valid: true, npv: _npv };
   };
@@ -127,6 +140,7 @@ let access = _.curry((config, state, action) => {
   };
 
   let { process, npv } = action;
+  state.time += 1;
   let resident = state.pageTables[process][npv].valid;
   if (!resident) {
     let maxresident = Math.pow(2, config.system.wsbits);
@@ -135,18 +149,18 @@ let access = _.curry((config, state, action) => {
     );
     if (residentPages == maxresident) {
       let cnpv = choose(process);
-      state.stats[process].pageFaults += 1;
+      state.stats[process] += 1;
       bringOut(process, cnpv);
       bringIn(process, npv);
     } else {
-      state.stats[process].pageFaults += 1;
+      state.stats[process] += 1;
       bringIn(process, npv);
     }
   } else {
     state.pageTables[process][npv].NFUAccesses += 1;
-    state.pageTables[process][npv].LRULastaccessed = state.pc;
+    state.pageTables[process][npv].LRULastaccessed = state.time;
   }
-  state.pc += 1;
+  state.action = `${process}->npv(${npv})`;
   return state;
 });
 
@@ -157,11 +171,6 @@ let main = () => {
     .action(async args => {
       // checkConfig(config);
       console.log(processSim(config));
-    })
-    .command("test")
-    .action(async args => {
-      console.log(scanl([1, 2, 3], (a, e) => a + e, 1));
-      // console.log(toLatexTable([config]));
     });
   prog.parse(process.argv);
 };
