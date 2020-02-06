@@ -4,7 +4,7 @@
 const prog = require("caporal");
 const _ = require("lodash");
 
-// let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 let { toLatexTable } = require("./lib/tex");
 
 // let testobj = {
@@ -16,64 +16,114 @@ let { toLatexTable } = require("./lib/tex");
 let scanl = (xs, f, ac) =>
   _.concat(ac, xs.length == 0 ? [] : scanl(_.tail(xs), f, f(ac, _.first(xs))));
 
-let config = {
-  system: {
-    npvbits: 2,
-    npfbits: 2,
-    wsbits: 1,
-    asid: 2,
-    policy: "LRU"
-  },
-  processes: {
-    p: { vmap: "CCcc..DDd.0...S", asid: "00" },
-    q: { vmap: "Ccc.DDd...1.0.S", asid: "01" }
-  },
-  accesses: [
-    { process: "p", npv: "0" },
-    { process: "p", npv: "1" },
-    { process: "q", npv: "0" },
-    { process: "p", npv: "0" },
-    { process: "p", npv: "2" }
-  ]
+// let config = {
+//   system: {
+//     npvbits: 2,
+//     npfbits: 2,
+//     wsbits: 1,
+//     alinesid: 2, // not used
+//     policy: "LRU"
+//   },
+//   processes: {
+//     p: { vmap: "CCcc..DDd.0...S", asid: "00" },
+//     q: { vmap: "Ccc.DDd...1.0.S", asid: "01" }
+//   },
+//   accesses: [
+//     { process: "p", npv: "0" },
+//     { process: "p", npv: "1" },
+//     { process: "q", npv: "0" },
+//     { process: "p", npv: "0" },
+//     { process: "p", npv: "2" }
+//   ]
+// };
+
+let produceConfig = (args, options, algo, limit) => {
+  let config = {
+    system: {
+      npvbits: options.npvbits,
+      npfbits: options.npfbits,
+      wsbits: options.wsbits,
+      policy: algo
+    },
+
+    processes: _.fromPairs(
+      _.map(options.processes, p => {
+        return [p, { valid: true }];
+      })
+    ),
+    accesses: _.map(args.alist.split(","), p => {
+      let regexp = /(?<process>[a-z]+)(?<npv>\d+)/;
+      let x = p.match(regexp);
+      if (!_.isNull(x)) {
+        return x.groups;
+      } else {
+        throw "error parsing acceses";
+      }
+    }),
+    limit: limit
+  };
+  return config;
 };
 
 let preprocess = (config, j) => {
-  let showPageTable = p => {
+  let showPageTable = (time, p) => {
     return _.map(p, entry => {
-      if (entry.valid)
-        return `${entry.npf}{\\color{gray}/${entry.LRULastaccessed}}`;
-      else return "-";
+      if (config.limit < 0 || (config.limit > 0 && time <= config.limit)) {
+        if (entry.valid)
+          if (config.system.policy === "LRU") {
+            return `${entry.npf}{\\color{gray}/${entry.LRULastaccessed}}`;
+          } else {
+            if (config.system.policy === "FIFO") {
+              return `${entry.npf}{\\color{gray}/${entry.FIFOloaded}}`;
+            } else {
+              return `ERR`;
+            }
+          }
+        else return `-{\\color{gray}/-}`;
+      } else {
+        return ``;
+      }
     });
   };
-  let showPhysical = a => {
-    if (a.valid) {
-      return `${a.process}${a.npv}`;
-    } else {
-      return "-";
-    }
+  let showPhysical = (time, a) => {
+    if (config.limit < 0 || (config.limit > 0 && time <= config.limit)) {
+      if (a.valid) {
+        return `${a.process}${a.npv}`;
+      } else {
+        return "-";
+      }
+    } else return " ";
+  };
+
+  let showStats = (time, a) => {
+    if (config.limit < 0 || (config.limit > 0 && time <= config.limit)) {
+      return a;
+    } else return " ";
   };
   return _.map(j, d => {
-    return {
+    let res = {
       time: d.time,
       action: d.action ? d.action : "init",
-      faults: d.stats,
-      physical: _.map(d.physical, showPhysical),
-      pageTables: _.mapValues(d.pageTables, showPageTable)
+      faults: _.map(d.stats, _.curry(showStats)(d.time)),
+      physical: _.map(d.physical, _.curry(showPhysical)(d.time))
     };
+    res[`pageTables (npv/${config.system.policy})`] = _.mapValues(
+      d.pageTables,
+      _.curry(showPageTable)(d.time)
+    );
+    return res;
   });
 };
 
 let checkConfig = config => {
-  let npventries = Math.pow(2, config.system.npvbits);
+  // let npventries = Math.pow(2, config.system.npvbits);
   let npfentries = Math.pow(2, config.system.npfbits);
   let maxresident = Math.pow(2, config.system.wsbits);
   let nproc = _.size(config.processes);
-  console.log(`Phys. pages: ${npfentries}, Virt. pages: ${npventries}`);
-  console.log(`Working set: ${maxresident}, processes: ${nproc}`);
+  // console.log(`Phys. pages: ${npfentries}, Virt. pages: ${npventries}`);
+  // console.log(`Working set: ${maxresident}, processes: ${nproc}`);
   if (maxresident * nproc > npfentries) {
-    console.log("Health check not passed! check working set size");
-  } else {
-    console.log("Ok, health check passed");
+    throw "Health check not passed! check working set size";
   }
 };
 
@@ -136,7 +186,12 @@ let access = _.curry((config, state, action) => {
       // console.log(state);
       let page = _.minBy(state.pageTables[_process], "LRULastaccessed");
       return page.npv;
-    } else throw "Method not implemented";
+    } else {
+      if (config.system.policy === "FIFO") {
+        let page = _.maxBy(state.pageTables[_process], "FIFOloaded");
+        return page.npv;
+      } else throw "Method not implemented";
+    }
   };
 
   let { process, npv } = action;
@@ -160,17 +215,87 @@ let access = _.curry((config, state, action) => {
     state.pageTables[process][npv].NFUAccesses += 1;
     state.pageTables[process][npv].LRULastaccessed = state.time;
   }
-  state.action = `${process}->npv(${npv})`;
+  state.action = `${process}$\\rightarrow$npv(${npv})`;
   return state;
 });
+
+let produceAndSaveArtifacts = async (args, options) => {
+  let result = {
+    latex: [
+      latexArtifact(
+        processSim(produceConfig(args, options, "LRU", -1)),
+        "lru",
+        "standalone",
+        "pdflatex",
+        ""
+      ),
+      latexArtifact(
+        processSim(produceConfig(args, options, "FIFO", -1)),
+        "fifo",
+        "standalone",
+        "pdflatex",
+        ""
+      ),
+      latexArtifact(
+        processSim(produceConfig(args, options, "LRU", options.upto)),
+        "lru blank",
+        "standalone",
+        "pdflatex",
+        ""
+      ),
+      latexArtifact(
+        processSim(produceConfig(args, options, "FIFO", options.upto)),
+        "fifo blank",
+        "standalone",
+        "pdflatex",
+        ""
+      )
+    ]
+  };
+  if (options.save) {
+    return saveArtifacts(result.latex, options.save);
+  } else {
+    console.log(JSON.stringify(result));
+  }
+};
 
 let main = () => {
   prog
     .description("Cache utils")
     .command("sim")
-    .action(async args => {
+    .argument(
+      "<alist>",
+      "comma separated list of virtual page accesses (e.g. 'p0,q1...')"
+    )
+    .option(
+      "--npvbits <num>",
+      "virtual page number size (log2)",
+      prog.INTEGER,
+      2
+    )
+    .option(
+      "--npfbits <num>",
+      "physical page number size (log2)",
+      prog.INTEGER,
+      2
+    )
+    .option("-x, --save <prefix>", "save with prefix or dump json")
+    .option("--wsbits <num>", "working set size (log2)", prog.INTEGER, 1)
+    .option(
+      "--processes <list>",
+      "comma separated list of processes",
+      prog.LIST
+    )
+    .option(
+      "--upto <num>",
+      "starting from <num> dont print anything in blank",
+      prog.INTEGER,
+      -1
+    )
+    .action(async (args, options) => {
+      produceAndSaveArtifacts(args, options);
       // checkConfig(config);
-      console.log(processSim(config));
+      // console.log(processSim(config));
     });
   prog.parse(process.argv);
 };
