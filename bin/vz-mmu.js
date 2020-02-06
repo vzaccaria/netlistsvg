@@ -102,9 +102,9 @@ let preprocess = (config, j) => {
   };
   return _.map(j, d => {
     let res = {
-      time: d.time,
-      action: d.action ? d.action : "init",
-      faults: _.map(d.stats, _.curry(showStats)(d.time)),
+      tempo: d.time,
+      azione: d.action ? d.action : "init",
+      fault: _.map(d.stats, _.curry(showStats)(d.time)),
       physical: _.map(d.physical, _.curry(showPhysical)(d.time))
     };
     res[`pageTables (npv/${config.system.policy})`] = _.mapValues(
@@ -125,6 +125,18 @@ let checkConfig = config => {
   if (maxresident * nproc > npfentries) {
     throw "Health check not passed! check working set size";
   }
+};
+
+let printConfig = config => {
+  let p = {
+    sistema: {
+      processi: _.join(_.map(config.processes, (v, k) => k), ", "),
+      "n. pagine fisiche": Math.pow(2, config.system.npfbits),
+      "n. pagine virtuali per processo": Math.pow(2, config.system.npvbits),
+      "dimensione working set": Math.pow(2, config.system.wsbits)
+    }
+  };
+  return toLatexTable([p]);
 };
 
 let processSim = config => {
@@ -188,7 +200,7 @@ let access = _.curry((config, state, action) => {
       return page.npv;
     } else {
       if (config.system.policy === "FIFO") {
-        let page = _.maxBy(state.pageTables[_process], "FIFOloaded");
+        let page = _.minBy(state.pageTables[_process], "FIFOloaded");
         return page.npv;
       } else throw "Method not implemented";
     }
@@ -246,6 +258,13 @@ let produceAndSaveArtifacts = async (args, options) => {
       latexArtifact(
         processSim(produceConfig(args, options, "FIFO", options.upto)),
         "fifo blank",
+        "standalone",
+        "pdflatex",
+        ""
+      ),
+      latexArtifact(
+        printConfig(produceConfig(args, options, "FIFO", options.upto)),
+        "configurazione",
         "standalone",
         "pdflatex",
         ""

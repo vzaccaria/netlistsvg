@@ -125,6 +125,19 @@ let waveTestBatch = {
   ]
 };
 
+let mmuTestBatch = {
+  name: "vz-mmu",
+  scriptname: `${__dirname}/vz-mmu.js`,
+  fixtures: `${__dirname}/fixtures/mmu`,
+  tests: [
+    {
+      msg: `two processes`,
+      cmd: s =>
+        `${s} sim p0,p1,q0,q1,q2,p2,p1,p3,p1,q0,q3 --processes p,q --upto 4`
+    }
+  ]
+};
+
 let cacheTestBatch = {
   name: "vz-cache",
   scriptname: `${__dirname}/vz-cache.js`,
@@ -164,5 +177,6 @@ module.exports = [
   pipeTestBatch,
   waveTestBatch,
   rvfcallTestBatch,
-  cacheTestBatch
+  cacheTestBatch,
+  mmuTestBatch
 ];
