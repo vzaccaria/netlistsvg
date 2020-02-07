@@ -104,7 +104,7 @@ let preprocess = (config, j) => {
     let res = {
       tempo: d.time,
       azione: d.action ? d.action : "init",
-      fault: _.map(d.stats, _.curry(showStats)(d.time)),
+      fault: _.mapValues(d.stats, _.curry(showStats)(d.time)),
       physical: _.map(d.physical, _.curry(showPhysical)(d.time))
     };
     res[`pageTables (npv/${config.system.policy})`] = _.mapValues(
