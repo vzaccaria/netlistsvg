@@ -95,8 +95,11 @@ let parseSignal = (options, sig) => {
 
 let produceWave = _.curry((args, options, vcd) => {
   let sigs = vcd.signal;
-  // console.log(_.map(sigs, s => s.name));
-  let observables = options.signals.split(",");
+  let signames = _.map(sigs, s => s.name);
+  if (options.showSigs) {
+    console.log(signames);
+  }
+  let observables = options.signals ? options.signals.split(",") : signames;
   let fsigs = _.map(observables, o => {
     return _.find(sigs, s => s.name === o);
   });
@@ -107,15 +110,14 @@ let produceWave = _.curry((args, options, vcd) => {
   return s;
 });
 
-let readWavedrom = (args, options) => {
-  let file_p = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
-  let wavedrom = options.isVcd
-    ? file_p
-        .then(vcdParser.parse)
-        .then(produceWave(args, options))
-        .then(JSON.stringify)
-    : file_p;
-  return wavedrom;
+let readWavedrom = async (args, options) => {
+  let data = await (args.file ? $fs.readFile(args.file, "utf-8") : $gstd());
+  if (options.isVcd) {
+    data = await vcdParser.parse(data);
+    data = produceWave(args, options, data);
+    data = JSON.stringify(data);
+  }
+  return data;
 };
 
 let processWhitelist = (wavedrom, options) => {
@@ -143,6 +145,7 @@ let main = () => {
     .option("-c, --is-vcd", "input is a vcd file")
     .option("-p, --posedge-clock", "clock is posedge, otherwise negedge")
     .option("-n, --trim-names", "trim hierarchic path names")
+    .option("--show-sigs", "show signals")
     .option("-w, --white-list <names>", "whitelisted names", prog.LIST)
     .option(
       "-z, --dump-tikz",
@@ -154,51 +157,49 @@ let main = () => {
     )
     .option("-r, --regformat", "Use wavedrom register")
     .option("-b, --bits <num>", "Number of bits for register", prog.INT, 32)
-    .action((args, options, logger) => {
+    .action(async (args, options, logger) => {
       options.logger = logger;
       if (!options.regformat) {
-        readWavedrom(args, options)
-          .then(wavedrom => {
-            let whitelisted = processWhitelist(wavedrom, options);
-            Promise.all([
-              wave2tikz(options, wavedrom),
-              wave2tikz(options, whitelisted)
-            ]).then(([complete, whitel]) => {
-              let artifacts = [
-                latexArtifact(
-                  complete,
-                  "wave",
-                  "standalone",
-                  "pdflatex",
-                  `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
-                ),
-                latexArtifact(
-                  whitel,
-                  "wave whitelisted",
-                  "standalone",
-                  "pdflatex",
-                  `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
-                )
-              ];
-              let result = { latex: artifacts };
-              if (options.save) {
-                saveArtifacts(result.latex, options.save);
+        try {
+          let wavedrom = await readWavedrom(args, options);
+          let whitelisted = processWhitelist(wavedrom, options);
+          let [complete, whitel] = await Promise.all([
+            wave2tikz(options, wavedrom),
+            wave2tikz(options, whitelisted)
+          ]);
+          let artifacts = [
+            latexArtifact(
+              complete,
+              "wave",
+              "standalone",
+              "pdflatex",
+              `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+            ),
+            latexArtifact(
+              whitel,
+              "wave whitelisted",
+              "standalone",
+              "pdflatex",
+              `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+            )
+          ];
+          let result = { latex: artifacts };
+          if (options.save) {
+            saveArtifacts(result.latex, options.save);
+          } else {
+            if (options.dumpTikz) {
+              console.log(complete);
+            } else {
+              if (options.dumpClassicPdf) {
+                return wave2pdf(options, wavedrom);
               } else {
-                if (options.dumpTikz) {
-                  console.log(complete);
-                } else {
-                  if (options.dumpClassicPdf) {
-                    return wave2pdf(options, wavedrom);
-                  } else {
-                    console.log(JSON.stringify(result, 0, 4));
-                  }
-                }
+                console.log(JSON.stringify(result, 0, 4));
               }
-            });
-          })
-          .catch(e => {
-            logger.error(e);
-          });
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
       } else {
         readWavedrom(args, options).then(wavedrom => {
           if (!options.dumpClassicPdf) {
