@@ -1,0 +1,21 @@
+
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+tempo & azione & \multicolumn{2}{c|}{fault} & \multicolumn{4}{c|}{physical} & \multicolumn{8}{c|}{pageTables (npv/LRU)}\\
+\hline
+ &  & 0 & 1 & 0 & 1 & 2 & 3 & \multicolumn{4}{c|}{p} & \multicolumn{4}{c|}{q}\\
+\hline
+ &  &  &  &  &  &  &  & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3\\ \hline
+
+\texttt{0} & init & \texttt{0} & \texttt{0} & - & - & - & - & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-}\\ 
+\texttt{1} & p$\rightarrow$npv(0) & \texttt{1} & \texttt{0} & p0 & - & - & - & 0{\color{gray}/1} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-}\\ 
+\texttt{2} & p$\rightarrow$npv(1) & \texttt{2} & \texttt{0} & p0 & p1 & - & - & 0{\color{gray}/1} & 1{\color{gray}/2} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-}\\ 
+\texttt{3} & q$\rightarrow$npv(0) & \texttt{2} & \texttt{1} & p0 & p1 & q0 & - & 0{\color{gray}/1} & 1{\color{gray}/2} & -{\color{gray}/-} & -{\color{gray}/-} & 2{\color{gray}/3} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-}\\ 
+\texttt{4} & q$\rightarrow$npv(1) & \texttt{2} & \texttt{2} & p0 & p1 & q0 & q1 & 0{\color{gray}/1} & 1{\color{gray}/2} & -{\color{gray}/-} & -{\color{gray}/-} & 2{\color{gray}/3} & 3{\color{gray}/4} & -{\color{gray}/-} & -{\color{gray}/-}\\ 
+\texttt{5} & q$\rightarrow$npv(2) & \texttt{2} & \texttt{3} & p0 & p1 & q2 & q1 & 0{\color{gray}/1} & 1{\color{gray}/2} & -{\color{gray}/-} & -{\color{gray}/-} & -{\color{gray}/-} & 3{\color{gray}/4} & 2{\color{gray}/5} & -{\color{gray}/-}\\ 
+\texttt{6} & p$\rightarrow$npv(2) & \texttt{3} & \texttt{3} & p2 & p1 & q2 & q1 & -{\color{gray}/-} & 1{\color{gray}/2} & 0{\color{gray}/6} & -{\color{gray}/-} & -{\color{gray}/-} & 3{\color{gray}/4} & 2{\color{gray}/5} & -{\color{gray}/-}\\ 
+\texttt{7} & p$\rightarrow$npv(1) & \texttt{3} & \texttt{3} & p2 & p1 & q2 & q1 & -{\color{gray}/-} & 1{\color{gray}/7} & 0{\color{gray}/6} & -{\color{gray}/-} & -{\color{gray}/-} & 3{\color{gray}/4} & 2{\color{gray}/5} & -{\color{gray}/-}\\ 
+\texttt{8} & p$\rightarrow$npv(3) & \texttt{4} & \texttt{3} & p3 & p1 & q2 & q1 & -{\color{gray}/-} & 1{\color{gray}/7} & -{\color{gray}/-} & 0{\color{gray}/8} & -{\color{gray}/-} & 3{\color{gray}/4} & 2{\color{gray}/5} & -{\color{gray}/-}\\ 
+\texttt{9} & p$\rightarrow$npv(1) & \texttt{4} & \texttt{3} & p3 & p1 & q2 & q1 & -{\color{gray}/-} & 1{\color{gray}/9} & -{\color{gray}/-} & 0{\color{gray}/8} & -{\color{gray}/-} & 3{\color{gray}/4} & 2{\color{gray}/5} & -{\color{gray}/-}\\ 
+\texttt{10} & q$\rightarrow$npv(0) & \texttt{4} & \texttt{4} & p3 & p1 & q2 & q0 & -{\color{gray}/-} & 1{\color{gray}/9} & -{\color{gray}/-} & 0{\color{gray}/8} & 3{\color{gray}/10} & -{\color{gray}/-} & 2{\color{gray}/5} & -{\color{gray}/-}\\ 
+\texttt{11} & q$\rightarrow$npv(3) & \texttt{4} & \texttt{5} & p3 & p1 & q3 & q0 & -{\color{gray}/-} & 1{\color{gray}/9} & -{\color{gray}/-} & 0{\color{gray}/8} & 3{\color{gray}/10} & -{\color{gray}/-} & -{\color{gray}/-} & 2{\color{gray}/11}
+\end{tabular}

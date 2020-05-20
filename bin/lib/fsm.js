@@ -2,6 +2,7 @@ let _ = require("lodash");
 let $fs = require("mz/fs");
 let { latexArtifact, saveArtifacts } = require("./artifacts");
 let { quickSynth } = require("./quine");
+let { toLatexTable } = require("./tex");
 
 let edgespec = `{nodes={inner sep=1pt, anchor=mid, circle, fill=white}}`;
 
@@ -436,9 +437,30 @@ let produceTransitionTables = fsm => {
   }
 };
 
+// _.mapValues(fsm.encoding, (v, k) => {
+//   return { nomeStato: k };
+// })
+let produceEncodingTable = fsm => {
+  let table = _.values(
+    _.mapValues(fsm.encoding, (v, k) => {
+      let o = { stato: `$${k}$` };
+      _.map(v, (x, i) => (o[`$FF_{${i}}$`] = x));
+      return o;
+    })
+  );
+  return latexArtifact(
+    toLatexTable(table),
+    "state encoding",
+    "standalone",
+    "lualatex",
+    ""
+  );
+};
+
 let synthesize = (fsm, options) => {
   let diagram = drawFSM(fsm, options);
   let ttables = produceTransitionTables(fsm);
+  ttables.push(produceEncodingTable(fsm));
   return _.merge({}, { diagram }, { ttables });
 };
 
