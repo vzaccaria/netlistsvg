@@ -26,14 +26,23 @@ ${c}
 \\end{tikzpicture}
 `;
 
+let asmCode = sim => {
+  return `
+\\begin{minted}{asm}
+${_.join(_.map(sim, i => i.ins), "\n")}
+\\end{minted}`;
+};
+
 let hazardsToTikz = (sim, options) => {
   let insttikz = (i, n) => {
     let pi = 2 + n * 1.5;
     let pj = -1 * n * options.hrowsep;
     let ii = [
-      `\\node at (0, ${pj}) [align=left, text width=25mm] {\\footnotesize\\texttt{${
-        i.ins
-      }}};`,
+      options.noInstructions
+        ? ""
+        : `\\node at (0, ${pj}) [align=left, text width=25mm] {\\footnotesize\\texttt{${
+            i.ins
+          }}};`,
       `\\pic (i${n}) at (${pi}, ${pj}) {pipe};`
     ];
 
@@ -289,6 +298,7 @@ let main = () => {
     .option("--branchpred", "Use branch prediction")
     .option("--branchopt", "Compute the branch sooner")
     .option("-b, --blank", "To fill up")
+    .option("-o, --no-instructions", "Don't show instructions")
     .option("-n, --max-cycles <integer>", "Grid size")
     .option("-c, --conflicts <string>", "Conflicts strings (comma separated)")
     .option(
@@ -337,6 +347,13 @@ let main = () => {
             "standalone",
             "pdflatex",
             `-r varwidth -i ${__dirname}/preambles/pipe.tex`
+          ),
+          latexArtifact(
+            asmCode(sim.table, options),
+            "asm code",
+            "standalone",
+            "pdflatex",
+            "--usepackage minted -r varwidth"
           )
         ]
       };
@@ -347,7 +364,7 @@ let main = () => {
       }
     })
     .command("preamble", "Print latex preamble")
-    .action((args, options) => {
+    .action(args => {
       $fs.readFile(`${__dirname}/preambles/pipe.tex`, "utf8").then(console.log);
     });
   prog.parse(process.argv);
