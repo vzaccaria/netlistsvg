@@ -110,7 +110,17 @@ let produceWave = _.curry((args, options, vcd) => {
   return s;
 });
 
-let readWavedrom = async (args, options) => {
+let readWavedromReg = async (args, options) => {
+  let data = await (args.file ? $fs.readFile(args.file, "utf-8") : $gstd());
+  if (options.isVcd) {
+    data = await vcdParser.parse(data);
+    data = produceWave(args, options, data);
+    data = JSON.stringify(data);
+  }
+  return data;
+};
+
+let readWavedromOrVCD = async (args, options) => {
   let data = await (args.file ? $fs.readFile(args.file, "utf-8") : $gstd());
   if (options.isVcd) {
     data = await vcdParser.parse(data);
@@ -161,7 +171,7 @@ let main = () => {
       options.logger = logger;
       if (!options.regformat) {
         try {
-          let wavedrom = await readWavedrom(args, options);
+          let wavedrom = await readWavedromOrVCD(args, options);
           let whitelisted = processWhitelist(wavedrom, options);
           let [complete, whitel] = await Promise.all([
             wave2tikz(options, wavedrom),
@@ -201,7 +211,7 @@ let main = () => {
           console.log(error);
         }
       } else {
-        readWavedrom(args, options).then(wavedrom => {
+        readWavedromReg(args, options).then(wavedrom => {
           if (!options.dumpClassicPdf) {
             throw "You must use -d option when printing register format";
           }
