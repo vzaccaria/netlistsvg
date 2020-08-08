@@ -74,6 +74,22 @@ let labelcmd = (lab, label, isLoop) => {
   }
 };
 
+let getType = (angle, n1, n2) => {
+  if (n1 === n2) return loopDir(angle);
+  else {
+    if (
+      angle === "left" ||
+      angle === "right" ||
+      angle === "up" ||
+      angle === "down"
+    ) {
+      return `orient=${angle}`;
+    } else {
+      return `bend left=${angle}`;
+    }
+  }
+};
+
 let connectMealy = (fsm, o1, o2, input) => {
   let _out = q => _.join(_.flatten(_.values(q)), "");
   //  get from { "name: .... } -> "name"
@@ -82,9 +98,7 @@ let connectMealy = (fsm, o1, o2, input) => {
   let { name, lab, angle } = parseName(in2);
   let n2 = name;
 
-  let lp = loopDir(angle);
-
-  let type = n1 === n2 ? `${lp}` : `bend left=${angle}`;
+  let type = getType(angle, n1, n2);
   let label = `$${_.join(input, "")}/${_out(o2)}$`;
   return `"$${n1}$" [${getSrcOpts(fsm, n1)}] -> [${type}, ${labelcmd(
     lab,
@@ -117,7 +131,7 @@ let connectMoore = (fsm, o1, o2, input, output) => {
 
   let tl = getMooreTransLabel(fsm, n1, n2, input);
 
-  let type = n1 === n2 ? `${loopDir(angle)}` : `bend left=${angle}`;
+  let type = getType(angle, n1, n2);
   let label = `$${tl}$`;
   return `"$${n1}$" [${getSrcOpts(fsm, n1)},as=$${l1}$] -> [${type}, ${labelcmd(
     lab,

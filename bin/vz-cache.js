@@ -368,6 +368,7 @@ let main = () => {
     .option("-m, --membits <num>", "main address size", prog.INT, 14)
     .option("-w, --cacheways <num>", "log2 of cache ways", prog.INT, 0)
     .option("-b, --blockbits <num>", "log2 of block size ", prog.INT, 9)
+    .option("-d, --dont-simulate", "dont do any simulation")
     .option("-j, --json", "produce trace in JSON format")
     .option(
       "-s, --cachesizebits <num>",
@@ -388,7 +389,9 @@ let main = () => {
         produceAndSaveArtifacts(
           args,
           options,
-          simulate(options, e, args.alist)
+          options.dontSimulate
+            ? { results: [] }
+            : simulate(options, e, args.alist)
         );
       else console.log(JSON.stringify(simulate(options, e, args.alist), 0, 4));
     });
