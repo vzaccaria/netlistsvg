@@ -45,6 +45,7 @@
     "vz-wave": "./bin/vz-wave.js",
     "vz-quine": "./bin/vz-quine.js",
     "vz-pipe": "./bin/vz-pipe.js",
+    "vz-pipe-new": "./bin/vz-pipe-new.js",
     "vz-fsm": "./bin/vz-fsm.js",
     "vz-memmap": "./bin/vz-memmap.js",
     "vz-spim": "./bin/vz-spim.js",

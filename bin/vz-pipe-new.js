@@ -7,8 +7,12 @@ const { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 let _ = require("lodash");
 let $fs = require("mz/fs");
 
-let pipe = (ft, dc) => {
-  return _.repeat("-", ft) + "F" + _.repeat("*", dc - ft - 1) + "DEMW";
+let pipe = ({ n_fe, n_de, n_ee, n_me, n_we }) => {
+  let prologue = _.repeat("-", n_fe);
+  let ftch = _.repeat("f", n_de - n_fe - 1) + "F";
+  let decode = _.repeat("d", n_ee - n_de - 1) + "D";
+  let remaining = "EMW";
+  return prologue + ftch + decode + remaining;
 };
 
 let wrapper = c => `
@@ -65,7 +69,8 @@ let insttikz = _.curry((blank, i) => {
   let remaining = _.map(i.pipe, c => {
     if (!blank) {
       if (c === "-") return `|[draw,fill=gray!20]|`;
-      else if (c === "*") return `|[draw]| $\\bullet$`;
+      else if (c === "f") return `|[draw,color=gray!50]| F`;
+      else if (c === "d") return `|[draw,color=gray!50]| D`;
       else return `|[draw]| ${c}`;
     } else {
       return `|[draw]|`;
@@ -110,72 +115,58 @@ let pipeSimulatorTikz = (sim, options) => {
 };
 
 let store = _.curry((name, s1, s2) => {
-  return ({ config, readypc, ready, table }) => {
-    let canDecodeAt = Math.max(ready[s1], ready[s2], readypc + 1);
-    let rdy = _.clone(ready);
-    let tbl = _.clone(table);
-    tbl.push({
-      ins: `${name} x${s1}, lab(x${s2})`,
-      pipe: pipe(
-        readypc,
-        canDecodeAt
-      ),
-      canDecodeAt
-    });
-    let nextState = {
-      readypc: canDecodeAt,
-      ready: rdy,
-      table: tbl,
-      config
-    };
-    return nextState;
+  return ({ config, ready, table }) => {
+    let isAluFw = config.hasAluForwarding;
+    let isMemFw = config.hasMemForwarding;
+    let n_fe = ready[de];
+    let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
+    let rs1 = isMemFw ? ready[s1] : ready[s1] + 1;
+    let rs2 = isAluFw ? ready[s2] : ready[s2] + 1;
+    let n_ee = Math.max(ready[me], n_de + 1, rs1, rs2);
+    let n_me = Math.max(ready[we], n_ee + 1);
+    let n_we = n_me + 1;
+    let n_pc = n_fe + 1;
+    let ins = `${name} x${s1}, lab(x${s2})`;
+    return prepareNewState(
+      { name, d: 0, s1, s2, config, ready, table, ins },
+      { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd: 0 }
+    );
   };
 });
 
 let load = _.curry((name, d, s1) => {
-  return ({ config, readypc, ready, table }) => {
-    let canDecodeAt = Math.max(ready[s1], readypc + 1);
-    let rdy = _.clone(ready);
-    let tbl = _.clone(table);
-    tbl.push({
-      ins: `${name} x${d}, lab(x${s1})`,
-      pipe: pipe(
-        readypc,
-        canDecodeAt
-      ),
-      canDecodeAt
-    });
-    rdy[d] = canDecodeAt + (config.hasMemForwarding ? 2 : 3);
-    let nextState = {
-      readypc: canDecodeAt,
-      ready: rdy,
-      table: tbl,
-      config
-    };
-    return nextState;
+  return ({ config, ready, table }) => {
+    let isAluFw = config.hasAluForwarding;
+    let n_fe = ready[de];
+    let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
+    let n_ee = isAluFw
+      ? Math.max(ready[me], n_de + 1, ready[s1])
+      : Math.max(ready[me], n_de + 1, ready[s1] + 1);
+    let n_me = Math.max(ready[we], n_ee + 1);
+    let n_we = n_me + 1;
+    let n_pc = n_fe + 1;
+    let n_rdd = n_we;
+    let ins = `${name} x${d}, lab(x${s1})`;
+    return prepareNewState(
+      { name, d, s1, s2: 0, config, ready, table, ins },
+      { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd }
+    );
   };
 });
 
 let other = name => () => {
-  return ({ config, readypc, ready, table }) => {
-    let canDecodeAt = Math.max(readypc + 1);
-    let rdy = _.clone(ready);
-    let tbl = _.clone(table);
-    tbl.push({
-      ins: name,
-      pipe: pipe(
-        readypc,
-        canDecodeAt
-      ),
-      canDecodeAt
-    });
-    let nextState = {
-      readypc: canDecodeAt,
-      ready: rdy,
-      table: tbl,
-      config
-    };
-    return nextState;
+  return ({ config, ready, table }) => {
+    let n_fe = ready[de];
+    let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
+    let n_ee = Math.max(ready[me], n_de + 1);
+    let n_me = Math.max(ready[we], n_ee + 1);
+    let n_we = n_me + 1;
+    let n_pc = n_fe + 1;
+    let ins = `other ${name}`;
+    return prepareNewState(
+      { name, d: 0, s1: 0, s2: 0, config, ready, table, ins },
+      { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd: 0 }
+    );
   };
 };
 
@@ -183,92 +174,109 @@ let nop = other("nop");
 
 let anything = other("...");
 
-let branch = _.curry((name, s1, s2) => {
-  return ({ config, readypc, ready, table }) => {
-    let o = config.hasBranchOptimization && config.hasAluForwarding;
-    let canDecodeAt = Math.max(
-      o ? ready[s1] + 1 : ready[s1],
-      o ? ready[s2] + 1 : ready[s2],
-      readypc + 1
+let alu = _.curry((name, d, s1, s2) => {
+  return ({ config, ready, table }) => {
+    let isAluFw = config.hasAluForwarding;
+    let n_fe = ready[de];
+    let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
+    let n_ee = isAluFw
+      ? Math.max(ready[me], n_de + 1, ready[s1], ready[s2])
+      : Math.max(ready[me], n_de + 1, ready[s1] + 1, ready[s2] + 1);
+    let n_me = Math.max(ready[we], n_ee + 1);
+    let n_we = n_me + 1;
+    let n_pc = n_fe + 1;
+    let n_rdd = isAluFw ? n_me : n_we;
+    let ins = `${name} x${d}, x${s1}, x${s2}`;
+    return prepareNewState(
+      { name, d, s1, s2, config, ready, table, ins },
+      { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd }
     );
-    let rdy = _.clone(ready);
-    let tbl = _.clone(table);
-    tbl.push({
-      ins: `${name} x${s1}, x${s2}, lab`,
-      pipe: pipe(
-        readypc,
-        canDecodeAt
-      ),
-      canDecodeAt
-    });
-    readypc =
-      canDecodeAt +
-      (config.hasBranchPrediction ? 0 : config.hasBranchOptimization ? 1 : 3);
-    let nextState = {
-      readypc: readypc,
-      ready: rdy,
-      table: tbl,
-      config
-    };
-    return nextState;
   };
 });
 
-let alu = _.curry((name, d, s1, s2) => {
-  return ({ config, readypc, ready, table }) => {
-    let canDecodeAt = Math.max(ready[s1], ready[s2], readypc + 1);
-    let canEndFetchAt = readypc;
-    let rdy = _.clone(ready);
-    let tbl = _.clone(table);
-    tbl.push({
-      ins: `${name} x${d}, x${s1}, x${s2}`,
-      pipe: pipe(
-        readypc,
-        canDecodeAt
-      ),
-      canDecodeAt,
-      canEndFetchAt
-    });
-    rdy[d] = canDecodeAt + (config.hasAluForwarding ? 1 : 3);
-    let nextState = {
-      readypc: canDecodeAt,
-      ready: rdy,
-      table: tbl,
-      config
-    };
-    return nextState;
+let branch = _.curry((name, s1, s2) => {
+  return ({ config, ready, table }) => {
+    let isAluFw = config.hasAluForwarding;
+    let isBranchOpt = config.hasBranchOptimization;
+    let n_fe = ready[de];
+    let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
+    let n_ee;
+    if (!isBranchOpt) {
+      n_ee = isAluFw
+        ? Math.max(ready[me], n_de + 1, ready[s1], ready[s2])
+        : Math.max(ready[me], n_de + 1, ready[s1] + 1, ready[s2] + 1);
+    } else {
+      n_ee = Math.max(ready[me], n_de + 1, ready[s1] + 1, ready[s2] + 1); // regs must be read in the decode stage
+    }
+    let n_me = Math.max(ready[we], n_ee + 1);
+    let n_we = n_me + 1;
+    let n_pc = isBranchOpt ? n_ee : n_we;
+    let ins = `${name} x${s1}, x${s2}, lab`;
+    return prepareNewState(
+      { name, d: 0, s1, s2, config, ready, table, ins },
+      { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd: 0 }
+    );
   };
 });
+
+let prepareNewState = (
+  { name, d, s1, s2, config, ready, table, ins },
+  { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd }
+) => {
+  let rdy = _.clone(ready);
+  rdy[d] = n_rdd;
+  rdy[fe] = n_fe;
+  rdy[de] = n_de;
+  rdy[ee] = n_ee;
+  rdy[me] = n_me;
+  rdy[we] = n_we;
+  rdy[pc] = n_pc;
+  // x0 is always ready
+  rdy[0] = 0;
+  let tbl = _.clone(table);
+  tbl.push({
+    ins,
+    n_fe,
+    n_de,
+    n_ee,
+    n_me,
+    n_we,
+    src1: ready[s1],
+    src2: ready[s2],
+    dest: rdy[d],
+    n_pc,
+    s1,
+    s2,
+    d,
+    pipe: pipe({ n_fe, n_de, n_ee, n_me, n_we })
+  });
+  let nextState = {
+    ready: rdy,
+    table: tbl,
+    config
+  };
+  return nextState;
+};
+
+// pc ready
+const pc = 32;
+// stage entry time bookkeeping, e.g. ready[fe] = ready to enter fetch
+const fe = 33;
+const de = 34;
+const ee = 35;
+const me = 36;
+const we = 37;
 
 let simulate = config => {
+  let ready = _.range(0, 38, 0);
+  ready[fe] = -1;
+  ready[de] = 0;
+  ready[ee] = 1;
+  ready[me] = 2;
+  ready[we] = 3;
+  ready[pc] = 0;
   let initialState = {
-    ready: [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ], // registrers
-    readypc: 0,
+    ready,
     table: [],
     config
   };
@@ -366,7 +374,7 @@ let main = () => {
       }
     })
     .command("preamble", "Print latex preamble")
-    .action(args => {
+    .action(() => {
       $fs.readFile(`${__dirname}/preambles/pipe.tex`, "utf8").then(console.log);
     });
   prog.parse(process.argv);
