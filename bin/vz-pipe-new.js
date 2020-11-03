@@ -116,12 +116,11 @@ let pipeSimulatorTikz = (sim, options) => {
 
 let store = _.curry((name, s1, s2) => {
   return ({ config, ready, table }) => {
-    let isAluFw = config.hasAluForwarding;
-    let isMemFw = config.hasMemForwarding;
+    let { hasFw } = config;
     let n_fe = ready[de];
     let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
-    let rs1 = isMemFw ? ready[s1] : ready[s1] + 1;
-    let rs2 = isAluFw ? ready[s2] : ready[s2] + 1;
+    let rs1 = hasFw ? ready[s1] : ready[s1] + 1;
+    let rs2 = hasFw ? ready[s2] : ready[s2] + 1;
     let n_ee = Math.max(ready[me], n_de + 1, rs1, rs2);
     let n_me = Math.max(ready[we], n_ee + 1);
     let n_we = n_me + 1;
@@ -136,10 +135,10 @@ let store = _.curry((name, s1, s2) => {
 
 let load = _.curry((name, d, s1) => {
   return ({ config, ready, table }) => {
-    let isAluFw = config.hasAluForwarding;
+    let { hasFw } = config;
     let n_fe = ready[de];
     let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
-    let n_ee = isAluFw
+    let n_ee = hasFw
       ? Math.max(ready[me], n_de + 1, ready[s1])
       : Math.max(ready[me], n_de + 1, ready[s1] + 1);
     let n_me = Math.max(ready[we], n_ee + 1);
@@ -162,7 +161,7 @@ let other = name => () => {
     let n_me = Math.max(ready[we], n_ee + 1);
     let n_we = n_me + 1;
     let n_pc = n_fe + 1;
-    let ins = `other ${name}`;
+    let ins = `${name}`;
     return prepareNewState(
       { name, d: 0, s1: 0, s2: 0, config, ready, table, ins },
       { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd: 0 }
@@ -176,16 +175,16 @@ let anything = other("...");
 
 let alu = _.curry((name, d, s1, s2) => {
   return ({ config, ready, table }) => {
-    let isAluFw = config.hasAluForwarding;
+    let { hasFw } = config;
     let n_fe = ready[de];
     let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
-    let n_ee = isAluFw
+    let n_ee = hasFw
       ? Math.max(ready[me], n_de + 1, ready[s1], ready[s2])
       : Math.max(ready[me], n_de + 1, ready[s1] + 1, ready[s2] + 1);
     let n_me = Math.max(ready[we], n_ee + 1);
     let n_we = n_me + 1;
     let n_pc = n_fe + 1;
-    let n_rdd = isAluFw ? n_me : n_we;
+    let n_rdd = hasFw ? n_me : n_we;
     let ins = `${name} x${d}, x${s1}, x${s2}`;
     return prepareNewState(
       { name, d, s1, s2, config, ready, table, ins },
@@ -196,17 +195,18 @@ let alu = _.curry((name, d, s1, s2) => {
 
 let branch = _.curry((name, s1, s2) => {
   return ({ config, ready, table }) => {
-    let isAluFw = config.hasAluForwarding;
+    let { hasFw } = config;
     let isBranchOpt = config.hasBranchOptimization;
     let n_fe = ready[de];
     let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
     let n_ee;
     if (!isBranchOpt) {
-      n_ee = isAluFw
+      n_ee = hasFw
         ? Math.max(ready[me], n_de + 1, ready[s1], ready[s2])
         : Math.max(ready[me], n_de + 1, ready[s1] + 1, ready[s2] + 1);
     } else {
-      n_ee = Math.max(ready[me], n_de + 1, ready[s1] + 1, ready[s2] + 1); // regs must be read in the decode stage
+      n_ee = Math.max(ready[me], n_de + 1, ready[s1] + 1, ready[s2] + 1);
+      // regs must be read in the decode stage
     }
     let n_me = Math.max(ready[we], n_ee + 1);
     let n_we = n_me + 1;
@@ -303,8 +303,7 @@ let main = () => {
       `The instructions separated by commas e.g.: 'lw(2, 1),add(4, 2, 5)'`
     )
     .option("-s, --save <prefix>", "save with prefix or dump json")
-    .option("-a, --alufw", "Use ALU forwarding")
-    .option("-m, --memfw", "Use Mem forwarding")
+    .option("-f, --fw", "Use forwarding")
     .option("--branchpred", "Use branch prediction")
     .option("--branchopt", "Compute the branch sooner")
     .option("-b, --blank", "To fill up")
@@ -319,8 +318,7 @@ let main = () => {
     )
     .action((args, options) => {
       let sim = simulate({
-        hasAluForwarding: options.alufw,
-        hasMemForwarding: options.memfw,
+        hasFw: options.fw,
         hasBranchPrediction: options.branchpred,
         hasBranchOptimization: options.branchopt
       })(eval(`[${args.program}]`));
