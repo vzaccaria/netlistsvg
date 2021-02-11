@@ -218,6 +218,9 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
 
 let getMemSize = ({ membits, cacheways, blockbits, cachesizebits }) => {
   let blockindexbits = cachesizebits - blockbits - cacheways;
+  let tagbits = membits - blockindexbits - blockbits;
+  if (blockindexbits + blockbits + tagbits !== membits)
+    throw `inconsistency between data (${blockindexbits} + ${blockbits} + ${tagbits} != ${membits})`;
   return {
     tagbits: membits - blockindexbits - blockbits,
     blockbits,
@@ -225,6 +228,17 @@ let getMemSize = ({ membits, cacheways, blockbits, cachesizebits }) => {
     blockindexbits,
     numberOfBlocks: Math.pow(2, blockindexbits) * Math.pow(2, cacheways)
   };
+};
+
+let checkTag = (config, tag) => {
+  let { tagbits } = getMemSize(config);
+  if (_.size(tag) !== tagbits) throw `tag ${tag} should have ${tagbits} bits`;
+};
+
+let checkIndex = (config, ix) => {
+  let { blockindexbits } = getMemSize(config);
+  if (_.size(ix) !== blockindexbits)
+    throw `index ${ix} should have ${blockindexbits} bits`;
 };
 
 // ◀───wkbnumber───▶
@@ -235,6 +249,8 @@ let getMemSize = ({ membits, cacheways, blockbits, cachesizebits }) => {
 let daddr = (config, numeric) => {
   let bits = _.join(_.filter(numeric, c => c !== " "), "");
   let { membits, blockindexbits, tagbits } = getMemSize(config);
+  if (_.size(bits) > membits)
+    throw `Address bits of ${bits} must at least ${membits}`;
   _.padStart(bits, membits, "0");
   let tag = bits.slice(0, tagbits);
   let bindex = bits.slice(tagbits, tagbits + blockindexbits);
@@ -334,8 +350,30 @@ let nextCache = _.curry((config, { cache, actions }, access, stepnum) => {
   return { cache, actions };
 });
 
+let randomSeq = size => _.join(_.map(_.range(size - 1), () => _.random(1)), "");
+
+let replaceAddress = _.curry((config, address) => {
+  let { blockbits } = getMemSize(config);
+  let bb = randomSeq(blockbits);
+  /* notation will be '0.1' -> t0t1+randomblockbits */
+  let [t0, i0, t1, i1] = config.simplesim.split(",");
+  checkTag(config, t0);
+  checkTag(config, t1);
+  checkIndex(config, i0);
+  checkIndex(config, i1);
+  let t = [t0, t1];
+  let i = [i0, i1];
+  let [tg, ix] = address.split(".");
+  tg = parseInt(tg);
+  ix = parseInt(ix);
+  return t[tg] + i[ix] + bb;
+});
+
 let simulate = (config, emptyc, accesslist) => {
   accesslist = accesslist.split(",");
+  if (!_.isUndefined(config.simplesim)) {
+    accesslist = _.map(accesslist, replaceAddress(config));
+  }
   return {
     accesslist,
     results: _.reduce(accesslist, nextCache(config), {
@@ -370,6 +408,11 @@ let main = () => {
     .option("-b, --blockbits <num>", "log2 of block size ", prog.INT, 9)
     .option("-d, --dont-simulate", "dont do any simulation")
     .option("-j, --json", "produce trace in JSON format")
+    .option("--simplesim <varlist>", "varlist is t0,i0,t1,i1 list of values")
+    .option("--t0 <tag>", "define tag t0 for easier simulations")
+    .option("--t1 <tag>", "define tag t1 for easier simulations")
+    .option("--i0 <index>", "define tag i0 for easier simulations")
+    .option("--i1 <index>", "define tag i1 for easier simulations")
     .option(
       "-s, --cachesizebits <num>",
       "log2 of cache size (bits)",
