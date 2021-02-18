@@ -241,6 +241,12 @@ let checkIndex = (config, ix) => {
     throw `index ${ix} should have ${blockindexbits} bits`;
 };
 
+let checkBlockBits = (config, ix) => {
+  let { blockbits } = getMemSize(config);
+  if (_.size(ix) !== blockbits)
+    throw `block offset ${ix} should be ${blockbits} bits`;
+};
+
 // ◀───wkbnumber───▶
 // ┌───────┬────────┬────────────────┐
 // │  tag  │ bindex │    boffset     │
@@ -249,8 +255,8 @@ let checkIndex = (config, ix) => {
 let daddr = (config, numeric) => {
   let bits = _.join(_.filter(numeric, c => c !== " "), "");
   let { membits, blockindexbits, tagbits } = getMemSize(config);
-  if (_.size(bits) > membits)
-    throw `Address bits of ${bits} must at least ${membits}`;
+  if (_.size(bits) !== membits)
+    throw `Address bits of ${bits} must be exactly ${membits}`;
   _.padStart(bits, membits, "0");
   let tag = bits.slice(0, tagbits);
   let bindex = bits.slice(tagbits, tagbits + blockindexbits);
@@ -350,7 +356,7 @@ let nextCache = _.curry((config, { cache, actions }, access, stepnum) => {
   return { cache, actions };
 });
 
-let randomSeq = size => _.join(_.map(_.range(size - 1), () => _.random(1)), "");
+let randomSeq = size => _.join(_.map(_.range(size), () => _.random(1)), "");
 
 let replaceAddress = _.curry((config, address) => {
   let { blockbits } = getMemSize(config);
@@ -361,6 +367,7 @@ let replaceAddress = _.curry((config, address) => {
   checkTag(config, t1);
   checkIndex(config, i0);
   checkIndex(config, i1);
+  checkBlockBits(config, bb);
   let t = [t0, t1];
   let i = [i0, i1];
   let [tg, ix] = address.split(".");
