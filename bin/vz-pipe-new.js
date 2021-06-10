@@ -30,10 +30,14 @@ ${c}
 \\end{tikzpicture}
 `;
 
-let asmCode = sim => {
+let asmCode = (sim, options) => {
+  let hwmny = !_.isUndefined(options.asmIns) ? options.asmIns : sim.length;
   return `
 \\begin{minted}{asm}
-${_.join(_.map(sim, i => i.ins), "\n")}
+${options.isLoop ? "loop:\n" : ""}${_.join(
+    _.map(_.slice(sim, 0, hwmny), i => i.ins),
+    "\n"
+  )}
 \\end{minted}`;
 };
 
@@ -211,7 +215,7 @@ let branch = _.curry((name, s1, s2) => {
     let n_me = Math.max(ready[we], n_ee + 1);
     let n_we = n_me + 1;
     let n_pc = isBranchOpt ? n_ee : n_we;
-    let ins = `${name} x${s1}, x${s2}, lab`;
+    let ins = `${name} x${s1}, x${s2}, loop`;
     return prepareNewState(
       { name, d: 0, s1, s2, config, ready, table, ins },
       { n_fe, n_de, n_ee, n_me, n_we, n_pc, n_rdd: 0 }
@@ -309,6 +313,12 @@ let main = () => {
     .option("-b, --blank", "To fill up")
     .option("-o, --no-instructions", "Don't show instructions")
     .option("-n, --max-cycles <integer>", "Grid size")
+    .option("--is-loop", "Use a 'loop' label for both code start and branch")
+    .option(
+      "--asm-ins <integer>",
+      "How many asm instructions to print (useful for initial parts of loops)",
+      prog.INT
+    )
     .option("-c, --conflicts <string>", "Conflicts strings (comma separated)")
     .option(
       "--hrowsep <double>",

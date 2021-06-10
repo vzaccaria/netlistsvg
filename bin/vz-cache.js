@@ -57,7 +57,9 @@ let produceCacheData = (opts, blank) => {
 \\setlength\\itemsep{-.5em}
 \\item dimensione di indirizzo (bits): ${_g(membits)}
 \\item dimensione byte offset nel blocco (bits): ${_g(blockbits)}
-\\item dimensione indice del blocco (bits): ${_g(blockindexbits)}
+\\item dimensione indice del blocco o insieme nella cache (bits): ${_g(
+    blockindexbits
+  )}
 \\item dimensione del tag (bits): ${_g(tagbits)}
 \\end{itemize}
 `;

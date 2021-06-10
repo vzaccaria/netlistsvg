@@ -176,7 +176,9 @@ let gpstate = data => {
       cells.push({
         type: "savedreg",
         name: register.substr(1),
-        cause: `reclamato per ${name}`,
+        cause: `reclamato per ${
+          name === "tmp" ? "valore intermedio espressione" : name
+        }`,
         size: 8
       });
     } else {
@@ -334,10 +336,8 @@ ${fname}:
 ${enlargeStack}
 ${saveregs}
 ${fpSet}
-
 # function body
 ${data.functionData.bodycontent}
-
 # function epilogue
 ${fname + "EPI"}:
 ${restoreregs}
