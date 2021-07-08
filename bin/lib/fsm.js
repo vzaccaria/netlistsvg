@@ -229,11 +229,12 @@ let tail = `
 
 let tableRow = row => `${_.join(row, " & ")} \\\\`;
 
-let latexTruth = (table, headings) => {
+let latexTruth = (table, headings, { partial }) => {
   return tableWrap(`
         ${tableHead(headings)}
         ${_.join(_.map(table, tableRow), "\n")}
         ${tail}
+        ${partial ? "\n\n \\ldots etc" : ""}
         `);
 };
 
@@ -340,9 +341,9 @@ let transSR = (fsm, s, i) => {
   );
 };
 
-let latexTable = (data, heads, name) => {
+let latexTable = (data, heads, name, opts) => {
   return latexArtifact(
-    latexTruth(data, heads),
+    latexTruth(data, heads, opts),
     name,
     "standalone",
     "pdflatex",
@@ -378,8 +379,8 @@ let genLatexTables = (fsm, name, ins, outs, f) => {
   let inssize = _.reduce(ins, (a, { size }) => a + size, 0);
   let outsize = _.reduce(outs, (a, { size }) => a + size, 0);
   let minsize = outs[0].size;
-  let genTable = m =>
-    _.map(inspace, vs => {
+  let genTable = (space, m) =>
+    _.map(space, vs => {
       let pars = [];
       _.forEach(ins, ({ size }) => {
         pars.push(_.take(vs, size));
@@ -403,8 +404,9 @@ let genLatexTables = (fsm, name, ins, outs, f) => {
   headings = _.flatten(headings);
   invars = _.flatten(invars);
   outvars = _.flatten(outvars);
-  let dataTable = genTable(f);
-  let blankTable = genTable(() => _rep("", outsize));
+  let dataTable = genTable(inspace, f);
+  let blankTable = genTable(inspace, () => _rep("", outsize));
+  let shortBlankTable = genTable(_.take(inspace, 4), () => _rep("", outsize));
 
   let column = i => {
     return _.map(inspace, (v, row) => {
@@ -419,8 +421,11 @@ let genLatexTables = (fsm, name, ins, outs, f) => {
     })
   );
   let result = _.flatten([
-    latexTable(dataTable, headings, name),
-    latexTable(blankTable, headings, `${name} blank`),
+    latexTable(dataTable, headings, name, { partial: false }),
+    latexTable(blankTable, headings, `${name} blank`, { partial: false }),
+    latexTable(shortBlankTable, headings, `${name} short blank`, {
+      partial: true
+    }),
     expressionsAndKarnaugh
   ]);
   return result;
