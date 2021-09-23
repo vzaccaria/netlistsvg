@@ -332,6 +332,18 @@ let main = () => {
         hasBranchPrediction: options.branchpred,
         hasBranchOptimization: options.branchopt
       })(eval(`[${args.program}]`));
+      let desc = (() => {
+        switch ("" + options.branchopt + ";" + options.fw) {
+          case "true;true":
+            return "con forwarding e con ottimizzazione del branch";
+          case "undefined;true":
+            return "con forwarding ma senza ottimizzazione del branch";
+          case "true;undefined":
+            return "senza forwarding ma con ottimizzazione del branch";
+          case "undefined;undefined":
+            return "senza forwarding e senza ottimizzazione del branch";
+        }
+      })();
       let ps = pipeSimulatorTikz(sim.table, options);
       let hz = hazardsToTikz(sim.table, options);
       let results = {
@@ -372,6 +384,13 @@ let main = () => {
             "standalone",
             "pdflatex",
             "--usepackage minted -r varwidth"
+          ),
+          latexArtifact(
+            desc,
+            "description",
+            "standalone",
+            "pdflatex",
+            "-r varwidth"
           )
         ]
       };
