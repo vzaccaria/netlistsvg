@@ -9,40 +9,38 @@ const { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 const prog = require("caporal");
 
 let schedule = {
+  timer: 0.1,
+  runfor: 10,
   class: {
     type: "CFS",
-    latency: 8,
-    mingran: 0
+    latency: 6.0,
+    mingran: 0.75,
+    wgup: 1
   },
 
   tasks: [
-    {
-      index: 2,
-      name: "$\\tau_2$",
-      state: "NEW",
-      lambda: 4,
-      start: 0,
-      events: [1, 2, 1, 1, 1]
-    },
-    {
-      index: 1,
-      name: "$\\tau_1$",
-      state: "NEW",
-      lambda: 4,
-      start: 0,
-      events: [1, 5, 2, 3, 2]
-    },
+    // {
+    //   index: 2,
+    //   name: "$\\tau_2$",
+    //   lambda: 1,
+    //   start: 0,
+    //   events: [5]
+    // },
+    // {
+    //   index: 1,
+    //   name: "$\\tau_1$",
+    //   lambda: 1,
+    //   start: 0,
+    //   events: [5]
+    // },
     {
       index: 0,
       name: "$\\tau_0$",
-      state: "NEW",
-      lambda: 3,
-      start: 0,
-      events: [2, 1, 10, 4, 2]
+      lambda: 1,
+      start: 1,
+      events: [2, 2, 2, 2, 2]
     }
   ],
-  timer: 0.01,
-  runfor: 20,
   graphics: {
     vspace: 1,
     hspace: 1,
@@ -50,189 +48,110 @@ let schedule = {
   }
 };
 
-let initialState = (options, schedule) => {
-  return {
-    timer: schedule.timer,
-    time: -schedule.timer,
+let eventLoop = (options, schedule) => {
+  let state = {
     schedule: schedule,
-    history: []
-  };
-};
-
-let mapred = (list, pred, fn) => {
-  return _.map(list, l => {
-    if (pred(l)) {
-      return fn(l);
-    } else return l;
-  });
-};
-
-let redred = (list, pred, fn, init) => {
-  return _.reduce(
-    list,
-    (a, l) => {
-      if (pred(l)) {
-        return fn(a, l);
-      } else return a;
-    },
-    init
-  );
-};
-
-let next = (i, oldstate) => {
-  let newstate = _.clone(oldstate);
-  newstate.time += newstate.timer;
-  let now = newstate.time;
-  let updateNewState = (p, a) => {
-    newstate.schedule.tasks = mapred(newstate.schedule.tasks, p, a);
+    curr: undefined,
+    rbt: [],
+    vmin: 0
   };
 
-  let minVRuntime = () => {
-    return redred(
-      newstate.schedule.tasks,
-      t => t.state == "RUNNABLE",
-      (a, l) => Math.min(a, l.vruntime),
-      123456789
-    );
+  let resched = msg => {
+    state.rbt = _.sortBy(state.rbt, "vrt");
+    console.log(msg, state.rbt);
+    if (state.rbt.length > 0) {
+      state.curr = state.rbt[0];
+      state.curr.prev = state.curr.sum;
+    } else {
+      state.curr = undefined;
+    }
   };
 
-  let getCurrentLoad = () =>
-    redred(
-      newstate.schedule.tasks,
-      t => t.state == "RUNNING" || t.state == "RUNNABLE",
-      (a, l) => a + l.lambda,
-      0
-    );
+  let sumlambda = () => _.reduce(state.rbt, (a, t) => a + t.lambda, 0);
 
-  let countPred = p => redred(newstate.schedule.tasks, p, a => a + 1, 0);
-  let countRunnable = () => countPred(t => t.state === "RUNNABLE");
+  let schedslice = t => schedule.class.latency * (t.lambda / sumlambda());
 
-  // let existsRunning = () =>
-  //   redred(
-  //     newstate.schedule.tasks,
-  //     t => t.state == "RUNNING",
-  //     (a, l) => a + 1,
-  //     0
-  //   );
-
-  let idealSlice = t => {
-    return (t.lambda * newstate.schedule.class.latency) / getCurrentLoad();
+  let _start_task = t => {
+    t.sum = 0;
+    // on clone, dont use a lower vrt that would interrupt the current process
+    state.rbt.push(t);
+    t.vrt = state.vmin + schedslice(t) / t.lambda;
+    if (
+      state.curr === undefined ||
+      t.vrt + schedule.class.wgup * (t.lambda / sumlambda()) < state.curr.vrt
+    ) {
+      resched(`starting task ${t.name} @${timer.walltime}`);
+    }
   };
 
-  let updateRunning = () =>
-    updateNewState(
-      t => t.state == "RUNNING",
-      t => {
-        // simplified assuming that update_curr is invoked only at each timer_interrupt
-        let delta_exec = newstate.timer;
-        t.vruntime = delta_exec / getCurrentLoad();
-        t.exruntime += delta_exec;
-        t.sum_exruntime += delta_exec;
+  let _wakeup = tw => {
+    console.log(`Waking up at @${timer.walltime}`);
+    tw.vrt = Math.max(tw.vrt, state.vmin - schedule.class.latency / 2);
+    state.rbt.push(tw);
+    state.rbt = _.sortBy(state.rbt, "vrt");
+    if (
+      state.curr === undefined ||
+      tw.vrt + schedule.class.wgup * tw.lambda < state.curr.vrt
+    ) {
+      resched(`waking up task ${tw.name} @${timer.walltime}`);
+    }
+  };
 
-        if (t.exruntime >= t.events[0]) {
-          t.events = _.tail(t.events);
-          if (t.events[0] !== undefined) {
-            t.state = "BLOCKED";
-            t.block_start = now;
-            t.block_end = now + t.events[0];
-            t.events = _.tail(t.events);
-            newstate.history.push({
-              task: t,
-              event: "RAN",
-              tstart: t.run_start,
-              tend: now
-            });
-          } else {
-            t.state = "EXITED";
-            newstate.history.push({
-              task: t,
-              event: "RAN",
-              tstart: t.run_start,
-              tend: now
-            });
-            newstate.history.push({
-              task: t,
-              event: "EXIT",
-              ts: now
-            });
-          }
+  let timer = {
+    walltime: 0,
+    events: []
+  };
+
+  let updateTimer = () => {
+    timer.walltime += schedule.timer;
+    console.log(timer);
+    if (timer.walltime > schedule.runfor) {
+      process.exit();
+    }
+    let firable = _.remove(timer.events, e => e.deadline <= timer.walltime);
+    _.map(firable, e => {
+      e.func(e.arg);
+    });
+  };
+
+  let _setTimeout = (func, ms, arg) => {
+    timer.events.push({ deadline: ms + timer.walltime, func, arg });
+  };
+
+  let _task_tick = () => {
+    _setTimeout(_task_tick, schedule.timer);
+    if (state.curr !== undefined) {
+      let delta = schedule.timer;
+      state.curr.sum += delta;
+      state.curr.vrt += delta / state.curr.lambda;
+      state.vmin = _.minBy(state.rbt, "vrt").vrt;
+      state.curr.events[0] -= delta;
+      if (state.curr.events[0] <= 0) {
+        // must sleep
+        let ts = state.curr;
+        state.rbt = _.filter(state.rbt, o => !(o.index == ts.index));
+        let blocktime = ts.events[1];
+        if (!_.isUndefined(blocktime)) {
+          console.log(`Blocking for ${blocktime}`);
+          _setTimeout(_wakeup, blocktime, ts);
+          ts.events = _.tail(_.tail(ts.events));
         }
-        if (
-          t.exruntime > idealSlice(t) ||
-          (countRunnable() > 0 && t.vruntime > minVRuntime())
-        ) {
-          t.state = "RUNNABLE";
-          newstate.history.push({
-            task: t,
-            event: "RAN",
-            tstart: t.run_start,
-            tend: now
-          });
-        }
-        return t;
-      }
-    );
-
-  let updateRunnable = () =>
-    updateNewState(
-      t => t.start <= now && t.state == "NEW",
-      t => {
-        t.state = "RUNNABLE";
-        t.vruntime = 0;
-        t.sum_exruntime = 0;
-        newstate.history.push({
-          task: t,
-          event: "STARTED",
-          ts: now
-        });
-        return t;
-      }
-    );
-
-  let updateBlocked = () =>
-    updateNewState(
-      t => t.block_end <= newstate.time && t.state == "BLOCKED",
-      t => {
-        t.state = "RUNNABLE";
-        newstate.history.push({
-          task: t,
-          event: "BLOCKED",
-          tstart: t.block_start,
-          tend: t.block_end
-        });
-        return t;
-      }
-    );
-
-  let selectRunning = () => {
-    let t = _.find(newstate.schedule.tasks, t => t.vruntime == minVRuntime());
-    if (t !== undefined) {
-      if (t.state !== "RUNNING") {
-        t.state = "RUNNING";
-        t.run_start = now;
-        t.exruntime = 0;
+        resched(`putting task to sleep ${ts.name} @${timer.walltime}`);
+      } else {
+        if (state.curr.prev - state.curr.sum == schedslice(state.curr))
+          resched(
+            `task ${state.curr.name} finished quantum @${timer.walltime}`
+          );
       }
     }
   };
 
-  // Main algorithm
-  updateRunnable();
-  updateBlocked();
-  updateRunning();
-  selectRunning();
-  newstate.currentLoad = getCurrentLoad();
-  newstate.minVRuntime = minVRuntime();
-  return newstate;
-};
-
-let run = (options, schedule) => {
-  let steps = schedule.runfor / schedule.timer;
-  let state = initialState(options, schedule);
-  _.forEach(_.range(0, steps), i => {
-    state = next(i, state);
-    // console.log(JSON.stringify(state, 0, 4));
+  _.map(schedule.tasks, t => {
+    _setTimeout(_start_task, t.start, t);
   });
-  return state;
+  _setTimeout(_task_tick, schedule.timer);
+
+  setInterval(updateTimer, 100);
 };
 
 let wrapper = c => `
@@ -300,8 +219,9 @@ let main = () => {
     )
     .option("-w, --draw", "produce only latex code for drawing")
     .action((args, options) => {
-      let result = run(options, schedule);
-      saveIt(options, result);
+      // let result = run(options, schedule);
+      eventLoop(options, schedule);
+      //saveIt(options, result);
     });
   prog.parse(process.argv);
 };
