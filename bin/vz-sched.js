@@ -3,7 +3,7 @@
 
 const name = "vz-sched";
 const prog = require("caporal");
-const { eventLoop, schedule0 } = require("./lib/" + name + "/lib");
+const { eventLoop, schedule0, schedule1 } = require("./lib/" + name + "/lib");
 
 let main = () => {
   prog
