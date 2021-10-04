@@ -7,6 +7,6 @@ it("Schedules 3 tasks with no waits - same weights", () => {
 });
 
 it("Schedules 3 tasks with no waits - different weights", () => {
-  const res = eventLoop({}, schedule0);
+  const res = eventLoop({}, schedule1);
   expect(res).toMatchSnapshot();
 });

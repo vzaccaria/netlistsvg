@@ -88,7 +88,7 @@ let schedule0 = {
 
 let schedule2 = {
   timer: 0.5,
-  runfor: 8,
+  runfor: 12,
   class: {
     type: "CFS",
     latency: 6.0,
@@ -102,7 +102,7 @@ let schedule2 = {
       name: "$\\tau_1$",
       lambda: 1,
       start: 0,
-      events: [1, 5, 2],
+      events: [1, 5, 8],
       // override vrt
       vrt: 100.0
     },
@@ -111,7 +111,7 @@ let schedule2 = {
       name: "$\\tau_2$",
       lambda: 1,
       start: 0,
-      events: [8],
+      events: [14],
       vrt: 100.5
     },
     {
@@ -119,7 +119,7 @@ let schedule2 = {
       name: "$\\tau_3$",
       lambda: 1,
       start: 0,
-      events: [3, 1],
+      events: [3, 1, 10],
       vrt: 101.0
     }
   ],

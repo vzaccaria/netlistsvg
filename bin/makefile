@@ -4,6 +4,9 @@ test:
 testartifacts:
 	./testartifacts.js
 
+jest:
+	jest lib/vz-sched/lib.test.js 
+
 clean:
 	rm -rf tmp*
 
