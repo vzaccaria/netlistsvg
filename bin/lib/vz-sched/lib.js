@@ -81,9 +81,6 @@ let eventLoop = (options, schedule) => {
   let updateTimer = () => {
     timer.walltime = r2(timer.walltime + schedule.timer);
     // console.log(timer);
-    if (timer.walltime > schedule.runfor) {
-      process.exit();
-    }
 
     /* Prioritize tasktick */
 
@@ -172,7 +169,7 @@ ${c}
 
 let parseHistoryEvents = (history, schedule) => {
   // assume we always start from 0
-  return _.flatten(
+  return _.flattenDeep(
     _.map(history, ({ rbt, time }) => {
       let v = {
         event: "RAN",
@@ -180,7 +177,21 @@ let parseHistoryEvents = (history, schedule) => {
         tend: time + schedule.timer,
         index: rbt[0].index
       };
-      return v;
+      let btsks = _.filter(
+        schedule.tasks,
+        ({ index }) => !_.includes(_.map(rbt, "index"), index)
+      );
+      return [
+        v,
+        _.map(btsks, t => {
+          return {
+            event: "BLOCKED",
+            tstart: time,
+            tend: time + schedule.timer,
+            index: t.index
+          };
+        })
+      ];
     })
   );
 };
@@ -193,16 +204,16 @@ let drawHistory = (history, schedule) => {
   let drawRan = r => {
     return `\\draw[draw=black] (${r.tstart * hs}, ${r.index *
       vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) 
-       node[pos=.5] {${r2(r.tend - r.tstart)}};`;
+       node[pos=.5] {};`;
   };
   let drawBlocked = r => {
     return `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.index *
       vs}) rectangle ++(${(r.tend - r.tstart) *
-      hs},${hh}) node[pos=.5, text=white] {${r2(r.tend - r.tstart)};`;
+      hs},${hh}) node[pos=.5, text=white] {};`;
   };
   let diag = _.map(parseHistoryEvents(history, schedule), x => {
     if (x.event === "RAN") return drawRan(x);
-    // if (x.event === "BLOCKED") return drawBlocked(state, x);
+    if (x.event === "BLOCKED") return drawBlocked(x);
   });
   let tnames = _.map(
     schedule.tasks,
