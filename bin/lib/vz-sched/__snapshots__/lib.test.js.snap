@@ -1,13 +1,1063 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Schedules 3 tasks with 2 waits - same weights 1`] = `
+Array [
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 0,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 0.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 1,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 1.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 2,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 2.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 3,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 3.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 4,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 4.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 5.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 6,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 6.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 7,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 7.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 8,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 8.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 9,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+    ],
+    "time": 9.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 10,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+    ],
+    "time": 10.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+    ],
+    "time": 11,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+    ],
+    "time": 11.5,
+  },
+  Object {
+    "rbt": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 1,
+        "lambda": 1,
+        "name": "$\\\\tau_2$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 4,
+        "vrt": 104.5,
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+        "vrtlwk": "104.33 < 104",
+      },
+      Object {
+        "R": "",
+        "events": Array [
+          4,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 3,
+        "q": 2,
+        "start": 0,
+        "sum": 5,
+        "vrt": 105,
+        "vrtlwk": "101.33 < 103",
+      },
+    ],
+    "time": 12,
+  },
+]
+`;
+
 exports[`Schedules 3 tasks with no waits - different weights 1`] = `
 Array [
   Object {
-    "0": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -21,7 +1071,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -47,13 +1097,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 0,
   },
   Object {
-    "0.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -67,7 +1118,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -93,13 +1144,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 0.5,
   },
   Object {
-    "1": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -113,7 +1165,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -139,13 +1191,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 1,
   },
   Object {
-    "1.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -159,7 +1212,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -185,13 +1238,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 1.5,
   },
   Object {
-    "2": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -219,7 +1273,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -231,13 +1285,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 2,
   },
   Object {
-    "2.5": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -265,7 +1320,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -277,13 +1332,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 2.5,
   },
   Object {
-    "3": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -311,7 +1367,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -323,13 +1379,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 3,
   },
   Object {
-    "3.5": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -357,7 +1414,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -369,13 +1426,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 3.5,
   },
   Object {
-    "4": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -403,7 +1461,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -415,13 +1473,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 4,
   },
   Object {
-    "4.5": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -449,7 +1508,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -461,9 +1520,10 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 4.5,
   },
   Object {
-    "5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
@@ -481,7 +1541,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -495,7 +1555,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -507,9 +1567,10 @@ Array [
         "vrt": 102.48,
       },
     ],
+    "time": 5,
   },
   Object {
-    "5.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
@@ -527,7 +1588,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -541,7 +1602,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -553,13 +1614,14 @@ Array [
         "vrt": 102.48,
       },
     ],
+    "time": 5.5,
   },
   Object {
-    "6": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -573,7 +1635,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -599,13 +1661,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 6,
   },
   Object {
-    "6.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -619,7 +1682,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -645,13 +1708,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 6.5,
   },
   Object {
-    "7": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -665,7 +1729,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -691,13 +1755,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 7,
   },
   Object {
-    "7.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -711,7 +1776,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -737,13 +1802,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 7.5,
   },
   Object {
-    "8": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          4.5,
+          5,
         ],
         "index": 1,
         "lambda": 1.5,
@@ -771,7 +1837,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -783,6 +1849,7 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 8,
   },
 ]
 `;
@@ -790,11 +1857,11 @@ Array [
 exports[`Schedules 3 tasks with no waits - same weights 1`] = `
 Array [
   Object {
-    "0": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -808,7 +1875,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -834,13 +1901,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 0,
   },
   Object {
-    "0.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -854,7 +1922,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -880,13 +1948,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 0.5,
   },
   Object {
-    "1": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -900,7 +1969,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -926,13 +1995,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 1,
   },
   Object {
-    "1.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -946,7 +2016,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -972,13 +2042,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 1.5,
   },
   Object {
-    "2": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1006,7 +2077,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1018,13 +2089,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 2,
   },
   Object {
-    "2.5": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1052,7 +2124,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1064,13 +2136,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 2.5,
   },
   Object {
-    "3": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1098,7 +2171,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1110,13 +2183,14 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 3,
   },
   Object {
-    "3.5": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1144,7 +2218,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1156,9 +2230,10 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 3.5,
   },
   Object {
-    "4": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
@@ -1176,7 +2251,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1190,7 +2265,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1202,9 +2277,10 @@ Array [
         "vrt": 102.5,
       },
     ],
+    "time": 4,
   },
   Object {
-    "4.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
@@ -1222,7 +2298,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1236,7 +2312,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1248,9 +2324,10 @@ Array [
         "vrt": 102.5,
       },
     ],
+    "time": 4.5,
   },
   Object {
-    "5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
@@ -1268,7 +2345,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1282,7 +2359,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1294,9 +2371,10 @@ Array [
         "vrt": 102.5,
       },
     ],
+    "time": 5,
   },
   Object {
-    "5.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
@@ -1314,7 +2392,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1328,7 +2406,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1340,13 +2418,14 @@ Array [
         "vrt": 102.5,
       },
     ],
+    "time": 5.5,
   },
   Object {
-    "6": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1360,7 +2439,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1386,13 +2465,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 6,
   },
   Object {
-    "6.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1406,7 +2486,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1432,13 +2512,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 6.5,
   },
   Object {
-    "7": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1452,7 +2533,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1478,13 +2559,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 7,
   },
   Object {
-    "7.5": Array [
+    "rbt": Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1498,7 +2580,7 @@ Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1524,13 +2606,14 @@ Array [
         "vrt": 103,
       },
     ],
+    "time": 7.5,
   },
   Object {
-    "8": Array [
+    "rbt": Array [
       Object {
         "R": "X",
         "events": Array [
-          5.5,
+          6,
         ],
         "index": 1,
         "lambda": 1,
@@ -1558,7 +2641,7 @@ Array [
       Object {
         "R": "",
         "events": Array [
-          4.5,
+          4,
         ],
         "index": 0,
         "lambda": 1,
@@ -1570,6 +2653,7 @@ Array [
         "vrt": 104,
       },
     ],
+    "time": 8,
   },
 ]
 `;

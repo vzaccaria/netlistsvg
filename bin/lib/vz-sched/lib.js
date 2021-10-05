@@ -58,19 +58,14 @@ let eventLoop = (options, schedule) => {
   };
 
   let _wakeup = tw => {
-    console.log(`Waking up at @${timer.walltime}`);
+    console.log(`Call to wake up ${tw.name} at @${timer.walltime}`);
     tw.vrt = Math.max(tw.vrt, state.vmin - schedule.class.latency / 2);
-    console.log(Table.print(state.rbt));
     addToRbt(tw);
-    console.log(Table.print(state.rbt));
-    if (
-      state.curr === undefined ||
-      tw.vrt + schedule.class.wgup * tw.lambda < state.curr.vrt
-    ) {
-      if (!_.isUndefined(state.curr)) {
-        let v = tw.vrt + schedule.class.wgup * tw.lambda;
-        tw.vrtlwk = `${v} < ${state.curr.vrt}`;
-      }
+    let v = r2(tw.vrt + schedule.class.wgup * (tw.lambda / sumlambda()));
+    if (!_.isUndefined(state.curr)) {
+      tw.vrtlwk = `${v} < ${state.curr.vrt}`;
+    }
+    if (state.curr === undefined || v < state.curr.vrt) {
       removeFromRbt(state.curr);
       addToRbt(state.curr);
       resched(`Waking up task ${tw.name} @${timer.walltime}`);
@@ -79,7 +74,8 @@ let eventLoop = (options, schedule) => {
 
   let timer = {
     walltime: -schedule.timer,
-    events: []
+    events: [],
+    show: [0, 1, 4, 6, 8, 9, 10, 11]
   };
 
   let updateTimer = () => {
@@ -113,11 +109,11 @@ let eventLoop = (options, schedule) => {
       }
       return t;
     });
-    console.log(`at time @${timer.walltime}`);
-    console.log(Table.print(state.rbt));
-    let d = {};
-    d[`${timer.walltime}`] = _.clone(state.rbt);
-    return d;
+    if (_.includes(timer.show, timer.walltime)) {
+      console.log(`at time @${timer.walltime}`);
+      console.log(Table.print(state.rbt));
+    }
+    return { rbt: _.clone(state.rbt), time: timer.walltime };
   };
 
   let _setTimeout = (func, ms, arg, type) => {
@@ -133,6 +129,7 @@ let eventLoop = (options, schedule) => {
         state.curr.sum = r2(state.curr.sum + delta);
         state.curr.vrt = r2(state.curr.vrt + delta / state.curr.lambda);
         state.vmin = _.minBy(state.rbt, "vrt").vrt;
+        state.curr.events[0] = r2(state.curr.events[0] - delta);
         if (state.curr.sum - state.curr.prev == schedslice(state.curr)) {
           removeFromRbt(state.curr);
           addToRbt(state.curr);
@@ -140,7 +137,6 @@ let eventLoop = (options, schedule) => {
             `task ${state.curr.name} finished quantum @${timer.walltime}`
           );
         }
-        state.curr.events[0] = r2(state.curr.events[0] - delta);
       }
       if (state.curr.events[0] === 0) {
         // must sleep
@@ -174,10 +170,12 @@ ${c}
 \\end{tikzpicture}
 `;
 
-let drawHistory = state => {
-  let hs = state.schedule.graphics.hspace;
-  let vs = state.schedule.graphics.vspace;
-  let hh = state.schedule.graphics.barheight;
+let historyToState = (history, schedule) => {};
+
+let drawHistory = (history, schedule) => {
+  let hs = schedule.graphics.hspace;
+  let vs = schedule.graphics.vspace;
+  let hh = schedule.graphics.barheight;
   let drawRan = (state, r) => {
     return `\\draw[draw=black] (${r.tstart * hs}, ${r.task.index *
       vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) 
@@ -200,10 +198,10 @@ let drawHistory = state => {
   return wrapper(_.join(_.flatten([tnames, diag]), "\n"));
 };
 
-let saveIt = (options, state) => {
-  state.latex = [
+let saveIt = (options, history, schedule) => {
+  history.latex = [
     latexArtifact(
-      drawHistory(state),
+      drawHistory(history, schedule),
       "rt diagram",
       "standalone",
       "pdflatex",
@@ -211,10 +209,10 @@ let saveIt = (options, state) => {
     )
   ];
   if (!options.save) {
-    console.log(JSON.stringify(state, 0, 4));
+    console.log(JSON.stringify(history, 0, 4));
   } else {
-    saveArtifacts(state.latex, options.save);
+    saveArtifacts(history.latex, options.save);
   }
 };
 
-module.exports = { eventLoop };
+module.exports = { eventLoop, saveIt };

@@ -7,6 +7,9 @@ testartifacts:
 jest:
 	jest lib/vz-sched/lib.test.js 
 
+jestu:
+	jest lib/vz-sched/lib.test.js -u
+
 clean:
 	rm -rf tmp*
 
