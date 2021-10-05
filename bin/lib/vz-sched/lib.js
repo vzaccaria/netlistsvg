@@ -113,7 +113,7 @@ let eventLoop = (options, schedule) => {
       console.log(`at time @${timer.walltime}`);
       console.log(Table.print(state.rbt));
     }
-    return { rbt: _.clone(state.rbt), time: timer.walltime };
+    return { rbt: _.cloneDeep(state.rbt), time: timer.walltime };
   };
 
   let _setTimeout = (func, ms, arg, type) => {
@@ -170,28 +170,42 @@ ${c}
 \\end{tikzpicture}
 `;
 
-let historyToState = (history, schedule) => {};
+let parseHistoryEvents = (history, schedule) => {
+  // assume we always start from 0
+  return _.flatten(
+    _.map(history, ({ rbt, time }) => {
+      let v = {
+        event: "RAN",
+        tstart: time,
+        tend: time + schedule.timer,
+        index: rbt[0].index
+      };
+      return v;
+    })
+  );
+};
 
 let drawHistory = (history, schedule) => {
   let hs = schedule.graphics.hspace;
   let vs = schedule.graphics.vspace;
   let hh = schedule.graphics.barheight;
-  let drawRan = (state, r) => {
-    return `\\draw[draw=black] (${r.tstart * hs}, ${r.task.index *
+
+  let drawRan = r => {
+    return `\\draw[draw=black] (${r.tstart * hs}, ${r.index *
       vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) 
        node[pos=.5] {${r2(r.tend - r.tstart)}};`;
   };
-  let drawBlocked = (state, r) => {
-    return `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.task.index *
+  let drawBlocked = r => {
+    return `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.index *
       vs}) rectangle ++(${(r.tend - r.tstart) *
       hs},${hh}) node[pos=.5, text=white] {${r2(r.tend - r.tstart)};`;
   };
-  let diag = _.map(state.history, x => {
-    if (x.event === "RAN") return drawRan(state, x);
-    if (x.event === "BLOCKED") return drawBlocked(state, x);
+  let diag = _.map(parseHistoryEvents(history, schedule), x => {
+    if (x.event === "RAN") return drawRan(x);
+    // if (x.event === "BLOCKED") return drawBlocked(state, x);
   });
   let tnames = _.map(
-    state.schedule.tasks,
+    schedule.tasks,
     t => `\\node at(${hs * -1}, ${t.index * hs + 0.5 * hh}) {${t.name}};`
   );
 
