@@ -14,62 +14,8 @@ let eventLoop = (options, schedule) => {
     schedule: schedule,
     curr: undefined,
     rbt: [],
+    blocked: [],
     vmin: 0
-  };
-
-  let resched = msg => {
-    console.log(msg);
-    if (state.rbt.length > 0) {
-      state.curr = state.rbt[0];
-      state.curr.prev = state.curr.sum;
-      console.log(
-        `scheduled task ${state.curr.name} to run @${timer.walltime}`
-      );
-    } else {
-      state.curr = undefined;
-    }
-  };
-
-  let sumlambda = () => _.reduce(state.rbt, (a, t) => a + t.lambda, 0);
-
-  let schedslice = t => schedule.class.latency * (t.lambda / sumlambda());
-
-  let _start_task = t => {
-    t.sum = 0;
-    // on clone, dont use a lower vrt that would interrupt the current process
-    state.rbt.push(t);
-    if (_.isUndefined(t.vrt)) {
-      t.vrt = state.vmin + schedslice(t) / t.lambda;
-    }
-    if (
-      state.curr === undefined ||
-      t.vrt + schedule.class.wgup * (t.lambda / sumlambda()) < state.curr.vrt
-    ) {
-      resched(`starting task ${t.name} @${timer.walltime}`);
-    }
-  };
-
-  let removeFromRbt = task => {
-    state.rbt = _.filter(state.rbt, o => !(o.index == task.index));
-  };
-
-  let addToRbt = task => {
-    state.rbt.splice(_.sortedLastIndexBy(state.rbt, task, "vrt"), 0, task);
-  };
-
-  let _wakeup = tw => {
-    console.log(`Call to wake up ${tw.name} at @${timer.walltime}`);
-    tw.vrt = Math.max(tw.vrt, state.vmin - schedule.class.latency / 2);
-    addToRbt(tw);
-    let v = r2(tw.vrt + schedule.class.wgup * (tw.lambda / sumlambda()));
-    if (!_.isUndefined(state.curr)) {
-      tw.vrtlwk = `${v} < ${state.curr.vrt}`;
-    }
-    if (state.curr === undefined || v < state.curr.vrt) {
-      removeFromRbt(state.curr);
-      addToRbt(state.curr);
-      resched(`Waking up task ${tw.name} @${timer.walltime}`);
-    }
   };
 
   let timer = {
@@ -110,7 +56,75 @@ let eventLoop = (options, schedule) => {
       console.log(`at time @${timer.walltime}`);
       console.log(Table.print(state.rbt));
     }
-    return { rbt: _.cloneDeep(state.rbt), time: timer.walltime };
+    return {
+      rbt: _.cloneDeep(state.rbt),
+      blocked: _.cloneDeep(state.blocked),
+      time: timer.walltime
+    };
+  };
+
+  let resched = msg => {
+    console.log(msg);
+    if (state.rbt.length > 0) {
+      state.curr = state.rbt[0];
+      state.curr.prev = state.curr.sum;
+      console.log(
+        `scheduled task ${state.curr.name} to run @${timer.walltime}`
+      );
+    } else {
+      state.curr = undefined;
+    }
+  };
+
+  let sumlambda = () => _.reduce(state.rbt, (a, t) => a + t.lambda, 0);
+
+  let schedslice = t => schedule.class.latency * (t.lambda / sumlambda());
+
+  let _start_task = t => {
+    t.sum = 0;
+    // on clone, dont use a lower vrt that would interrupt the current process
+    state.rbt.push(t);
+    if (_.isUndefined(t.vrt)) {
+      t.vrt = state.vmin + schedslice(t) / t.lambda;
+    }
+    if (
+      state.curr === undefined ||
+      t.vrt + schedule.class.wgup * (t.lambda / sumlambda()) < state.curr.vrt
+    ) {
+      resched(`starting task ${t.name} @${timer.walltime}`);
+    }
+  };
+
+  let removeFromRbt = task => {
+    state.rbt = _.filter(state.rbt, o => !(o.index == task.index));
+  };
+
+  let addBlocked = task => {
+    state.blocked.splice(0, 0, task);
+  };
+
+  let removeBlocked = task => {
+    state.blocked = _.filter(state.blocked, o => !(o.index == task.index));
+  };
+
+  let addToRbt = task => {
+    state.rbt.splice(_.sortedLastIndexBy(state.rbt, task, "vrt"), 0, task);
+  };
+
+  let _wakeup = tw => {
+    console.log(`Call to wake up ${tw.name} at @${timer.walltime}`);
+    tw.vrt = Math.max(tw.vrt, state.vmin - schedule.class.latency / 2);
+    removeBlocked(tw);
+    addToRbt(tw);
+    let v = r2(tw.vrt + schedule.class.wgup * (tw.lambda / sumlambda()));
+    if (!_.isUndefined(state.curr)) {
+      tw.vrtlwk = `${v} < ${state.curr.vrt}`;
+    }
+    if (state.curr === undefined || v < state.curr.vrt) {
+      removeFromRbt(state.curr);
+      addToRbt(state.curr);
+      resched(`Waking up task ${tw.name} @${timer.walltime}`);
+    }
   };
 
   let _setTimeout = (func, ms, arg, type) => {
@@ -139,6 +153,7 @@ let eventLoop = (options, schedule) => {
         // must sleep
         let ts = state.curr;
         removeFromRbt(state.curr);
+        addBlocked(state.curr);
         let blocktime = ts.events[1];
         if (!_.isUndefined(blocktime)) {
           _setTimeout(_wakeup, blocktime, ts, "_wakeup");
@@ -171,19 +186,24 @@ let parseHistoryEvents = (history, schedule) => {
   // assume we always start from 0
   return _.flattenDeep(
     _.map(history, ({ rbt, time }) => {
-      let v = {
-        event: "RAN",
-        tstart: time,
-        tend: time + schedule.timer,
-        index: rbt[0].index
-      };
-      let btsks = _.filter(
+      let v;
+      if (rbt.length > 0) {
+        v = {
+          event: "RAN",
+          tstart: time,
+          tend: time + schedule.timer,
+          index: rbt[0].index,
+          vrt: rbt[0].vrt,
+          sum: rbt[0].sum
+        };
+      }
+      let blocked_tasks = _.filter(
         schedule.tasks,
         ({ index }) => !_.includes(_.map(rbt, "index"), index)
       );
       return [
         v,
-        _.map(btsks, t => {
+        _.map(blocked_tasks, t => {
           return {
             event: "BLOCKED",
             tstart: time,
@@ -196,29 +216,74 @@ let parseHistoryEvents = (history, schedule) => {
   );
 };
 
+let rewriteHistory = (history, schedule) => {
+  return _.flattenDeep([
+    _.map(schedule.tasks, t => {
+      let hst = _.filter(
+        history,
+        ht => ht.index === t.index && ht.event === "RAN"
+      );
+      for (let i = 0; i < hst.length - 1; i++) {
+        hst[i].vrt = hst[i + 1].vrt;
+        hst[i].sum = hst[i + 1].sum;
+      }
+      return hst;
+    }),
+    _.map(schedule.tasks, t => {
+      let hst = _.filter(
+        history,
+        ht => ht.index === t.index && ht.event === "BLOCKED"
+      );
+      for (let i = 0; i < hst.length - 1; i++) {
+        hst[i].vrt = hst[i + 1].vrt;
+        hst[i].sum = hst[i + 1].sum;
+      }
+      return hst;
+    })
+  ]);
+};
+
 let drawHistory = (history, schedule) => {
   let hs = schedule.graphics.hspace;
   let vs = schedule.graphics.vspace;
   let hh = schedule.graphics.barheight;
 
+  let printAt = (time, index, m) => {
+    return `\\node at(${hs * time}, ${index * hs + 0.5 * hh}) {\\tiny ${m}};`;
+  };
+
   let drawRan = r => {
-    return `\\draw[draw=black] (${r.tstart * hs}, ${r.index *
-      vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) 
-       node[pos=.5] {};`;
+    return [
+      `\\draw[draw=black] (${r.tstart * hs}, ${r.index *
+        vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) 
+       node[pos=.5] {}; `,
+      printAt(r.tend, r.index - 0.4, r.vrt),
+      printAt(r.tend, r.index + 0.4, r.sum)
+    ];
   };
   let drawBlocked = r => {
     return `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.index *
       vs}) rectangle ++(${(r.tend - r.tstart) *
       hs},${hh}) node[pos=.5, text=white] {};`;
   };
-  let diag = _.map(parseHistoryEvents(history, schedule), x => {
+  history = parseHistoryEvents(history, schedule);
+  console.log(history);
+  history = rewriteHistory(history, schedule);
+  let diag = _.map(history, x => {
     if (x.event === "RAN") return drawRan(x);
     if (x.event === "BLOCKED") return drawBlocked(x);
   });
-  let tnames = _.map(
-    schedule.tasks,
-    t => `\\node at(${hs * -1}, ${t.index * hs + 0.5 * hh}) {${t.name}};`
-  );
+  let tnames = _.flattenDeep([
+    _.map(
+      schedule.tasks,
+      t => `\\node at(${hs * -1}, ${t.index * hs + 0.5 * hh}) {${t.name}};`
+    ),
+    _.map(
+      schedule.tasks,
+      t =>
+        `\\node at(${hs * -0.6}, ${t.index * hs + 0.3 * hh}) {\\tiny ${t.vrt}};`
+    )
+  ]);
 
   return wrapper(_.join(_.flatten([tnames, diag]), "\n"));
 };
@@ -240,4 +305,10 @@ let saveIt = (options, history, schedule) => {
   }
 };
 
-module.exports = { eventLoop, saveIt };
+let runAndSave = (options, schedule) => {
+  let schcopy = _.cloneDeep(schedule);
+  let history = eventLoop(options, schedule);
+  saveIt(options, history, schcopy);
+};
+
+module.exports = { eventLoop, saveIt, runAndSave };

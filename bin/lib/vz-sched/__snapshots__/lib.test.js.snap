@@ -3,6 +3,7 @@
 exports[`Schedules 3 tasks with 2 waits - same weights 1`] = `
 Array [
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -52,6 +53,7 @@ Array [
     "time": 0,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -101,6 +103,22 @@ Array [
     "time": 0.5,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -135,6 +153,22 @@ Array [
     "time": 1,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -169,6 +203,22 @@ Array [
     "time": 1.5,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -203,6 +253,22 @@ Array [
     "time": 2,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -237,6 +303,22 @@ Array [
     "time": 2.5,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -271,6 +353,22 @@ Array [
     "time": 3,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -305,6 +403,22 @@ Array [
     "time": 3.5,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -340,6 +454,22 @@ Array [
     "time": 4,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -375,6 +505,22 @@ Array [
     "time": 4.5,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -410,6 +556,22 @@ Array [
     "time": 5,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          8,
+        ],
+        "index": 0,
+        "lambda": 1,
+        "name": "$\\\\tau_1$",
+        "prev": 0,
+        "q": 2,
+        "start": 0,
+        "sum": 1,
+        "vrt": 101,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -445,6 +607,7 @@ Array [
     "time": 5.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -495,6 +658,7 @@ Array [
     "time": 6,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -545,6 +709,7 @@ Array [
     "time": 6.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -595,6 +760,7 @@ Array [
     "time": 7,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -645,6 +811,7 @@ Array [
     "time": 7.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -695,6 +862,7 @@ Array [
     "time": 8,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -745,6 +913,22 @@ Array [
     "time": 8.5,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -779,6 +963,22 @@ Array [
     "time": 9,
   },
   Object {
+    "blocked": Array [
+      Object {
+        "R": "X",
+        "events": Array [
+          10,
+        ],
+        "index": 2,
+        "lambda": 1,
+        "name": "$\\\\tau_3$",
+        "prev": 2,
+        "q": 2,
+        "start": 0,
+        "sum": 3,
+        "vrt": 104,
+      },
+    ],
     "rbt": Array [
       Object {
         "R": "X",
@@ -813,6 +1013,7 @@ Array [
     "time": 9.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -862,6 +1063,7 @@ Array [
     "time": 10,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -911,6 +1113,7 @@ Array [
     "time": 10.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -960,6 +1163,7 @@ Array [
     "time": 11,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1009,6 +1213,7 @@ Array [
     "time": 11.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1063,6 +1268,7 @@ Array [
 exports[`Schedules 3 tasks with no waits - different weights 1`] = `
 Array [
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1108,6 +1314,7 @@ Array [
     "time": 0,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1153,6 +1360,7 @@ Array [
     "time": 0.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1198,6 +1406,7 @@ Array [
     "time": 1,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1243,6 +1452,7 @@ Array [
     "time": 1.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1289,6 +1499,7 @@ Array [
     "time": 2,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1335,6 +1546,7 @@ Array [
     "time": 2.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1381,6 +1593,7 @@ Array [
     "time": 3,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1427,6 +1640,7 @@ Array [
     "time": 3.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1473,6 +1687,7 @@ Array [
     "time": 4,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1519,6 +1734,7 @@ Array [
     "time": 4.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1566,6 +1782,7 @@ Array [
     "time": 5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1613,6 +1830,7 @@ Array [
     "time": 5.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1660,6 +1878,7 @@ Array [
     "time": 6,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1707,6 +1926,7 @@ Array [
     "time": 6.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1754,6 +1974,7 @@ Array [
     "time": 7,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1801,6 +2022,7 @@ Array [
     "time": 7.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1853,6 +2075,7 @@ Array [
 exports[`Schedules 3 tasks with no waits - same weights 1`] = `
 Array [
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1898,6 +2121,7 @@ Array [
     "time": 0,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1943,6 +2167,7 @@ Array [
     "time": 0.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -1988,6 +2213,7 @@ Array [
     "time": 1,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2033,6 +2259,7 @@ Array [
     "time": 1.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2079,6 +2306,7 @@ Array [
     "time": 2,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2125,6 +2353,7 @@ Array [
     "time": 2.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2171,6 +2400,7 @@ Array [
     "time": 3,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2217,6 +2447,7 @@ Array [
     "time": 3.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2264,6 +2495,7 @@ Array [
     "time": 4,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2311,6 +2543,7 @@ Array [
     "time": 4.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2358,6 +2591,7 @@ Array [
     "time": 5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2405,6 +2639,7 @@ Array [
     "time": 5.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2452,6 +2687,7 @@ Array [
     "time": 6,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2499,6 +2735,7 @@ Array [
     "time": 6.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2546,6 +2783,7 @@ Array [
     "time": 7,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",
@@ -2593,6 +2831,7 @@ Array [
     "time": 7.5,
   },
   Object {
+    "blocked": Array [],
     "rbt": Array [
       Object {
         "R": "X",

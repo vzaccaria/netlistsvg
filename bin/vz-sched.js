@@ -3,7 +3,7 @@
 
 const name = "vz-sched";
 const prog = require("caporal");
-const { eventLoop, saveIt } = require("./lib/" + name + "/lib");
+const { eventLoop, saveIt, runAndSave } = require("./lib/" + name + "/lib");
 const { schedule0, schedule1, schedule2 } = require("./lib/" +
   name +
   "/fixtures");
@@ -19,9 +19,7 @@ let main = () => {
     .option("-w, --draw", "produce only latex code for drawing")
     .action((args, options) => {
       // let result = run(options, schedule);
-      let history = eventLoop(options, schedule2);
-      saveIt(options, history, schedule2);
-      console.log("done");
+      runAndSave(options, schedule2);
     });
   prog.parse(process.argv);
 };
