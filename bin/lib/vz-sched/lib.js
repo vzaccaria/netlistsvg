@@ -52,15 +52,19 @@ let eventLoop = (options, schedule) => {
       }
       return t;
     });
-    if (_.includes(timer.show, timer.walltime)) {
-      console.log(`at time @${timer.walltime}`);
-      console.log(Table.print(state.rbt));
-    }
-    return {
+
+    // if (_.includes(timer.show, timer.walltime)) {
+    console.log(`at time @${timer.walltime}`);
+    console.log(Table.print(state.rbt));
+    console.log(Table.print(state.blocked));
+    // }
+    let res = {
       rbt: _.cloneDeep(state.rbt),
       blocked: _.cloneDeep(state.blocked),
       time: timer.walltime
     };
+    _.map(schedule.tasks, t => (t.vrtlwk = ""));
+    return res;
   };
 
   let resched = msg => {
@@ -120,10 +124,14 @@ let eventLoop = (options, schedule) => {
     if (!_.isUndefined(state.curr)) {
       tw.vrtlwk = `${v} < ${state.curr.vrt}`;
     }
-    if (state.curr === undefined || v < state.curr.vrt) {
+    if (state.curr !== undefined && v < state.curr.vrt) {
+      console.log(`HEII ${v} ---- ${state.curr.vrt}`);
       removeFromRbt(state.curr);
       addToRbt(state.curr);
       resched(`Waking up task ${tw.name} @${timer.walltime}`);
+    } else {
+      if (state.curr === undefined)
+        resched(`Waking up task ${tw.name} @${timer.walltime}`);
     }
   };
 
@@ -141,7 +149,10 @@ let eventLoop = (options, schedule) => {
         state.curr.vrt = r2(state.curr.vrt + delta / state.curr.lambda);
         state.vmin = _.minBy(state.rbt, "vrt").vrt;
         state.curr.events[0] = r2(state.curr.events[0] - delta);
-        if (state.curr.sum - state.curr.prev == schedslice(state.curr)) {
+        if (
+          state.curr.sum - state.curr.prev == schedslice(state.curr) &&
+          state.curr.events[0] > 0
+        ) {
           removeFromRbt(state.curr);
           addToRbt(state.curr);
           resched(
@@ -158,6 +169,9 @@ let eventLoop = (options, schedule) => {
         if (!_.isUndefined(blocktime)) {
           _setTimeout(_wakeup, blocktime, ts, "_wakeup");
           ts.events = _.tail(_.tail(ts.events));
+        } else {
+          let v = _.find(schedule.tasks, t => t.index === state.curr.index);
+          v.exited = timer.walltime;
         }
         resched(`putting task to sleep ${ts.name} @${timer.walltime}`);
       }
@@ -170,7 +184,7 @@ let eventLoop = (options, schedule) => {
   _setTimeout(_task_tick, 2 * schedule.timer, undefined, "_task_tick");
 
   let res = _.map(
-    _.range(1, (schedule.runfor + 1) / schedule.timer),
+    _.range(1, schedule.runfor / schedule.timer + 2),
     updateTimer
   );
   return res;
@@ -184,66 +198,89 @@ ${c}
 
 let parseHistoryEvents = (history, schedule) => {
   // assume we always start from 0
-  return _.flattenDeep(
-    _.map(history, ({ rbt, time }) => {
-      let v;
-      if (rbt.length > 0) {
-        v = {
-          event: "RAN",
-          tstart: time,
-          tend: time + schedule.timer,
-          index: rbt[0].index,
-          vrt: rbt[0].vrt,
-          sum: rbt[0].sum
+  let getTaskState = (task, t) => {
+    let { rbt, blocked } = _.find(history, ({ time }) => {
+      return time === t;
+    });
+    let findRunning = () => _.find(rbt, t => t.R === "X");
+    let tr = findRunning();
+    if (rbt.length > 0 && tr.index === task.index) {
+      return {
+        event: "RAN",
+        tstart: t,
+        tend: t + schedule.timer,
+        index: tr.index,
+        vrt: tr.vrt,
+        sum: tr.sum,
+        q: tr.q,
+        p: tr.prev,
+        vrtlwk: tr.vrtlwk
+      };
+    } else {
+      let tt;
+      if (!_.isUndefined((tt = _.find(rbt, t => t.index === task.index)))) {
+        return {
+          event: "RUNNABLE",
+          tstart: t,
+          tend: t + schedule.timer,
+          index: tt.index,
+          vrt: tt.vrt,
+          sum: tt.sum,
+          vrtlwk: tt.vrtlwk
         };
+      } else {
+        if (
+          !_.isUndefined((tt = _.find(blocked, t => t.index === task.index)))
+        ) {
+          if (_.isUndefined(tt.exited) || t < tt.exited) {
+            return {
+              event: "BLOCKED",
+              tstart: t,
+              tend: t + schedule.timer,
+              index: tt.index,
+              vrt: tt.vrt,
+              sum: tt.sum,
+              vrtlwk: tt.vrtlwk
+            };
+          } else {
+            return {
+              event: "EXITED",
+              tstart: t,
+              tend: t + schedule.timer,
+              index: tt.index,
+              vrt: tt.vrt,
+              sum: tt.sum,
+              vrtlwk: tt.vrtlwk
+            };
+          }
+        }
       }
-      let blocked_tasks = _.filter(
-        schedule.tasks,
-        ({ index }) => !_.includes(_.map(rbt, "index"), index)
+    }
+  };
+  let tasksToShow = _.flattenDeep(
+    _.map(history, ({ time }, i) => {
+      let ranOrBlockedAtTime = _.map(schedule.tasks, t =>
+        getTaskState(t, time)
       );
-      return [
-        v,
-        _.map(blocked_tasks, t => {
-          return {
-            event: "BLOCKED",
-            tstart: time,
-            tend: time + schedule.timer,
-            index: t.index
-          };
-        })
-      ];
+      // _.filter(
+      // _.map(schedule.tasks, t => getTaskState(t, time)),
+      // ({ event }) => event !== "RUNNABLE"
+      // );
+      if (i < history.length - 1) {
+        ranOrBlockedAtTime = _.map(ranOrBlockedAtTime, t => {
+          let nextState = getTaskState(t, r2(time + schedule.timer));
+          t.vrtend = nextState.vrt;
+          t.sumend = nextState.sum;
+          return t;
+        });
+      }
+      return ranOrBlockedAtTime;
     })
   );
+  return tasksToShow;
 };
 
-let rewriteHistory = (history, schedule) => {
-  return _.flattenDeep([
-    _.map(schedule.tasks, t => {
-      let hst = _.filter(
-        history,
-        ht => ht.index === t.index && ht.event === "RAN"
-      );
-      for (let i = 0; i < hst.length - 1; i++) {
-        hst[i].vrt = hst[i + 1].vrt;
-        hst[i].sum = hst[i + 1].sum;
-      }
-      return hst;
-    }),
-    _.map(schedule.tasks, t => {
-      let hst = _.filter(
-        history,
-        ht => ht.index === t.index && ht.event === "BLOCKED"
-      );
-      for (let i = 0; i < hst.length - 1; i++) {
-        hst[i].vrt = hst[i + 1].vrt;
-        hst[i].sum = hst[i + 1].sum;
-      }
-      return hst;
-    })
-  ]);
-};
-
-let drawHistory = (history, schedule) => {
+let drawHistory = (history, schedule, finalschedule) => {
   let hs = schedule.graphics.hspace;
   let vs = schedule.graphics.vspace;
   let hh = schedule.graphics.barheight;
@@ -252,26 +289,50 @@ let drawHistory = (history, schedule) => {
     return `\\node at(${hs * time}, ${index * hs + 0.5 * hh}) {\\tiny ${m}};`;
   };
 
+  let printAtConf = (time, index, m, conf) => {
+    return `\\node [${conf}] at(${hs * time}, ${index * hs +
+      0.5 * hh}) {\\tiny ${m}};`;
+  };
+
+  let pwrlk = r =>
+    !_.isUndefined(r.vrtlwk) && r.vrtlwk !== ""
+      ? printAtConf(
+          r.tend,
+          r.index + 0.4,
+          `${r.vrtlwk} ?`,
+          "anchor=east, text=red"
+        )
+      : "";
+
   let drawRan = r => {
     return [
       `\\draw[draw=black] (${r.tstart * hs}, ${r.index *
-        vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) 
-       node[pos=.5] {}; `,
-      printAt(r.tend, r.index - 0.4, r.vrt),
-      printAt(r.tend, r.index + 0.4, r.sum)
+        vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) node[pos=.5] {}; `,
+      printAt(r.tend, r.index - 0.4, r.vrtend),
+      // printAtConf(r.tend, r.index + 0.4, r.sumend, "color=gray!90"),
+      printAt(r.tend - 0.25, r.index, `${r.sumend - r.p}/${r2(r.q)}`),
+      pwrlk(r)
     ];
   };
   let drawBlocked = r => {
-    return `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.index *
-      vs}) rectangle ++(${(r.tend - r.tstart) *
-      hs},${hh}) node[pos=.5, text=white] {};`;
+    return [
+      `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.index *
+        vs}) rectangle ++(${(r.tend - r.tstart) *
+        hs},${hh}) node[pos=.5, text=white] {};`,
+      pwrlk(r)
+    ];
+  };
+  let drawRunnable = r => {
+    return [pwrlk(r)];
   };
   history = parseHistoryEvents(history, schedule);
-  console.log(history);
-  history = rewriteHistory(history, schedule);
-  let diag = _.map(history, x => {
-    if (x.event === "RAN") return drawRan(x);
-    if (x.event === "BLOCKED") return drawBlocked(x);
+  let diag = _.map(history, (x, i) => {
+    if (i < history.length - 2) {
+      if (x.event === "RAN") return drawRan(x);
+      if (x.event === "BLOCKED") return drawBlocked(x);
+      if (x.event === "RUNNABLE") return drawRunnable(x);
+    }
+    return [];
   });
   let tnames = _.flattenDeep([
     _.map(
@@ -280,18 +341,78 @@ let drawHistory = (history, schedule) => {
     ),
     _.map(
       schedule.tasks,
-      t =>
-        `\\node at(${hs * -0.6}, ${t.index * hs + 0.3 * hh}) {\\tiny ${t.vrt}};`
+      t => [
+        printAt(-0.6, t.index - 0.4, `$\\rho=$${t.vrt}`),
+        printAt(-0.6, t.index - 0.2, `$\\lambda=$${t.lambda}`)
+      ]
+      // `\\node at(${hs * -0.6}, ${t.index * hs + 0.3 * hh}) {\\tiny ${t.vrt}};`
     )
   ]);
+  let grid = [
+    `\\draw[xstep=${
+      schedule.timer
+    },gray!20,thin,shift={(0,-0.25)}] (0,0) grid (${schedule.runfor},${
+      schedule.tasks.length
+    });`,
+    _.map(_.range(0, schedule.runfor / schedule.timer + 1), i =>
+      printAtConf(
+        i * schedule.timer,
+        -0.7,
+        `\\emph{${i * schedule.timer}}`,
+        "text=gray"
+      )
+    )
+  ];
+  console.log(schedule.tasks);
 
-  return wrapper(_.join(_.flatten([tnames, diag]), "\n"));
+  let taskevents = _.map(schedule.tasks, t => {
+    return [
+      printAtConf(
+        0,
+        (-schedule.tasks.length + t.index) * 0.2 - 0.7,
+        `task ${t.name}: starts at ${t.start}, ` +
+          _.join(
+            _.map(t.events, (e, i) =>
+              i % 2 === 0 ? `runs for ${e}` : `blocks for ${e}`
+            ),
+            ", "
+          ),
+        "anchor=west"
+      ),
+      `\\draw [->] (${t.start}, ${t.index} + 0.75) -- (${t.start}, ${t.index});`
+    ];
+  });
+
+  let taskexits = _.map(finalschedule.tasks, t => {
+    return !_.isUndefined(t.exited)
+      ? [
+          `\\draw [<-] (${t.exited}, ${t.index} + 0.75) -- (${t.exited}, ${
+            t.index
+          });`
+        ]
+      : [];
+  });
+
+  let data = [
+    printAtConf(
+      -0.6,
+      schedule.tasks.length,
+      `Schedule data: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
+        schedule.class.mingran
+      }, $\\omega$=${schedule.class.wgup}`,
+      "anchor=west"
+    ),
+    taskevents,
+    taskexits
+  ];
+
+  return wrapper(_.join(_.flattenDeep([grid, tnames, diag, data]), "\n"));
 };
 
-let saveIt = (options, history, schedule) => {
+let saveIt = (options, history, origschedule, finalschedule) => {
   history.latex = [
     latexArtifact(
-      drawHistory(history, schedule),
+      drawHistory(history, origschedule, finalschedule),
       "rt diagram",
       "standalone",
       "pdflatex",
@@ -306,9 +427,9 @@ let saveIt = (options, history, schedule) => {
 };
 
 let runAndSave = (options, schedule) => {
-  let schcopy = _.cloneDeep(schedule);
+  let origschedule = _.cloneDeep(schedule);
   let history = eventLoop(options, schedule);
-  saveIt(options, history, schcopy);
+  saveIt(options, history, origschedule, schedule);
 };
 
 module.exports = { eventLoop, saveIt, runAndSave };
