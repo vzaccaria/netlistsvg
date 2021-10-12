@@ -3,8 +3,10 @@
 
 const name = "vz-sched";
 const prog = require("caporal");
-const { eventLoop, saveIt, runAndSave } = require("./lib/" + name + "/lib");
-const { schedule } = require("./lib/" + name + "/fixtures");
+const { runAndSave } = require("./lib/" + name + "/lib");
+// const { schedule } = require("./lib/" + name + "/fixtures");
+let $fs = require("mz/fs");
+let $gstd = require("get-stdin");
 
 let main = () => {
   prog
@@ -17,8 +19,10 @@ let main = () => {
     .option("-w, --draw", "produce only latex code for drawing")
     .option("-n, --num <int>", "which test schedule", prog.INT, 9)
     .action((args, options) => {
-      // let result = run(options, schedule);
-      runAndSave(options, schedule[options.num]);
+      let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
+      datap.then(JSON.parse).then(sched => {
+        runAndSave(options, sched);
+      });
     });
   prog.parse(process.argv);
 };
