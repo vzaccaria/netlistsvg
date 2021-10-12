@@ -15,9 +15,10 @@ let main = () => {
       "save data with in files with prefix <string>"
     )
     .option("-w, --draw", "produce only latex code for drawing")
+    .option("-n, --num <int>", "which test schedule", prog.INT, 9)
     .action((args, options) => {
       // let result = run(options, schedule);
-      runAndSave(options, schedule[9]);
+      runAndSave(options, schedule[options.num]);
     });
   prog.parse(process.argv);
 };

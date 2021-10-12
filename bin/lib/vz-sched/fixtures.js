@@ -187,7 +187,7 @@ let schedule = [
   _.merge(_.cloneDeep(schedule1), { runfor: 40 }),
   schedule3,
   _.merge(_.cloneDeep(schedule3), {
-    runfor: 40,
+    runfor: 21,
     tasks: [{ lambda: 0.5 }, { lambda: 1 }, { lambda: 1.5 }]
   })
 ];

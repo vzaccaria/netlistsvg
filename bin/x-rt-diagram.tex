@@ -1,6 +1,6 @@
 
 \begin{tikzpicture}
-\draw[xstep=0.5,gray!20,thin,shift={(0,-0.25)}] (0,0) grid (40,3);
+\draw[xstep=0.5,gray!20,thin,shift={(0,-0.25)}] (0,0) grid (21,3);
 \node [text=gray] at(0, -0.44999999999999996) {\tiny \emph{0}};
 \node [text=gray] at(0.5, -0.44999999999999996) {\tiny \emph{0.5}};
 \node [text=gray] at(1, -0.44999999999999996) {\tiny \emph{1}};
@@ -44,44 +44,6 @@
 \node [text=gray] at(20, -0.44999999999999996) {\tiny \emph{20}};
 \node [text=gray] at(20.5, -0.44999999999999996) {\tiny \emph{20.5}};
 \node [text=gray] at(21, -0.44999999999999996) {\tiny \emph{21}};
-\node [text=gray] at(21.5, -0.44999999999999996) {\tiny \emph{21.5}};
-\node [text=gray] at(22, -0.44999999999999996) {\tiny \emph{22}};
-\node [text=gray] at(22.5, -0.44999999999999996) {\tiny \emph{22.5}};
-\node [text=gray] at(23, -0.44999999999999996) {\tiny \emph{23}};
-\node [text=gray] at(23.5, -0.44999999999999996) {\tiny \emph{23.5}};
-\node [text=gray] at(24, -0.44999999999999996) {\tiny \emph{24}};
-\node [text=gray] at(24.5, -0.44999999999999996) {\tiny \emph{24.5}};
-\node [text=gray] at(25, -0.44999999999999996) {\tiny \emph{25}};
-\node [text=gray] at(25.5, -0.44999999999999996) {\tiny \emph{25.5}};
-\node [text=gray] at(26, -0.44999999999999996) {\tiny \emph{26}};
-\node [text=gray] at(26.5, -0.44999999999999996) {\tiny \emph{26.5}};
-\node [text=gray] at(27, -0.44999999999999996) {\tiny \emph{27}};
-\node [text=gray] at(27.5, -0.44999999999999996) {\tiny \emph{27.5}};
-\node [text=gray] at(28, -0.44999999999999996) {\tiny \emph{28}};
-\node [text=gray] at(28.5, -0.44999999999999996) {\tiny \emph{28.5}};
-\node [text=gray] at(29, -0.44999999999999996) {\tiny \emph{29}};
-\node [text=gray] at(29.5, -0.44999999999999996) {\tiny \emph{29.5}};
-\node [text=gray] at(30, -0.44999999999999996) {\tiny \emph{30}};
-\node [text=gray] at(30.5, -0.44999999999999996) {\tiny \emph{30.5}};
-\node [text=gray] at(31, -0.44999999999999996) {\tiny \emph{31}};
-\node [text=gray] at(31.5, -0.44999999999999996) {\tiny \emph{31.5}};
-\node [text=gray] at(32, -0.44999999999999996) {\tiny \emph{32}};
-\node [text=gray] at(32.5, -0.44999999999999996) {\tiny \emph{32.5}};
-\node [text=gray] at(33, -0.44999999999999996) {\tiny \emph{33}};
-\node [text=gray] at(33.5, -0.44999999999999996) {\tiny \emph{33.5}};
-\node [text=gray] at(34, -0.44999999999999996) {\tiny \emph{34}};
-\node [text=gray] at(34.5, -0.44999999999999996) {\tiny \emph{34.5}};
-\node [text=gray] at(35, -0.44999999999999996) {\tiny \emph{35}};
-\node [text=gray] at(35.5, -0.44999999999999996) {\tiny \emph{35.5}};
-\node [text=gray] at(36, -0.44999999999999996) {\tiny \emph{36}};
-\node [text=gray] at(36.5, -0.44999999999999996) {\tiny \emph{36.5}};
-\node [text=gray] at(37, -0.44999999999999996) {\tiny \emph{37}};
-\node [text=gray] at(37.5, -0.44999999999999996) {\tiny \emph{37.5}};
-\node [text=gray] at(38, -0.44999999999999996) {\tiny \emph{38}};
-\node [text=gray] at(38.5, -0.44999999999999996) {\tiny \emph{38.5}};
-\node [text=gray] at(39, -0.44999999999999996) {\tiny \emph{39}};
-\node [text=gray] at(39.5, -0.44999999999999996) {\tiny \emph{39.5}};
-\node [text=gray] at(40, -0.44999999999999996) {\tiny \emph{40}};
 \node at(-1, 0.25) {$\tau_1$};
 \node at(-1, 1.25) {$\tau_2$};
 \node at(-1, 2.25) {$\tau_3$};
@@ -131,7 +93,7 @@
 \node at(2.75, 1.25) {\tiny 2/2.4};
 
 
-\node [anchor=east, text=red] at(3.5, 0.65) {\tiny 102.25 < 101 ?};
+\node [anchor=east, text=red] at(3.5, 0.65) {\tiny (102.25 < 101) \times};
 \draw[draw=black, fill=gray] (3, 1) rectangle ++(0.5,0.5) node[pos=.5, text=white] {};
 
 \draw[draw=black] (3, 2) rectangle ++(0.5,0.5) node[pos=.5] {}; 
@@ -160,7 +122,7 @@
 \node at(4.75, 2.25) {\tiny 2/4.5};
 
 
-\node [anchor=east, text=red] at(5.5, 1.65) {\tiny 102.83 < 102.32 ?};
+\node [anchor=east, text=red] at(5.5, 1.65) {\tiny (102.83 < 102.32) \times};
 \draw[draw=black] (5, 2) rectangle ++(0.5,0.5) node[pos=.5] {}; 
 \node at(5.5, 1.85) {\tiny 102.65};
 \node at(5.25, 2.25) {\tiny 2.5/3};
@@ -190,7 +152,7 @@
 \node at(7.5, 0.85) {\tiny 103};
 \node at(7.25, 1.25) {\tiny 0.5/2};
 
-\node [anchor=east, text=red] at(7.5, 2.65) {\tiny 103.48 < 104 ?};
+\node [anchor=east, text=blue] at(7.5, 2.65) {\tiny (103.48 < 104) \checkmark};
 
 \draw[draw=black] (7.5, 1) rectangle ++(0.5,0.5) node[pos=.5] {}; 
 \node at(8, 0.85) {\tiny 103.5};
@@ -257,7 +219,7 @@
 \draw[draw=black] (12, 1) rectangle ++(0.5,0.5) node[pos=.5] {}; 
 \node at(12.5, 0.85) {\tiny 105};
 \node at(12.25, 1.25) {\tiny 0.5/4};
-\node [anchor=east, text=red] at(12.5, 1.65) {\tiny 105.17 < 106 ?};
+\node [anchor=east, text=blue] at(12.5, 1.65) {\tiny (105.17 < 106) \checkmark};
 \draw[draw=black, fill=gray] (12, 2) rectangle ++(0.5,0.5) node[pos=.5, text=white] {};
 
 
@@ -327,54 +289,13 @@
 \node at(21, -0.15000000000000002) {\tiny 114};
 \node at(20.75, 0.25) {\tiny 3/6};
 
-\draw[draw=black] (21, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(21.5, -0.15000000000000002) {\tiny 115};
-\node at(21.25, 0.25) {\tiny 3.5/6};
-
-\draw[draw=black] (21.5, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(22, -0.15000000000000002) {\tiny 116};
-\node at(21.75, 0.25) {\tiny 4/6};
-
-\draw[draw=black] (22, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(22.5, -0.15000000000000002) {\tiny 117};
-\node at(22.25, 0.25) {\tiny 4.5/6};
-
-\draw[draw=black] (22.5, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(23, -0.15000000000000002) {\tiny 118};
-\node at(22.75, 0.25) {\tiny 5/6};
-
-\draw[draw=black] (23, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(23.5, -0.15000000000000002) {\tiny 119};
-\node at(23.25, 0.25) {\tiny 5.5/6};
-
-\draw[draw=black] (23.5, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(24, -0.15000000000000002) {\tiny 120};
-\node at(23.75, 0.25) {\tiny 6/6};
-
-\draw[draw=black] (24, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(24.5, -0.15000000000000002) {\tiny 121};
-\node at(24.25, 0.25) {\tiny 0.5/6};
-
-\draw[draw=black] (24.5, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(25, -0.15000000000000002) {\tiny 122};
-\node at(24.75, 0.25) {\tiny 1/6};
-
-\draw[draw=black] (25, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(25.5, -0.15000000000000002) {\tiny 123};
-\node at(25.25, 0.25) {\tiny 1.5/6};
-
-\draw[draw=black] (25.5, 0) rectangle ++(0.5,0.5) node[pos=.5] {}; 
-\node at(26, -0.15000000000000002) {\tiny 124};
-\node at(25.75, 0.25) {\tiny 2/6};
-
-\node [anchor=west] at(-0.6, 3.25) {\tiny Schedule data: $\bar{\tau}$= 6, $\mu$=0.75, $\omega$=1};
 \node [anchor=west] at(0, -1.05) {\tiny task $\tau_1$: starts at 0, runs for 1, blocks for 2, runs for 3, blocks for 4, runs for 8};
 \draw [->] (0, 0 + 0.75) -- (0, 0);
 \node [anchor=west] at(0, -0.8500000000000001) {\tiny task $\tau_2$: starts at 0, runs for 2, blocks for 2, runs for 2, blocks for 3, runs for 1};
 \draw [->] (0, 1 + 0.75) -- (0, 1);
 \node [anchor=west] at(0, -0.6499999999999999) {\tiny task $\tau_3$: starts at 0, runs for 3, blocks for 1, runs for 2, blocks for 3, runs for 1};
 \draw [->] (0, 2 + 0.75) -- (0, 2);
-\draw [<-] (26, 0 + 0.75) -- (26, 0);
 \draw [<-] (13, 1 + 0.75) -- (13, 1);
 \draw [<-] (15, 2 + 0.75) -- (15, 2);
+\node [anchor=west] at(-0.6, 3.25) {\tiny Schedule data: $\bar{\tau}$= 6, $\mu$=0.75, $\omega$=1};
 \end{tikzpicture}

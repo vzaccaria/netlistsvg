@@ -125,6 +125,7 @@ let eventLoop = (options, schedule) => {
       tw.vrtlwk = `${v} < ${state.curr.vrt}`;
     }
     if (state.curr !== undefined && v < state.curr.vrt) {
+      tw.vrtlwk = `(${v} < ${state.curr.vrt}) \\checkmark`;
       console.log(`HEII ${v} ---- ${state.curr.vrt}`);
       removeFromRbt(state.curr);
       addToRbt(state.curr);
@@ -132,6 +133,9 @@ let eventLoop = (options, schedule) => {
     } else {
       if (state.curr === undefined)
         resched(`Waking up task ${tw.name} @${timer.walltime}`);
+      else {
+        tw.vrtlwk = `(${v} < ${state.curr.vrt}) \\times`;
+      }
     }
   };
 
@@ -280,7 +284,7 @@ let parseHistoryEvents = (history, schedule) => {
   return tasksToShow;
 };
 
-let drawHistory = (history, schedule, finalschedule) => {
+let drawHistory = (history, schedule, finalschedule, options) => {
   let hs = schedule.graphics.hspace;
   let vs = schedule.graphics.vspace;
   let hh = schedule.graphics.barheight;
@@ -299,8 +303,8 @@ let drawHistory = (history, schedule, finalschedule) => {
       ? printAtConf(
           r.tend,
           r.index + 0.4,
-          `${r.vrtlwk} ?`,
-          "anchor=east, text=red"
+          `${r.vrtlwk}`,
+          `anchor=east, text=${r.vrtlwk.slice(-1) === "k" ? "blue" : "red"}`
         )
       : "";
 
@@ -327,7 +331,7 @@ let drawHistory = (history, schedule, finalschedule) => {
   };
   history = parseHistoryEvents(history, schedule);
   let diag = _.map(history, (x, i) => {
-    if (i < history.length - 2) {
+    if (x.tstart < schedule.runfor) {
       if (x.event === "RAN") return drawRan(x);
       if (x.event === "BLOCKED") return drawBlocked(x);
       if (x.event === "RUNNABLE") return drawRunnable(x);
@@ -401,19 +405,35 @@ let drawHistory = (history, schedule, finalschedule) => {
         schedule.class.mingran
       }, $\\omega$=${schedule.class.wgup}`,
       "anchor=west"
-    ),
-    taskevents,
-    taskexits
+    )
   ];
 
-  return wrapper(_.join(_.flattenDeep([grid, tnames, diag, data]), "\n"));
+  if (_.isUndefined(options.blank) || !options.blank) {
+    return wrapper(
+      _.join(
+        _.flattenDeep([grid, tnames, diag, taskevents, taskexits, data]),
+        "\n"
+      )
+    );
+  } else {
+    return wrapper(
+      _.join(_.flattenDeep([grid, tnames, taskevents, data]), "\n")
+    );
+  }
 };
 
 let saveIt = (options, history, origschedule, finalschedule) => {
   history.latex = [
     latexArtifact(
-      drawHistory(history, origschedule, finalschedule),
+      drawHistory(history, origschedule, finalschedule, { blank: false }),
       "rt diagram",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      drawHistory(history, origschedule, finalschedule, { blank: true }),
+      "rt diagram blank",
       "standalone",
       "pdflatex",
       "-r varwidth"
