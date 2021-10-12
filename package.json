@@ -42,6 +42,7 @@
   "bin": {
     "netlistsvg": "./bin/vz-netlist.js",
     "vz-netlist": "./bin/vz-netlist.js",
+    "vz-sched": "./bin/vz-sched.js",
     "vz-compile-artifacts": "./bin/vz-compile-artifacts.js",
     "vz-wave": "./bin/vz-wave.js",
     "vz-quine": "./bin/vz-quine.js",
