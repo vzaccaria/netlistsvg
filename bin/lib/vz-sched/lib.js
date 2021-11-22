@@ -284,6 +284,32 @@ let parseHistoryEvents = (history, schedule) => {
   return tasksToShow;
 };
 
+let printData = (history, schedule, finalschedule, options) => {
+  let taskevents = _.join(
+    _.map(schedule.tasks, t => {
+      return [
+        `\\item task ${t.name} (\\lambda = ${t.lambda}) inizia a ${t.start}, ` +
+          _.join(
+            _.map(t.events, (e, i) =>
+              i % 2 === 0 ? `gira per ${e}` : `in attesa per ${e}`
+            ),
+            ", "
+          )
+      ];
+    }),
+    "\n"
+  );
+  let s = `
+  \\begin{itemize}
+  \\item Dati scheduling: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
+    schedule.class.mingran
+  }, $\\omega$=${schedule.class.wgup}
+  ${taskevents}
+  \\end{itemize}`;
+
+  return s;
+};
+
 let drawHistory = (history, schedule, finalschedule, options) => {
   let hs = schedule.graphics.hspace;
   let vs = schedule.graphics.vspace;
@@ -434,6 +460,13 @@ let saveIt = (options, history, origschedule, finalschedule) => {
     latexArtifact(
       drawHistory(history, origschedule, finalschedule, { blank: true }),
       "rt diagram blank",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
+    ),
+    latexArtifact(
+      printData(history, origschedule, finalschedule, {}),
+      "data table",
       "standalone",
       "pdflatex",
       "-r varwidth"
