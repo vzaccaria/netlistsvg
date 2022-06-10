@@ -6,6 +6,7 @@ testartifacts:
 
 jest:
 	jest lib/vz-sched/lib.test.js 
+	jest lib/vz-pipe/lib.test.js 
 
 jestu:
 	jest lib/vz-sched/lib.test.js -u
