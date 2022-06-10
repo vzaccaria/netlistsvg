@@ -604,6 +604,68 @@ add x13, x1, x2  2     3     4     5     6     4     0     5     3     1   2   1
 "
 `;
 
+exports[`Fw 9`] = `
+Array [
+  Object {
+    "d": 1,
+    "dest": 4,
+    "ins": "lw x1, lab(x10)",
+    "n_de": 1,
+    "n_ee": 2,
+    "n_fe": 0,
+    "n_me": 3,
+    "n_pc": 1,
+    "n_we": 4,
+    "pipe": "FDEMW",
+    "s1": 10,
+    "s2": 0,
+    "src1": 0,
+    "src2": 0,
+  },
+  Object {
+    "d": 0,
+    "dest": 0,
+    "ins": "sw x3, lab(x1)",
+    "n_de": 2,
+    "n_ee": 4,
+    "n_fe": 1,
+    "n_me": 5,
+    "n_pc": 2,
+    "n_we": 6,
+    "pipe": "-FdDEMW",
+    "s1": 3,
+    "s2": 1,
+    "src1": 0,
+    "src2": 4,
+  },
+  Object {
+    "d": 13,
+    "dest": 6,
+    "ins": "add x13, x1, x2",
+    "n_de": 4,
+    "n_ee": 5,
+    "n_fe": 2,
+    "n_me": 6,
+    "n_pc": 3,
+    "n_we": 7,
+    "pipe": "--fFDEMW",
+    "s1": 1,
+    "s2": 2,
+    "src1": 4,
+    "src2": 0,
+  },
+]
+`;
+
+exports[`Fw 10`] = `
+"ins              n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe    
+---------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  --------
+lw x1, lab(x10)  0     1     2     3     4     0     0     4     1     10  0   1   FDEMW   
+sw x3, lab(x1)   1     2     4     5     6     0     4     0     2     3   1   0   -FdDEMW 
+add x13, x1, x2  2     4     5     6     7     4     0     6     3     1   2   13  --fFDEMW
+"
+`;
+
 exports[`Fw BranchOpt 1`] = `
 Array [
   Object {
@@ -1380,5 +1442,129 @@ beq x2, x5, loop  2     5     8     9     10    7     0     0     10    2   5   
 lw x1, lab(x3)    5     11    12    13    14    0     0     14    6     3   0   1  -----fffffFDEMW      
 sub x2, x1, x10   11    12    15    16    17    14    0     17    12    1   10  2  -----------FddDEMW   
 beq x2, x5, loop  12    15    18    19    20    17    0     0     20    2   5   0  ------------ffFddDEMW
+"
+`;
+
+exports[`No fw 11`] = `
+Array [
+  Object {
+    "d": 1,
+    "dest": 4,
+    "ins": "lw x1, lab(x10)",
+    "n_de": 1,
+    "n_ee": 2,
+    "n_fe": 0,
+    "n_me": 3,
+    "n_pc": 1,
+    "n_we": 4,
+    "pipe": "FDEMW",
+    "s1": 10,
+    "s2": 0,
+    "src1": 0,
+    "src2": 0,
+  },
+  Object {
+    "d": 0,
+    "dest": 0,
+    "ins": "sw x1, lab(x11)",
+    "n_de": 2,
+    "n_ee": 5,
+    "n_fe": 1,
+    "n_me": 6,
+    "n_pc": 2,
+    "n_we": 7,
+    "pipe": "-FddDEMW",
+    "s1": 1,
+    "s2": 11,
+    "src1": 4,
+    "src2": 0,
+  },
+  Object {
+    "d": 13,
+    "dest": 8,
+    "ins": "add x13, x1, x2",
+    "n_de": 5,
+    "n_ee": 6,
+    "n_fe": 2,
+    "n_me": 7,
+    "n_pc": 3,
+    "n_we": 8,
+    "pipe": "--ffFDEMW",
+    "s1": 1,
+    "s2": 2,
+    "src1": 4,
+    "src2": 0,
+  },
+]
+`;
+
+exports[`No fw 12`] = `
+"ins              n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe     
+---------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  ---------
+lw x1, lab(x10)  0     1     2     3     4     0     0     4     1     10  0   1   FDEMW    
+sw x1, lab(x11)  1     2     5     6     7     4     0     0     2     1   11  0   -FddDEMW 
+add x13, x1, x2  2     5     6     7     8     4     0     8     3     1   2   13  --ffFDEMW
+"
+`;
+
+exports[`No fw 13`] = `
+Array [
+  Object {
+    "d": 1,
+    "dest": 4,
+    "ins": "lw x1, lab(x10)",
+    "n_de": 1,
+    "n_ee": 2,
+    "n_fe": 0,
+    "n_me": 3,
+    "n_pc": 1,
+    "n_we": 4,
+    "pipe": "FDEMW",
+    "s1": 10,
+    "s2": 0,
+    "src1": 0,
+    "src2": 0,
+  },
+  Object {
+    "d": 0,
+    "dest": 0,
+    "ins": "sw x3, lab(x1)",
+    "n_de": 2,
+    "n_ee": 5,
+    "n_fe": 1,
+    "n_me": 6,
+    "n_pc": 2,
+    "n_we": 7,
+    "pipe": "-FddDEMW",
+    "s1": 3,
+    "s2": 1,
+    "src1": 0,
+    "src2": 4,
+  },
+  Object {
+    "d": 13,
+    "dest": 8,
+    "ins": "add x13, x1, x2",
+    "n_de": 5,
+    "n_ee": 6,
+    "n_fe": 2,
+    "n_me": 7,
+    "n_pc": 3,
+    "n_we": 8,
+    "pipe": "--ffFDEMW",
+    "s1": 1,
+    "s2": 2,
+    "src1": 4,
+    "src2": 0,
+  },
+]
+`;
+
+exports[`No fw 14`] = `
+"ins              n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe     
+---------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  ---------
+lw x1, lab(x10)  0     1     2     3     4     0     0     4     1     10  0   1   FDEMW    
+sw x3, lab(x1)   1     2     5     6     7     0     4     0     2     3   1   0   -FddDEMW 
+add x13, x1, x2  2     5     6     7     8     4     0     8     3     1   2   13  --ffFDEMW
 "
 `;
