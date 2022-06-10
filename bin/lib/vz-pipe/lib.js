@@ -9,8 +9,8 @@ let run = (options, program) => {
   let ty = `${options.fw ? "FW" : ""} - ${options.branchopt ? "BO" : ""}`;
   let trace = Table.print(sim.table);
   if (options.debug) {
-    console.log();
-    console.log(Table.print(sim.table));
+    console.log(ty);
+    console.log(trace);
   }
   sim.type = ty;
   sim.trace = trace;

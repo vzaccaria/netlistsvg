@@ -542,6 +542,68 @@ add x3, x1, x2    2     6     7     8     9     3     0     8     3     1   2   
 "
 `;
 
+exports[`Fw 7`] = `
+Array [
+  Object {
+    "d": 1,
+    "dest": 4,
+    "ins": "lw x1, lab(x10)",
+    "n_de": 1,
+    "n_ee": 2,
+    "n_fe": 0,
+    "n_me": 3,
+    "n_pc": 1,
+    "n_we": 4,
+    "pipe": "FDEMW",
+    "s1": 10,
+    "s2": 0,
+    "src1": 0,
+    "src2": 0,
+  },
+  Object {
+    "d": 0,
+    "dest": 0,
+    "ins": "sw x1, lab(x11)",
+    "n_de": 2,
+    "n_ee": 4,
+    "n_fe": 1,
+    "n_me": 5,
+    "n_pc": 2,
+    "n_we": 6,
+    "pipe": "-FdDEMW",
+    "s1": 1,
+    "s2": 11,
+    "src1": 4,
+    "src2": 0,
+  },
+  Object {
+    "d": 13,
+    "dest": 6,
+    "ins": "add x13, x1, x2",
+    "n_de": 4,
+    "n_ee": 5,
+    "n_fe": 2,
+    "n_me": 6,
+    "n_pc": 3,
+    "n_we": 7,
+    "pipe": "--fFDEMW",
+    "s1": 1,
+    "s2": 2,
+    "src1": 4,
+    "src2": 0,
+  },
+]
+`;
+
+exports[`Fw 8`] = `
+"ins              n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe    
+---------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  --------
+lw x1, lab(x10)  0     1     2     3     4     0     0     4     1     10  0   1   FDEMW   
+sw x1, lab(x11)  1     2     4     5     6     4     0     0     2     1   11  0   -FdDEMW 
+add x13, x1, x2  2     4     5     6     7     4     0     6     3     1   2   13  --fFDEMW
+"
+`;
+
 exports[`Fw BranchOpt 1`] = `
 Array [
   Object {
