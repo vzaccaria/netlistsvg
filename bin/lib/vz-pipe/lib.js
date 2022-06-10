@@ -6,10 +6,14 @@ let run = (options, program) => {
     hasBranchPrediction: options.branchpred,
     hasBranchOptimization: options.branchopt
   })(eval(`[${program}]`));
+  let ty = `${options.fw ? "FW" : ""} - ${options.branchopt ? "BO" : ""}`;
+  let trace = Table.print(sim.table);
   if (options.debug) {
-    console.log(`${options.fw ? "FW" : ""} - ${options.branchopt ? "BO" : ""}`);
+    console.log();
     console.log(Table.print(sim.table));
   }
+  sim.type = ty;
+  sim.trace = trace;
   return sim;
 };
 

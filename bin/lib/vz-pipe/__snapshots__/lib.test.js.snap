@@ -198,6 +198,24 @@ Array [
 `;
 
 exports[`BranchOpt 2`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe                     
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  -------------------------
+lw x1, lab(x2)    0     1     2     3     4     0     0     4     1     2   0   1  FDEMW                    
+sw x1, lab(x3)    1     2     5     6     7     4     0     0     2     1   3   0  -FddDEMW                 
+sub x4, x4, x5    2     5     6     7     8     0     0     8     3     4   5   4  --ffFDEMW                
+add x2, x2, x4    5     6     9     10    11    0     8     11    6     2   4   2  -----FddDEMW             
+add x3, x3, x4    6     9     10    11    12    0     8     12    7     3   4   3  ------ffFDEMW            
+beq x4, x6, loop  9     10    11    12    13    8     0     0     11    4   6   0  ---------FDEMW           
+lw x1, lab(x2)    10    12    13    14    15    11    0     15    11    2   0   1  ----------fFDEMW         
+sw x1, lab(x3)    12    13    16    17    18    15    12    0     13    1   3   0  ------------FddDEMW      
+sub x4, x4, x5    13    16    17    18    19    8     0     19    14    4   5   4  -------------ffFDEMW     
+add x2, x2, x4    16    17    20    21    22    11    19    22    17    2   4   2  ----------------FddDEMW  
+add x3, x3, x4    17    20    21    22    23    12    19    23    18    3   4   3  -----------------ffFDEMW 
+beq x4, x6, loop  20    21    22    23    24    19    0     0     22    4   6   0  --------------------FDEMW
+"
+`;
+
+exports[`BranchOpt 3`] = `
 Array [
   Object {
     "d": 1,
@@ -250,7 +268,16 @@ Array [
 ]
 `;
 
-exports[`BranchOpt 3`] = `
+exports[`BranchOpt 4`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe      
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  ----------
+add x1, x10, x12  0     1     2     3     4     0     0     4     1     10  12  1  FDEMW     
+beq x1, x2, loop  1     2     5     6     7     4     0     0     5     1   2   0  -FddDEMW  
+add x3, x1, x2    2     6     7     8     9     4     0     9     3     1   2   3  --fffFDEMW
+"
+`;
+
+exports[`BranchOpt 5`] = `
 Array [
   Object {
     "d": 1,
@@ -319,6 +346,16 @@ Array [
 ]
 `;
 
+exports[`BranchOpt 6`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe       
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  -----------
+lw x1, lab(x3)    0     1     2     3     4     0     0     4     1     3   0   1  FDEMW      
+beq x1, x5, loop  1     2     5     6     7     4     0     0     5     1   5   0  -FddDEMW   
+lw x2, lab(x3)    2     6     7     8     9     0     0     9     3     3   0   2  --fffFDEMW 
+add x3, x3, x3    6     7     8     9     10    0     0     10    7     3   3   3  ------FDEMW
+"
+`;
+
 exports[`Fw 1`] = `
 Array [
   Object {
@@ -373,6 +410,15 @@ Array [
 `;
 
 exports[`Fw 2`] = `
+"ins              n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe    
+---------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  --------
+lw x1, lab(x10)  0     1     2     3     4     0     0     4     1     10  0   1   FDEMW   
+sub x2, x1, x12  1     2     4     5     6     4     0     5     2     1   12  2   -FdDEMW 
+add x13, x1, x2  2     4     5     6     7     4     5     6     3     1   2   13  --fFDEMW
+"
+`;
+
+exports[`Fw 3`] = `
 Array [
   Object {
     "d": 1,
@@ -425,7 +471,16 @@ Array [
 ]
 `;
 
-exports[`Fw 3`] = `
+exports[`Fw 4`] = `
+"ins              n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe   
+---------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  -------
+lw x1, lab(x10)  0     1     2     3     4     0     0     4     1     10  0   1   FDEMW  
+sw x2, lab(x11)  1     2     3     4     5     0     0     0     2     2   11  0   -FDEMW 
+add x13, x1, x2  2     3     4     5     6     4     0     5     3     1   2   13  --FDEMW
+"
+`;
+
+exports[`Fw 5`] = `
 Array [
   Object {
     "d": 1,
@@ -476,6 +531,15 @@ Array [
     "src2": 0,
   },
 ]
+`;
+
+exports[`Fw 6`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe      
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  ----------
+add x1, x10, x12  0     1     2     3     4     0     0     3     1     10  12  1  FDEMW     
+beq x1, x2, loop  1     2     3     4     5     3     0     0     5     1   2   0  -FDEMW    
+add x3, x1, x2    2     6     7     8     9     3     0     8     3     1   2   3  --fffFDEMW
+"
 `;
 
 exports[`Fw BranchOpt 1`] = `
@@ -580,6 +644,18 @@ Array [
 `;
 
 exports[`Fw BranchOpt 2`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe       
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  -----------
+lw x1, lab(x2)    0     1     2     3     4     0     0     4     1     2   0   1  FDEMW      
+sw x1, lab(x3)    1     2     4     5     6     4     0     0     2     1   3   0  -FdDEMW    
+sub x4, x4, x5    2     4     5     6     7     0     0     6     3     4   5   4  --fFDEMW   
+add x2, x2, x4    4     5     6     7     8     0     6     7     5     2   4   2  ----FDEMW  
+add x3, x3, x4    5     6     7     8     9     0     6     8     6     3   4   3  -----FDEMW 
+beq x4, x6, loop  6     7     8     9     10    6     0     0     8     4   6   0  ------FDEMW
+"
+`;
+
+exports[`Fw BranchOpt 3`] = `
 Array [
   Object {
     "d": 1,
@@ -632,7 +708,16 @@ Array [
 ]
 `;
 
-exports[`Fw BranchOpt 3`] = `
+exports[`Fw BranchOpt 4`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe     
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  ---------
+add x1, x10, x12  0     1     2     3     4     0     0     3     1     10  12  1  FDEMW    
+beq x1, x2, loop  1     2     4     5     6     3     0     0     4     1   2   0  -FdDEMW  
+add x3, x1, x2    2     5     6     7     8     3     0     7     3     1   2   3  --ffFDEMW
+"
+`;
+
+exports[`Fw BranchOpt 5`] = `
 Array [
   Object {
     "d": 1,
@@ -733,7 +818,19 @@ Array [
 ]
 `;
 
-exports[`Fw BranchOpt 4`] = `
+exports[`Fw BranchOpt 6`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe           
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  ---------------
+lw x1, lab(x3)    0     1     2     3     4     0     0     4     1     3   0   1  FDEMW          
+sub x2, x1, x10   1     2     4     5     6     4     0     5     2     1   10  2  -FdDEMW        
+beq x2, x5, loop  2     4     6     7     8     5     0     0     6     2   5   0  --fFdDEMW      
+lw x1, lab(x3)    4     7     8     9     10    0     0     10    5     3   0   1  ----ffFDEMW    
+sub x2, x1, x10   7     8     10    11    12    10    0     11    8     1   10  2  -------FdDEMW  
+beq x2, x5, loop  8     10    12    13    14    11    0     0     12    2   5   0  --------fFdDEMW
+"
+`;
+
+exports[`Fw BranchOpt 7`] = `
 Array [
   Object {
     "d": 1,
@@ -802,6 +899,16 @@ Array [
 ]
 `;
 
+exports[`Fw BranchOpt 8`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe       
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  -----------
+lw x1, lab(x3)    0     1     2     3     4     0     0     4     1     3   0   1  FDEMW      
+beq x1, x5, loop  1     2     5     6     7     4     0     0     5     1   5   0  -FddDEMW   
+lw x2, lab(x3)    2     6     7     8     9     0     0     9     3     3   0   2  --fffFDEMW 
+add x3, x3, x3    6     7     8     9     10    0     0     9     7     3   3   3  ------FDEMW
+"
+`;
+
 exports[`No fw 1`] = `
 Array [
   Object {
@@ -856,6 +963,15 @@ Array [
 `;
 
 exports[`No fw 2`] = `
+"ins              n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe       
+---------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  -----------
+lw x1, lab(x10)  0     1     2     3     4     0     0     4     1     10  0   1   FDEMW      
+sub x2, x1, x12  1     2     5     6     7     4     0     7     2     1   12  2   -FddDEMW   
+add x13, x1, x2  2     5     8     9     10    4     7     10    3     1   2   13  --ffFddDEMW
+"
+`;
+
+exports[`No fw 3`] = `
 Array [
   Object {
     "d": 1,
@@ -908,7 +1024,16 @@ Array [
 ]
 `;
 
-exports[`No fw 3`] = `
+exports[`No fw 4`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d   pipe    
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  --  --------
+add x1, x10, x12  0     1     2     3     4     0     0     4     1     10  12  1   FDEMW   
+sub x3, x4, x12   1     2     3     4     5     0     0     5     2     4   12  3   -FDEMW  
+add x13, x1, x2   2     3     5     6     7     4     0     7     3     1   2   13  --FdDEMW
+"
+`;
+
+exports[`No fw 5`] = `
 Array [
   Object {
     "d": 1,
@@ -961,7 +1086,16 @@ Array [
 ]
 `;
 
-exports[`No fw 4`] = `
+exports[`No fw 6`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe        
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  ------------
+add x1, x10, x12  0     1     2     3     4     0     0     4     1     10  12  1  FDEMW       
+beq x1, x2, loop  1     2     5     6     7     4     0     0     7     1   2   0  -FddDEMW    
+add x3, x1, x2    2     8     9     10    11    4     0     11    3     1   2   3  --fffffFDEMW
+"
+`;
+
+exports[`No fw 7`] = `
 Array [
   Object {
     "d": 2,
@@ -1062,7 +1196,19 @@ Array [
 ]
 `;
 
-exports[`No fw 5`] = `
+exports[`No fw 8`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe                  
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  ----------------------
+add x2, x9, x10   0     1     2     3     4     0     0     4     1     9   10  2  FDEMW                 
+beq x2, x1, loop  1     2     5     6     7     4     0     0     7     2   1   0  -FddDEMW              
+add x2, x9, x10   2     8     9     10    11    0     0     11    3     9   10  2  --fffffFDEMW          
+beq x2, x1, loop  8     9     12    13    14    11    0     0     14    2   1   0  --------FddDEMW       
+add x2, x9, x10   9     15    16    17    18    0     0     18    10    9   10  2  ---------fffffFDEMW   
+beq x2, x1, loop  15    16    19    20    21    18    0     0     21    2   1   0  ---------------FddDEMW
+"
+`;
+
+exports[`No fw 9`] = `
 Array [
   Object {
     "d": 1,
@@ -1161,4 +1307,16 @@ Array [
     "src2": 0,
   },
 ]
+`;
+
+exports[`No fw 10`] = `
+"ins               n_fe  n_de  n_ee  n_me  n_we  src1  src2  dest  n_pc  s1  s2  d  pipe                 
+----------------  ----  ----  ----  ----  ----  ----  ----  ----  ----  --  --  -  ---------------------
+lw x1, lab(x3)    0     1     2     3     4     0     0     4     1     3   0   1  FDEMW                
+sub x2, x1, x10   1     2     5     6     7     4     0     7     2     1   10  2  -FddDEMW             
+beq x2, x5, loop  2     5     8     9     10    7     0     0     10    2   5   0  --ffFddDEMW          
+lw x1, lab(x3)    5     11    12    13    14    0     0     14    6     3   0   1  -----fffffFDEMW      
+sub x2, x1, x10   11    12    15    16    17    14    0     17    12    1   10  2  -----------FddDEMW   
+beq x2, x5, loop  12    15    18    19    20    17    0     0     20    2   5   0  ------------ffFddDEMW
+"
 `;

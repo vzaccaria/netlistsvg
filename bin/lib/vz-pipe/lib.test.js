@@ -7,4 +7,8 @@ _.map(fixtures, f => {
     const res = run(f.options, f.program);
     expect(res.table).toMatchSnapshot();
   });
+  it(f.desc, () => {
+    const res = run(f.options, f.program);
+    expect(res.trace).toMatchSnapshot();
+  });
 });

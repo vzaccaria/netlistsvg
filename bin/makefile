@@ -10,6 +10,7 @@ jest:
 
 jestu:
 	jest lib/vz-sched/lib.test.js -u
+	jest lib/vz-pipe/lib.test.js -u
 
 clean:
 	rm -rf tmp*
