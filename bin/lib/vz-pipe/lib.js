@@ -139,8 +139,8 @@ let store = _.curry((name, s1, s2) => {
     let n_de = Math.max(ready[ee], n_fe + 1, ready[pc] + 1);
     let rs1 = hasFw ? ready[s1] : ready[s1] + 1;
     let rs2 = hasFw ? ready[s2] : ready[s2] + 1;
-    let n_ee = Math.max(ready[me], n_de + 1, rs1, rs2);
-    let n_me = Math.max(ready[we], n_ee + 1);
+    let n_ee = Math.max(ready[me], n_de + 1, rs2, !hasFw ? rs1 : 0);
+    let n_me = Math.max(ready[we], n_ee + 1, hasFw ? rs1 : 0);
     let n_we = n_me + 1;
     let n_pc = n_fe + 1;
     let ins = `${name} x${s1}, lab(x${s2})`;
