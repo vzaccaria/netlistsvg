@@ -7,7 +7,7 @@ let Table = require("easy-table");
 // let $gstd = require("get-stdin");
 const { latexArtifact, saveArtifacts } = require("../artifacts");
 
-let r2 = x => Math.round(x * 100) / 100;
+let r2 = x => Math.round(x * 1000) / 1000;
 
 let eventLoop = (options, schedule) => {
   let state = {
