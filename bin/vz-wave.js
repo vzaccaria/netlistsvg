@@ -15,19 +15,17 @@ let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 
 let wave2tikz = (options, wavedata) => {
   return execWithString(
-    path => `${__dirname}/lib/wavedromtikz.py wavedrom ${path}`,
+    (path) => `${__dirname}/lib/wavedromtikz.py wavedrom ${path}`,
     wavedata,
     { postfix: ".json", cleanup: false, logger: options.logger }
   );
 };
 
 let reg2pdf = (options, regdata) => {
-  return tmp.file({ postfix: ".svg" }).then(tmpsvg => {
+  return tmp.file({ postfix: ".svg" }).then((tmpsvg) => {
     return execWithString(
-      path =>
-        `${__dirname}/../node_modules/bit-field/bin/bitfield.js --lanes 1 -i ${path} --bits ${
-          options.bits
-        } > ${tmpsvg.path}`,
+      (path) =>
+        `${__dirname}/../node_modules/bit-field/bin/bitfield.js --lanes 1 -i ${path} --bits ${options.bits} > ${tmpsvg.path}`,
       regdata,
       { postfix: ".js", cleanup: false, logger: options.logger }
     )
@@ -41,12 +39,10 @@ let reg2pdf = (options, regdata) => {
 };
 
 let wave2pdf = (options, wavedata) => {
-  return tmp.file({ postfix: ".svg" }).then(tmpsvg => {
+  return tmp.file({ postfix: ".svg" }).then((tmpsvg) => {
     return execWithString(
-      path =>
-        `phantomjs ${__dirname}/../node_modules/wavedrom-cli/bin/wavedrom-cli.js -i ${path} -s ${
-          tmpsvg.path
-        }`,
+      (path) =>
+        `phantomjs ${__dirname}/../node_modules/wavedrom-cli/bin/wavedrom-cli.js -i ${path} -s ${tmpsvg.path}`,
       wavedata,
       { postfix: ".js", cleanup: false, logger: options.logger }
     )
@@ -61,7 +57,7 @@ let wave2pdf = (options, wavedata) => {
   });
 };
 
-let trimName = n => {
+let trimName = (n) => {
   return _.last(n.split("."));
 };
 
@@ -74,7 +70,7 @@ let parseSignal = (options, sig) => {
   let pc = isclock && !negedge;
 
   for (let i = 0; i < options.end; i++) {
-    let value = _.last(_.filter(sig.wave, s => parseInt(s[0]) <= i))[1];
+    let value = _.last(_.filter(sig.wave, (s) => parseInt(s[0]) <= i))[1];
     if (pc) {
       value = value === "1" ? "H" : "l";
     } else if (nc) {
@@ -89,22 +85,22 @@ let parseSignal = (options, sig) => {
   }
   return {
     name: options.trimNames ? trimName(_.toUpper(sig.name)) : sig.name,
-    wave: _.join(v, "")
+    wave: _.join(v, ""),
   };
 };
 
 let produceWave = _.curry((args, options, vcd) => {
   let sigs = vcd.signal;
-  let signames = _.map(sigs, s => s.name);
+  let signames = _.map(sigs, (s) => s.name);
   if (options.showSigs) {
     console.log(signames);
   }
   let observables = options.signals ? options.signals.split(",") : signames;
-  let fsigs = _.map(observables, o => {
-    return _.find(sigs, s => s.name === o);
+  let fsigs = _.map(observables, (o) => {
+    return _.find(sigs, (s) => s.name === o);
   });
   let s = {
-    signal: _.map(fsigs, _.curry(parseSignal)(options))
+    signal: _.map(fsigs, _.curry(parseSignal)(options)),
   };
   // console.log(s);
   return s;
@@ -138,7 +134,7 @@ let processWhitelist = (wavedrom, options) => {
     });
 
     return JSON.stringify({
-      signal: wd
+      signal: wd,
     });
   } else {
     return wavedrom;
@@ -165,6 +161,10 @@ let main = () => {
       "-d, --dump-classic-pdf <file>",
       "Produce the wave from the classic wavedrom cli"
     )
+    .option(
+      "-j, --dump-json",
+      "Produce the wave in json format to be rendered elsewhere"
+    )
     .option("-r, --regformat", "Use wavedrom register")
     .option("-b, --bits <num>", "Number of bits for register", prog.INT, 32)
     .action(async (args, options, logger) => {
@@ -173,9 +173,17 @@ let main = () => {
         try {
           let wavedrom = await readWavedromOrVCD(args, options);
           let whitelisted = processWhitelist(wavedrom, options);
+          if (options.dumpJson) {
+            if (!_.isUndefined(options.whitelist)) {
+              console.log(whitelisted);
+            } else {
+              console.log(wavedrom);
+            }
+            return;
+          }
           let [complete, whitel] = await Promise.all([
             wave2tikz(options, wavedrom),
-            wave2tikz(options, whitelisted)
+            wave2tikz(options, whitelisted),
           ]);
           let artifacts = [
             latexArtifact(
@@ -191,7 +199,7 @@ let main = () => {
               "standalone",
               "pdflatex",
               `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
-            )
+            ),
           ];
           let result = { latex: artifacts };
           if (options.save) {
@@ -211,7 +219,7 @@ let main = () => {
           console.log(error);
         }
       } else {
-        readWavedromReg(args, options).then(wavedrom => {
+        readWavedromReg(args, options).then((wavedrom) => {
           if (!options.dumpClassicPdf) {
             throw "You must use -d option when printing register format";
           }
