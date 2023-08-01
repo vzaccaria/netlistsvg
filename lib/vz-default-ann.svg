@@ -1,0 +1,753 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="svg226"
+   sodipodi:docname="vz-default-ann.svg"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:s="https://github.com/nturley/netlistsvg">
+  <defs
+     id="defs230" />
+  <sodipodi:namedview
+     id="namedview228"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="16"
+     inkscape:cx="67.0625"
+     inkscape:cy="68.4375"
+     inkscape:window-width="2548"
+     inkscape:window-height="1290"
+     inkscape:window-x="6"
+     inkscape:window-y="31"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg226" />
+  <s:properties>
+    <s:layoutEngine
+       org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers="35"
+       org.eclipse.elk.spacing.nodeNode="35"
+       org.eclipse.elk.layered.layering.strategy="LONGEST_PATH"
+       org.eclipse.elk.layered.unnecessaryBendpoints="true"
+       org.eclipse.elk.layered.compaction.connectedComponents="true" />
+    <s:low_priority_alias
+       val="$dff" />
+  </s:properties>
+  <style
+     id="style2">
+svg {
+  stroke:#000;
+  fill:none;
+}
+text {
+  fill:#000;
+  stroke:none;
+  font-size:10px;
+  font-weight: bold;
+  font-family: &quot;Courier New&quot;, monospace;
+}
+.nodelabel {
+  text-anchor: middle;
+}
+.inputPortLabel {
+  text-anchor: end;
+}
+.splitjoinBody {
+  fill:#000;
+}
+</style>
+  <!-- and -->
+  <g
+     s:type="and"
+     transform="translate(150,50)"
+     s:width="30"
+     s:height="25"
+     id="g24">
+    <s:alias
+       val="$and" />
+    <s:alias
+       val="$logic_and" />
+    <s:alias
+       val="$_AND_" />
+    <path
+       d="M0,0 L0,25 L15,25 A15 12.5 0 0 0 15,0 Z"
+       id="path16" />
+    <g
+       s:x="0"
+       s:y="5"
+       s:pid="A"
+       id="g18" />
+    <g
+       s:x="0"
+       s:y="20"
+       s:pid="B"
+       id="g20" />
+    <g
+       s:x="30"
+       s:y="12.5"
+       s:pid="Y"
+       id="g22" />
+  </g>
+  <g
+     s:type="nand"
+     transform="translate(150,100)"
+     s:width="30"
+     s:height="25"
+     id="g36">
+    <s:alias
+       val="$nand" />
+    <s:alias
+       val="$logic_nand" />
+    <s:alias
+       val="$_NAND_" />
+    <path
+       d="M0,0 L0,25 L15,25 A15 12.5 0 0 0 15,0 Z"
+       id="path26" />
+    <circle
+       cx="34"
+       cy="12.5"
+       r="3"
+       id="circle28" />
+    <g
+       s:x="0"
+       s:y="5"
+       s:pid="A"
+       id="g30" />
+    <g
+       s:x="0"
+       s:y="20"
+       s:pid="B"
+       id="g32" />
+    <g
+       s:x="36"
+       s:y="12.5"
+       s:pid="Y"
+       id="g34" />
+  </g>
+  <!-- or -->
+  <g
+     s:type="or"
+     transform="translate(250,50)"
+     s:width="30"
+     s:height="25"
+     id="g48">
+    <s:alias
+       val="$or" />
+    <s:alias
+       val="$logic_or" />
+    <s:alias
+       val="$_OR_" />
+    <path
+       d="M0,25 L0,25 L15,25 A15 12.5 0 0 0 15,0 L0,0"
+       id="path38" />
+    <path
+       d="M0,0 A30 25 0 0 1 0,25"
+       id="path40" />
+    <g
+       s:x="3"
+       s:y="5"
+       s:pid="A"
+       id="g42" />
+    <g
+       s:x="3"
+       s:y="20"
+       s:pid="B"
+       id="g44" />
+    <g
+       s:x="30"
+       s:y="12.5"
+       s:pid="Y"
+       id="g46" />
+  </g>
+  <g
+     s:type="reduce_nor"
+     transform="translate(250, 100)"
+     s:width="33"
+     s:height="25"
+     id="g62">
+    <s:alias
+       val="$nor" />
+    <s:alias
+       val="$reduce_nor" />
+    <s:alias
+       val="$_NOR_" />
+    <path
+       d="M0,25 L0,25 L15,25 A15 12.5 0 0 0 15,0 L0,0"
+       id="path50" />
+    <path
+       d="M0,0 A30 25 0 0 1 0,25"
+       id="path52" />
+    <circle
+       cx="34"
+       cy="12.5"
+       r="3"
+       id="circle54" />
+    <g
+       s:x="3"
+       s:y="5"
+       s:pid="A"
+       id="g56" />
+    <g
+       s:x="3"
+       s:y="20"
+       s:pid="B"
+       id="g58" />
+    <g
+       s:x="36"
+       s:y="12.5"
+       s:pid="Y"
+       id="g60" />
+  </g>
+  <!--xor -->
+  <g
+     s:type="reduce_xor"
+     transform="translate(350, 50)"
+     s:width="33"
+     s:height="25"
+     id="g74">
+    <s:alias
+       val="$xor" />
+    <s:alias
+       val="$reduce_xor" />
+    <s:alias
+       val="$_XOR_" />
+    <path
+       d="M3,0 A30 25 0 0 1 3,25 A30 25 0 0 0 33,12.5 A30 25 0 0 0 3,0"
+       id="path64" />
+    <path
+       d="M0,0 A30 25 0 0 1 0,25"
+       id="path66" />
+    <g
+       s:x="3"
+       s:y="5"
+       s:pid="A"
+       id="g68" />
+    <g
+       s:x="3"
+       s:y="20"
+       s:pid="B"
+       id="g70" />
+    <g
+       s:x="33"
+       s:y="12.5"
+       s:pid="Y"
+       id="g72" />
+  </g>
+  <g
+     s:type="reduce_nxor"
+     transform="translate(350, 100)"
+     s:width="33"
+     s:height="25"
+     id="g88">
+    <s:alias
+       val="$xnor" />
+    <s:alias
+       val="$reduce_xnor" />
+    <s:alias
+       val="$_XNOR_" />
+    <path
+       d="M3,0 A30 25 0 0 1 3,25 A30 25 0 0 0 33,12.5 A30 25 0 0 0 3,0"
+       id="path76" />
+    <path
+       d="M0,0 A30 25 0 0 1 0,25"
+       id="path78" />
+    <circle
+       cx="35"
+       cy="12.5"
+       r="3"
+       id="circle80" />
+    <g
+       s:x="3"
+       s:y="5"
+       s:pid="A"
+       id="g82" />
+    <g
+       s:x="3"
+       s:y="20"
+       s:pid="B"
+       id="g84" />
+    <g
+       s:x="38"
+       s:y="12.5"
+       s:pid="Y"
+       id="g86" />
+  </g>
+  <!--buffer -->
+  <g
+     s:type="not"
+     transform="translate(450,100)"
+     s:width="30"
+     s:height="20"
+     id="g98">
+    <s:alias
+       val="$_NOT_" />
+    <s:alias
+       val="$not" />
+    <s:alias
+       val="$logic_not" />
+    <path
+       d="M0,0 L0,20 L20,10 Z"
+       id="path90" />
+    <circle
+       cx="23"
+       cy="10"
+       r="3"
+       id="circle92" />
+    <g
+       s:x="0"
+       s:y="10"
+       s:pid="A"
+       id="g94" />
+    <g
+       s:x="25"
+       s:y="10"
+       s:pid="Y"
+       id="g96" />
+  </g>
+  <g
+     s:type="add"
+     transform="translate(50, 150)"
+     s:width="25"
+     s:height="25"
+     id="g112">
+    <s:alias
+       val="$add" />
+    <circle
+       r="12.5"
+       cx="12.5"
+       cy="12.5"
+       id="circle100" />
+    <line
+       x1="7.5"
+       x2="17.5"
+       y1="12.5"
+       y2="12.5"
+       id="line102" />
+    <line
+       x1="12.5"
+       x2="12.5"
+       y1="7.5"
+       y2="17.5"
+       id="line104" />
+    <g
+       s:x="3"
+       s:y="5"
+       s:pid="A"
+       id="g106" />
+    <g
+       s:x="3"
+       s:y="20"
+       s:pid="B"
+       id="g108" />
+    <g
+       s:x="25"
+       s:y="12.5"
+       s:pid="Y"
+       id="g110" />
+  </g>
+  <g
+     s:type="sub"
+     transform="translate(150,150)"
+     s:width="25"
+     s:height="25"
+     id="g124">
+    <s:alias
+       val="$sub" />
+    <circle
+       r="12.5"
+       cx="12.5"
+       cy="12.5"
+       id="circle114" />
+    <line
+       x1="7.5"
+       x2="17.5"
+       y1="12.5"
+       y2="12.5"
+       id="line116" />
+    <g
+       s:x="3"
+       s:y="5"
+       s:pid="A"
+       id="g118" />
+    <g
+       s:x="3"
+       s:y="20"
+       s:pid="B"
+       id="g120" />
+    <g
+       s:x="25"
+       s:y="12.5"
+       s:pid="Y"
+       id="g122" />
+  </g>
+  <g
+     s:type="eq"
+     transform="translate(250,150)"
+     s:width="25"
+     s:height="25"
+     id="g138">
+    <s:alias
+       val="$eq" />
+    <circle
+       r="12.5"
+       cx="12.5"
+       cy="12.5"
+       id="circle126" />
+    <line
+       x1="7.5"
+       x2="17.5"
+       y1="10"
+       y2="10"
+       id="line128" />
+    <line
+       x1="7.5"
+       x2="17.5"
+       y1="15"
+       y2="15"
+       id="line130" />
+    <g
+       s:x="3"
+       s:y="5"
+       s:pid="A"
+       id="g132" />
+    <g
+       s:x="3"
+       s:y="20"
+       s:pid="B"
+       id="g134" />
+    <g
+       s:x="25"
+       s:y="12.5"
+       s:pid="Y"
+       id="g136" />
+  </g>
+  <g
+     s:type="dff"
+     transform="translate(350,150)"
+     s:width="30"
+     s:height="40"
+     id="g150">
+    <s:alias
+       val="$dff" />
+    <s:alias
+       val="$_DFF_" />
+    <rect
+       width="30"
+       height="40"
+       x="0"
+       y="0"
+       id="rect140" />
+    <path
+       d="M0,35 L5,30 L0,25"
+       id="path142" />
+    <g
+       s:x="30"
+       s:y="10"
+       s:pid="Q"
+       id="g144" />
+    <g
+       s:x="0"
+       s:y="30"
+       s:pid="CLK"
+       id="g146" />
+    <g
+       s:x="0"
+       s:y="10"
+       s:pid="D"
+       id="g148" />
+  </g>
+  <g
+     s:type="inputExt"
+     transform="translate(50,200)"
+     s:width="30"
+     s:height="20"
+     id="g158">
+    <text
+       x="15"
+       y="-4"
+       class="nodelabel"
+       s:attribute="ref"
+       id="text152">input</text>
+    <s:alias
+       val="$_inputExt_" />
+    <path
+       d="M0,0 L0,20 L15,20 L30,10 L15,0 Z"
+       id="path154" />
+    <g
+       s:x="28"
+       s:y="10"
+       s:pid="Y"
+       id="g156" />
+    <text
+       x="15"
+       y="-4"
+       class="nodelabel"
+       s:attribute="ref"
+       id="text393">input</text>
+  </g>
+  <g
+     s:type="constant"
+     transform="translate(150,200)"
+     s:width="30"
+     s:height="20"
+     id="g166">
+    <text
+       x="15"
+       y="-4"
+       class="nodelabel"
+       s:attribute="ref"
+       id="text160">constant</text>
+    <s:alias
+       val="$_constant_" />
+    <rect
+       width="30"
+       height="20"
+       id="rect162" />
+    <g
+       s:x="30"
+       s:y="10"
+       s:pid="Y"
+       id="g164" />
+  </g>
+  <g
+     s:type="outputExt"
+     transform="translate(250,200)"
+     s:width="30"
+     s:height="20"
+     id="g174">
+    <text
+       x="15"
+       y="-4"
+       class="nodelabel"
+       s:attribute="ref"
+       id="text168">output</text>
+    <s:alias
+       val="$_outputExt_" />
+    <path
+       d="M30,0 L30,20 L15,20 L0,10 L15,0 Z"
+       id="path170" />
+    <g
+       s:x="0"
+       s:y="10"
+       s:pid="A"
+       id="g172" />
+  </g>
+  <g
+     s:type="split"
+     transform="translate(350,200)"
+     s:width="5"
+     s:height="40"
+     id="g188">
+    <rect
+       width="5"
+       height="40"
+       class="splitjoinBody"
+       s:generic="body"
+       id="rect176" />
+    <s:alias
+       val="$_split_" />
+    <g
+       s:x="0"
+       s:y="20"
+       s:pid="in"
+       id="g178" />
+    <g
+       transform="translate(5, 10)"
+       s:x="4"
+       s:y="10"
+       s:pid="out0"
+       id="g182">
+      <text
+         x="5"
+         y="-4"
+         id="text180">hi:lo</text>
+    </g>
+    <g
+       transform="translate(5, 30)"
+       s:x="4"
+       s:y="30"
+       s:pid="out1"
+       id="g186">
+      <text
+         x="5"
+         y="-4"
+         id="text184">hi:lo</text>
+    </g>
+  </g>
+  <g
+     s:type="join"
+     transform="translate(450,200)"
+     s:width="4"
+     s:height="40"
+     id="g202">
+    <rect
+       width="5"
+       height="40"
+       class="splitjoinBody"
+       s:generic="body"
+       id="rect190" />
+    <s:alias
+       val="$_join_" />
+    <g
+       s:x="5"
+       s:y="20"
+       s:pid="out"
+       id="g192" />
+    <g
+       transform="translate(0, 10)"
+       s:x="0"
+       s:y="10"
+       s:pid="in0"
+       id="g196">
+      <text
+         x="-3"
+         y="-4"
+         class="inputPortLabel"
+         id="text194">hi:lo</text>
+    </g>
+    <g
+       transform="translate(0, 30)"
+       s:x="0"
+       s:y="30"
+       s:pid="in1"
+       id="g200">
+      <text
+         x="-3"
+         y="-4"
+         class="inputPortLabel"
+         id="text198">hi:lo</text>
+    </g>
+  </g>
+  <g
+     s:type="generic"
+     transform="translate(550,200)"
+     s:width="30"
+     s:height="40"
+     id="g224">
+    <text
+       x="15"
+       y="-4"
+       class="nodelabel"
+       s:attribute="ref"
+       id="text204">generic</text>
+    <rect
+       width="30"
+       height="40"
+       s:generic="body"
+       id="rect206" />
+    <g
+       transform="translate(30, 10)"
+       s:x="30"
+       s:y="10"
+       s:pid="out0"
+       id="g210">
+      <text
+         x="5"
+         y="-4"
+         style="fill:#000; stroke:none"
+         id="text208">out0</text>
+    </g>
+    <g
+       transform="translate(30, 30)"
+       s:x="30"
+       s:y="30"
+       s:pid="out1"
+       id="g214">
+      <text
+         x="5"
+         y="-4"
+         style="fill:#000;stroke:none"
+         id="text212">out1</text>
+    </g>
+    <g
+       transform="translate(0, 10)"
+       s:x="0"
+       s:y="10"
+       s:pid="in0"
+       id="g218">
+      <text
+         x="-3"
+         y="-4"
+         class="inputPortLabel"
+         id="text216">in0</text>
+    </g>
+    <g
+       transform="translate(0, 30)"
+       s:x="0"
+       s:y="30"
+       s:pid="in1"
+       id="g222">
+      <text
+         x="-3"
+         y="-4"
+         class="inputPortLabel"
+         id="text220">in1</text>
+    </g>
+  </g>
+  <g
+     id="g661">
+    <g
+       s:type="mux"
+       transform="translate(50, 50)"
+       s:width="20"
+       s:height="40"
+       id="g14">
+      <s:alias
+         val="$pmux" />
+      <s:alias
+         val="$mux" />
+      <s:alias
+         val="$_MUX_" />
+      <path
+         d="M0,0 L20,10 L20,30 L0,40 Z"
+         id="path4" />
+      <g
+         s:x="0"
+         s:y="10"
+         s:pid="A"
+         id="g6" />
+      <g
+         s:x="0"
+         s:y="30"
+         s:pid="B"
+         id="g8" />
+      <g
+         s:x="10"
+         s:y="35"
+         s:pid="S"
+         id="g10" />
+      <g
+         s:x="20"
+         s:y="20"
+         s:pid="Y"
+         id="g12" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="fill:#000000"
+       x="51.125"
+       y="61.5"
+       id="text525"><tspan
+         sodipodi:role="line"
+         id="tspan523"
+         x="51.125"
+         y="61.5">0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="fill:#000000"
+       x="51.4375"
+       y="84.5"
+       id="text529"><tspan
+         sodipodi:role="line"
+         id="tspan527"
+         x="51.4375"
+         y="84.5">1</tspan></text>
+  </g>
+</svg>

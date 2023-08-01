@@ -16,17 +16,17 @@ let { execWithString } = require("./lib/common");
 
 let svg2pdf = (options, outputpdf, svgdata) => {
   return execWithString(
-    tmpfile => `cairosvg ${tmpfile} -f pdf -o ${outputpdf}`,
+    (tmpfile) => `cairosvg ${tmpfile} -f pdf -o ${outputpdf}`,
     svgdata,
     {
       cleanup: !options.keep,
-      logger: options.logger
+      logger: options.logger,
     }
   );
 };
 
 let verilog2svg = (args, options) => {
-  let json2svg = jsonfile => {
+  let json2svg = (jsonfile) => {
     let skin_data = $fs.readFile(options.skin, "utf-8");
     let jsondata = $fs.readFile(jsonfile, "utf-8");
     options.logger.info("Rendering json");
@@ -35,7 +35,7 @@ let verilog2svg = (args, options) => {
         nd = JSON.parse(nd);
         return lib.render(sd, nd);
       })
-      .catch(e => {
+      .catch((e) => {
         console.log(
           `"${e}" detected while rendering the following json to svg`
         );
@@ -45,9 +45,7 @@ let verilog2svg = (args, options) => {
   };
 
   let verilog2json = (jsonfile, verilogdata) => {
-    let command = `yosys -q -p "${
-      options.script
-    }; write_json ${jsonfile}" -f verilog`;
+    let command = `yosys -q -p "${options.script}; write_json ${jsonfile}" -f verilog`;
     let loadopts;
     if (options.ilang) {
       loadopts = `-f ilang -S`;
@@ -55,15 +53,15 @@ let verilog2svg = (args, options) => {
       loadopts = `-S`;
     }
     return execWithString(
-      tmpfile => `${command} ${loadopts} ${tmpfile}`,
+      (tmpfile) => `${command} ${loadopts} ${tmpfile}`,
       verilogdata,
       {
         cleanup: !options.keep,
-        logger: options.logger
+        logger: options.logger,
       }
     )
       .then(() => jsonfile)
-      .catch(e => {
+      .catch((e) => {
         options.logger.info(`ignoring error ${e}`);
         return jsonfile;
       });
@@ -76,7 +74,7 @@ let verilog2svg = (args, options) => {
     : "output.pdf";
   return tmp
     .file({ postfix: ".json", keep: options.keep })
-    .then(jsonfilename => {
+    .then((jsonfilename) => {
       let verilogdata_p = args.file
         ? $fs.readFile(args.file, "utf-8")
         : $gstd();
@@ -117,20 +115,20 @@ let main = () => {
       if (options.aig) options.script = "prep -flatten -auto-top; aigmap";
       if (options.simple) options.script = "prep -flatten -auto-top; simplemap";
       verilog2svg(args, options)
-        .then(output => {
+        .then((output) => {
           if (options.open) open(output);
           if (options.watch) {
             let towatch = _.concat([], [args.file]);
             console.log("Watching " + towatch);
-            gaze(towatch, function() {
-              this.on("error", e => {
+            gaze(towatch, function () {
+              this.on("error", (e) => {
                 logger.debug(`Suppressing error ${e}`);
               });
               this.on("changed", () => verilog2svg(args, options));
             });
           }
         })
-        .catch(e => {
+        .catch((e) => {
           logger.error(e);
         });
     });
