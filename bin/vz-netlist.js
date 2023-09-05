@@ -32,6 +32,7 @@ let verilog2svg = (args, options) => {
     options.logger.info("Rendering json");
     return Promise.all([skin_data, jsondata])
       .then(([sd, nd]) => {
+        nd = nd.replace(/\$_DFF_NP0_/gi, "DFF");
         nd = JSON.parse(nd);
         return lib.render(sd, nd);
       })
