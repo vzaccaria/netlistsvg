@@ -42,7 +42,7 @@ let wave2pdf = (options, wavedata) => {
   return tmp.file({ postfix: ".svg" }).then((tmpsvg) => {
     return execWithString(
       (path) =>
-        `phantomjs ${__dirname}/../node_modules/wavedrom-cli/bin/wavedrom-cli.js -i ${path} -s ${tmpsvg.path}`,
+        `${__dirname}/../node_modules/.bin/wavedrom-cli -i ${path} -s ${tmpsvg.path}`,
       wavedata,
       { postfix: ".js", cleanup: false, logger: options.logger }
     )
@@ -181,35 +181,35 @@ let main = () => {
             }
             return;
           }
-          let [complete, whitel] = await Promise.all([
-            wave2tikz(options, wavedrom),
-            wave2tikz(options, whitelisted),
-          ]);
-          let artifacts = [
-            latexArtifact(
-              complete,
-              "wave",
-              "standalone",
-              "pdflatex",
-              `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
-            ),
-            latexArtifact(
-              whitel,
-              "wave whitelisted",
-              "standalone",
-              "pdflatex",
-              `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
-            ),
-          ];
-          let result = { latex: artifacts };
-          if (options.save) {
-            saveArtifacts(result.latex, options.save);
+          if (options.dumpClassicPdf) {
+            return wave2pdf(options, wavedrom);
           } else {
-            if (options.dumpTikz) {
-              console.log(complete);
+            let [complete, whitel] = await Promise.all([
+              wave2tikz(options, wavedrom),
+              wave2tikz(options, whitelisted),
+            ]);
+            let artifacts = [
+              latexArtifact(
+                complete,
+                "wave",
+                "standalone",
+                "pdflatex",
+                `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+              ),
+              latexArtifact(
+                whitel,
+                "wave whitelisted",
+                "standalone",
+                "pdflatex",
+                `-i ${__dirname}/preambles/wavedrom2tikz.tex --usepackage ifthen --usetikzlibrary patterns`
+              ),
+            ];
+            let result = { latex: artifacts };
+            if (options.save) {
+              saveArtifacts(result.latex, options.save);
             } else {
-              if (options.dumpClassicPdf) {
-                return wave2pdf(options, wavedrom);
+              if (options.dumpTikz) {
+                console.log(complete);
               } else {
                 console.log(JSON.stringify(result, 0, 4));
               }

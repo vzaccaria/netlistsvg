@@ -33,7 +33,7 @@
     "sprintf-js": "1.1.2",
     "tmp-promise": "1.0.3",
     "vcd-parser": "1.0.0",
-    "wavedrom-cli": "0.5.0"
+    "wavedrom-cli": "3.2.0"
   },
   "repository": {
     "type": "git",
