@@ -32,7 +32,13 @@ let verilog2svg = (args, options) => {
     options.logger.info("Rendering json");
     return Promise.all([skin_data, jsondata])
       .then(([sd, nd]) => {
-        nd = nd.replace(/\$_DFF_NP0_/gi, "DFF");
+        let i = 0;
+        let ffs = options.ffIndices;
+        nd = nd.replace(/\$_DFF_NP0_/gi, (match) => {
+          let rep = "DFF_" + (!_.isUndefined(ffs) ? _.split(ffs, ",")[i] : i);
+          i++;
+          return rep;
+        });
         nd = JSON.parse(nd);
         return lib.render(sd, nd);
       })
@@ -110,6 +116,7 @@ let main = () => {
     .option("-w, --watch", "Watch for input file to change")
     .option("-k, --keep", "Dont cleanup")
     .option("-p, --open", "Open file")
+    .option("-x, --ff-indices <list>", "Assign list of indices", prog.STRING)
     .option("-i, --ilang", "If input file is ilang instead of verilog")
     .action((args, options, logger) => {
       options.logger = logger;
