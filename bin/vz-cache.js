@@ -16,7 +16,7 @@ let { lab } = require("./lib/common");
    - last: integer (last access time)
 */
 
-let asTableLine = a => {
+let asTableLine = (a) => {
   return _.join(a, " & ") + "\\\\";
 };
 
@@ -24,17 +24,17 @@ let getCacheBlock = _.curry((i, { valid, tag, data, highlight }) => {
   if (highlight || i === 0) {
     return [
       valid ? "$\\checkmark$" : "$\\times$",
-      tag ? `\\texttt{${tag}}` : "",
-      !_.isUndefined(data) ? data : ""
+      valid ? (tag ? `\\texttt{${tag}}` : "") : "inval.",
+      !_.isUndefined(data) ? data : "",
     ];
   } else {
     return _.map(
       [
         valid ? "$\\checkmark$" : "$\\times$",
         tag ? `\\texttt{${tag}}` : "",
-        !_.isUndefined(data) ? data : ""
+        !_.isUndefined(data) ? data : "",
       ],
-      i => `{\\color{lightgray}${i}}`
+      (i) => `{\\color{lightgray}${i}}`
     );
   }
 });
@@ -51,7 +51,7 @@ const numeral = require("numeral");
 
 let produceCacheData = (opts, blank) => {
   let { membits, blockindexbits, tagbits, blockbits } = getMemSize(opts);
-  let _g = x => (!blank ? x : "\\ldots");
+  let _g = (x) => (!blank ? x : "\\ldots");
   let b = `
 \\begin{itemize}
 \\setlength\\itemsep{-.5em}
@@ -66,7 +66,7 @@ let produceCacheData = (opts, blank) => {
   return b;
 };
 
-let produceCacheBadge = opts => {
+let produceCacheBadge = (opts) => {
   let b = `
 \\begin{itemize}
 \\setlength\\itemsep{-.5em}
@@ -96,7 +96,7 @@ let produceLine = _.curry((opts, t, i) => {
         acc,
         ttype,
         _.map(t.state, getCacheBlock(i)),
-        t.description
+        t.description,
       ])
     );
   } else {
@@ -106,7 +106,7 @@ let produceLine = _.curry((opts, t, i) => {
   }
 });
 
-let nblocks = opts => getMemSize(opts).numberOfBlocks;
+let nblocks = (opts) => getMemSize(opts).numberOfBlocks;
 
 let encodeBlockIndex = _.curry((opts, i) => {
   if (opts.cacheways === 0) return i;
@@ -120,25 +120,25 @@ let encodeBlockIndex = _.curry((opts, i) => {
 
 let replArray = (n, f) => _.map(_.range(0, n), f);
 
-let l0 = opts =>
+let l0 = (opts) =>
   _.flattenDeep([
     "",
     "",
     "",
     replArray(
       nblocks(opts),
-      i => `\\multicolumn{3}{c|}{Block ${encodeBlockIndex(opts, i)}}`
+      (i) => `\\multicolumn{3}{c|}{Block ${encodeBlockIndex(opts, i)}}`
     ),
-    ""
+    "",
   ]);
 
-let l1 = opts =>
+let l1 = (opts) =>
   _.flattenDeep([
     "",
     "address",
     "result",
     replArray(nblocks(opts), () => ["V", "T", "M"]),
-    "action"
+    "action",
   ]);
 
 let tableWrap = _.curry((n, data, opts) => {
@@ -152,7 +152,7 @@ let tableWrap = _.curry((n, data, opts) => {
   \\end{tabular}`;
 });
 
-let getCols = opts => {
+let getCols = (opts) => {
   let { numberOfBlocks } = getMemSize(opts);
   return 2 + 3 * numberOfBlocks + 2;
 };
@@ -201,8 +201,8 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
         "standalone",
         "pdflatex",
         "-r varwidth=20cm --usepackage amssymb"
-      )
-    ]
+      ),
+    ],
   };
   if (options.save) {
     return saveArtifacts(result.latex, options.save);
@@ -228,7 +228,7 @@ let getMemSize = ({ membits, cacheways, blockbits, cachesizebits }) => {
     blockbits,
     membits,
     blockindexbits,
-    numberOfBlocks: Math.pow(2, blockindexbits) * Math.pow(2, cacheways)
+    numberOfBlocks: Math.pow(2, blockindexbits) * Math.pow(2, cacheways),
   };
 };
 
@@ -255,7 +255,10 @@ let checkBlockBits = (config, ix) => {
 // └───────┴────────┴────────────────┘
 
 let daddr = (config, numeric) => {
-  let bits = _.join(_.filter(numeric, c => c !== " "), "");
+  let bits = _.join(
+    _.filter(numeric, (c) => c !== " "),
+    ""
+  );
   let { membits, blockindexbits, tagbits } = getMemSize(config);
   if (_.size(bits) !== membits)
     throw `Address bits of ${bits} must be exactly ${membits}`;
@@ -275,44 +278,44 @@ let daddr = (config, numeric) => {
   return { tag, bindex, boffset, wkbnumber, desc, ibindex, iwkbnumber };
 };
 
-let emptyCache = opts =>
+let emptyCache = (opts) =>
   replArray(nblocks(opts), () => {
     return {
-      valid: false
+      valid: false,
     };
   });
 
 let nextCache = _.curry((config, { cache, actions }, access, stepnum) => {
   cache = _.cloneDeep(cache);
-  cache = _.map(cache, c => {
+  cache = _.map(cache, (c) => {
     delete c.highlight;
     return c;
   });
   actions = _.cloneDeep(actions);
   let { tag, ibindex, iwkbnumber, desc } = daddr(config, access);
-  let markMiss = idx => {
+  let markMiss = (idx) => {
     cache[idx] = {
       valid: true,
       tag,
       data: iwkbnumber,
       highlight: true,
-      lastaccess: stepnum
+      lastaccess: stepnum,
     };
     actions.push({
       type: "miss",
       state: cache,
       description: `carico ${desc}`,
-      access
+      access,
     });
   };
-  let markHit = idx => {
+  let markHit = (idx) => {
     cache[idx].highlight = true;
     cache[idx].lastaccess = stepnum;
     actions.push({
       type: "hit",
       state: cache,
       description: `leggo ${desc}`,
-      access
+      access,
     });
   };
   if (config.cacheways === 0) {
@@ -330,27 +333,27 @@ let nextCache = _.curry((config, { cache, actions }, access, stepnum) => {
     let setSize = Math.pow(2, config.cacheways);
     let blocksToCheck;
     if (!_.isNaN(ibindex)) {
-      blocksToCheck = _.map(_.range(0, setSize), i => i + ibindex * setSize);
+      blocksToCheck = _.map(_.range(0, setSize), (i) => i + ibindex * setSize);
     } else {
       // this is a completely set associative cache
       blocksToCheck = _.range(0, setSize);
     }
     let resHit = findBlockAmong(
       blocksToCheck,
-      i => cache[i].valid && cache[i].tag === tag
+      (i) => cache[i].valid && cache[i].tag === tag
     );
     if (resHit !== -1) markHit(resHit);
     else {
       /* miss */
-      let notused = findBlockAmong(blocksToCheck, i => !cache[i].valid);
+      let notused = findBlockAmong(blocksToCheck, (i) => !cache[i].valid);
       if (notused !== -1) markMiss(notused);
       else {
-        let annotedBlocks = _.map(blocksToCheck, i => {
+        let annotedBlocks = _.map(blocksToCheck, (i) => {
           cache[i].num = i;
           if (_.isUndefined(cache[i].lastaccess)) cache[i].lastaccess = 0;
           return cache[i];
         });
-        let victim = _.minBy(annotedBlocks, b => b.lastaccess).num;
+        let victim = _.minBy(annotedBlocks, (b) => b.lastaccess).num;
         markMiss(victim);
       }
     }
@@ -358,7 +361,11 @@ let nextCache = _.curry((config, { cache, actions }, access, stepnum) => {
   return { cache, actions };
 });
 
-let randomSeq = size => _.join(_.map(_.range(size), () => _.random(1)), "");
+let randomSeq = (size) =>
+  _.join(
+    _.map(_.range(size), () => _.random(1)),
+    ""
+  );
 
 let replaceAddress = _.curry((config, address) => {
   let { blockbits } = getMemSize(config);
@@ -387,12 +394,14 @@ let simulate = (config, emptyc, accesslist) => {
     accesslist,
     results: _.reduce(accesslist, nextCache(config), {
       cache: emptyc,
-      actions: [{ type: "", state: emptyc, description: "Situazione iniziale" }]
-    })
+      actions: [
+        { type: "", state: emptyc, description: "Situazione iniziale" },
+      ],
+    }),
   };
 };
 
-let getEmptyConfig = options => {
+let getEmptyConfig = (options) => {
   let s = options.empty;
   s = s.split(",");
   s = _.chunk(s, 3);
@@ -400,7 +409,7 @@ let getEmptyConfig = options => {
     return {
       valid: parseInt(v),
       tag: e,
-      data: parseInt(d)
+      data: parseInt(d),
     };
   });
   return e;
