@@ -134,7 +134,7 @@ let eventLoop = (options, schedule) => {
       if (state.curr === undefined)
         resched(`Waking up task ${tw.name} @${timer.walltime}`);
       else {
-        tw.vrtlwk = `(${v} < ${state.curr.vrt}) \\times`;
+        tw.vrtlwk = `(${v} < ${state.curr.vrt}) $\\times$`;
       }
     }
   };
@@ -288,22 +288,21 @@ let printData = (history, schedule, finalschedule, options) => {
   let taskevents = _.join(
     _.map(schedule.tasks, t => {
       return [
-        `\\item task ${t.name} (\\lambda = ${t.lambda}) inizia a ${t.start}, ` +
-          _.join(
-            _.map(t.events, (e, i) =>
-              i % 2 === 0 ? `gira per ${e}` : `in attesa per ${e}`
-            ),
-            ", "
-          )
+        `\\item task ${t.name} ($\\lambda=$${t.lambda}) inizia a ${t.start}, ` +
+        _.join(
+          _.map(t.events, (e, i) =>
+            i % 2 === 0 ? `gira per ${e}` : `in attesa per ${e}`
+          ),
+          ", "
+        )
       ];
     }),
     "\n"
   );
   let s = `
   \\begin{itemize}
-  \\item Dati scheduling: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
-    schedule.class.mingran
-  }, $\\omega$=${schedule.class.wgup}
+  \\item Dati scheduling: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${schedule.class.mingran
+    }, $\\omega$=${schedule.class.wgup}
   ${taskevents}
   \\end{itemize}`;
 
@@ -327,17 +326,17 @@ let drawHistory = (history, schedule, finalschedule, options) => {
   let pwrlk = r =>
     !_.isUndefined(r.vrtlwk) && r.vrtlwk !== ""
       ? printAtConf(
-          r.tend,
-          r.index + 0.4,
-          `${r.vrtlwk}`,
-          `anchor=east, text=${r.vrtlwk.slice(-1) === "k" ? "blue" : "red"}`
-        )
+        r.tend,
+        r.index + 0.4,
+        `${r.vrtlwk}`,
+        `anchor=east, text=${r.vrtlwk.slice(-1) === "k" ? "blue" : "red"}`
+      )
       : "";
 
   let drawRan = r => {
     return [
       `\\draw[draw=black] (${r.tstart * hs}, ${r.index *
-        vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) node[pos=.5] {}; `,
+      vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) node[pos=.5] {}; `,
       printAt(r.tend, r.index - 0.4, r.vrtend),
       // printAtConf(r.tend, r.index + 0.4, r.sumend, "color=gray!90"),
       printAt(r.tend - 0.25, r.index, `${r.sumend - r.p}/${r2(r.q)}`),
@@ -347,8 +346,8 @@ let drawHistory = (history, schedule, finalschedule, options) => {
   let drawBlocked = r => {
     return [
       `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.index *
-        vs}) rectangle ++(${(r.tend - r.tstart) *
-        hs},${hh}) node[pos=.5, text=white] {};`,
+      vs}) rectangle ++(${(r.tend - r.tstart) *
+      hs},${hh}) node[pos=.5, text=white] {};`,
       pwrlk(r)
     ];
   };
@@ -379,10 +378,8 @@ let drawHistory = (history, schedule, finalschedule, options) => {
     )
   ]);
   let grid = [
-    `\\draw[xstep=${
-      schedule.timer
-    },gray!20,thin,shift={(0,-0.25)}] (0,0) grid (${schedule.runfor},${
-      schedule.tasks.length
+    `\\draw[xstep=${schedule.timer
+    },gray!20,thin,shift={(0,-0.25)}] (0,0) grid (${schedule.runfor},${schedule.tasks.length
     });`,
     _.map(_.range(0, schedule.runfor / schedule.timer + 1), i =>
       printAtConf(
@@ -401,12 +398,12 @@ let drawHistory = (history, schedule, finalschedule, options) => {
         0,
         (-schedule.tasks.length + t.index) * 0.2 - 0.7,
         `task ${t.name}: starts at ${t.start}, ` +
-          _.join(
-            _.map(t.events, (e, i) =>
-              i % 2 === 0 ? `runs for ${e}` : `blocks for ${e}`
-            ),
-            ", "
+        _.join(
+          _.map(t.events, (e, i) =>
+            i % 2 === 0 ? `runs for ${e}` : `blocks for ${e}`
           ),
+          ", "
+        ),
         "anchor=west"
       ),
       `\\draw [->] (${t.start}, ${t.index} + 0.75) -- (${t.start}, ${t.index});`
@@ -416,10 +413,9 @@ let drawHistory = (history, schedule, finalschedule, options) => {
   let taskexits = _.map(finalschedule.tasks, t => {
     return !_.isUndefined(t.exited)
       ? [
-          `\\draw [<-] (${t.exited}, ${t.index} + 0.75) -- (${t.exited}, ${
-            t.index
-          });`
-        ]
+        `\\draw [<-] (${t.exited}, ${t.index} + 0.75) -- (${t.exited}, ${t.index
+        });`
+      ]
       : [];
   });
 
@@ -427,8 +423,7 @@ let drawHistory = (history, schedule, finalschedule, options) => {
     printAtConf(
       -0.6,
       schedule.tasks.length,
-      `Schedule data: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
-        schedule.class.mingran
+      `Schedule data: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${schedule.class.mingran
       }, $\\omega$=${schedule.class.wgup}`,
       "anchor=west"
     )
