@@ -338,7 +338,7 @@ let printConditions = (history, schedule) => {
   let items = _.map(conds, c => {
     let sub = subOf(c.task);
     let rho = `\\rho_{${sub}}`;
-    let clamp = `${rho} \\gets \\max(${fmtNum(c.vrtBefore)},\\; v_{min} - \\bar\\tau/2) = \\max(${fmtNum(c.vrtBefore)},\\; ${fmtNum(c.vminUsed)} - ${c.latency}/2) = ${fmtNum(c.vrtAfter)}`;
+    let clamp = `${rho} \\gets \\max(${fmtNum(c.vrtBefore)},\\; \\rho_{min} - \\bar\\tau/2) = \\max(${fmtNum(c.vrtBefore)},\\; ${fmtNum(c.vminUsed)} - ${c.latency}/2) = ${fmtNum(c.vrtAfter)}`;
     let vLine = `v_{${sub}} = ${rho} + \\omega/\\lambda_{${sub}} = ${fmtNum(c.vrtAfter)} + ${c.omega}/${c.lambda} = ${fmtNum(c.v)}`;
     let cmp;
     if (_.isUndefined(c.currVrt)) {
