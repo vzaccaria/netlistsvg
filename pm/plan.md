@@ -4,8 +4,7 @@ Last updated: 2026-05-22
 
 ## Active epics
 
-None yet. Bootstrap pass only — populate via `/pm feature` and `/pm bug`
-as concrete work arises.
+None — both epics from this session are closed (see Completed).
 
 ## Parked / future
 
@@ -17,4 +16,10 @@ as concrete work arises.
 
 ## Completed (recent)
 
+- vz-sched scheduling correctness (`netlistsvg-yr5`) — closed 2026-05-22.
+  Both bugs resolved (`yr5.1` formula, `yr5.2` vmin invariant verified).
+  See `pm/adr/0001-vz-sched-preemption-math.md`.
+- vz-sched artifacts & presentation (`netlistsvg-3l0`) — closed
+  2026-05-22. New `printConditions` LaTeX artifact wired into
+  `saveIt` via shared `wakeupV` helper.
 - Repo PM bootstrap (`bare` layout) — 2026-05-22.

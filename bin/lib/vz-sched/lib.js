@@ -15,7 +15,8 @@ let eventLoop = (options, schedule) => {
     curr: undefined,
     rbt: [],
     blocked: [],
-    vmin: 0
+    vmin: 0,
+    conditions: []
   };
 
   let timer = {
@@ -84,16 +85,46 @@ let eventLoop = (options, schedule) => {
 
   let schedslice = t => schedule.class.latency * (t.lambda / sumlambda());
 
+  // Canonical wakeup/start preemption value (ADR 0001):
+  //   v = tw.vrt + omega / tw.lambda
+  // Mirrors Linux CFS wakeup_gran(se) = calc_delta_fair(gran, se).
+  let wakeupV = tw => r2(tw.vrt + schedule.class.wgup / tw.lambda);
+
+  let recordCondition = (kind, tw, vrtBefore, vminUsed) => {
+    let v = wakeupV(tw);
+    let currVrt = _.isUndefined(state.curr) ? undefined : state.curr.vrt;
+    let currTask = _.isUndefined(state.curr) ? undefined : state.curr.name;
+    let decision =
+      _.isUndefined(currVrt) ? "no-curr" : v < currVrt ? "preempt" : "keep";
+    state.conditions.push({
+      kind,
+      time: timer.walltime,
+      task: tw.name,
+      lambda: tw.lambda,
+      omega: schedule.class.wgup,
+      latency: schedule.class.latency,
+      vrtBefore: r2(vrtBefore),
+      vrtAfter: r2(tw.vrt),
+      vminUsed: r2(vminUsed),
+      v,
+      currVrt: _.isUndefined(currVrt) ? undefined : r2(currVrt),
+      currTask,
+      decision
+    });
+  };
+
   let _start_task = t => {
     t.sum = 0;
     // on clone, dont use a lower vrt that would interrupt the current process
     state.rbt.push(t);
+    let vrtBefore = t.vrt;
     if (_.isUndefined(t.vrt)) {
       t.vrt = state.vmin + schedslice(t) / t.lambda;
     }
+    recordCondition("start", t, _.isUndefined(vrtBefore) ? t.vrt : vrtBefore, state.vmin);
     if (
       state.curr === undefined ||
-      t.vrt + schedule.class.wgup * (t.lambda / sumlambda()) < state.curr.vrt
+      wakeupV(t) < state.curr.vrt
     ) {
       resched(`starting task ${t.name} @${timer.walltime}`);
     }
@@ -117,10 +148,15 @@ let eventLoop = (options, schedule) => {
 
   let _wakeup = tw => {
     console.log(`Call to wake up ${tw.name} at @${timer.walltime}`);
+    let vrtBefore = tw.vrt;
+    // vmin here excludes tw by construction: tw is still in 'blocked',
+    // not in state.rbt (ADR 0001, decision #2).
+    let vminUsed = state.vmin;
     tw.vrt = Math.max(tw.vrt, state.vmin - schedule.class.latency / 2);
     removeBlocked(tw);
     addToRbt(tw);
-    let v = r2(tw.vrt + schedule.class.wgup * (tw.lambda / sumlambda()));
+    let v = wakeupV(tw);
+    recordCondition("wakeup", tw, vrtBefore, vminUsed);
     if (!_.isUndefined(state.curr)) {
       tw.vrtlwk = `${v} < ${state.curr.vrt}`;
     }
@@ -191,6 +227,7 @@ let eventLoop = (options, schedule) => {
     _.range(1, schedule.runfor / schedule.timer + 2),
     updateTimer
   );
+  res.conditions = state.conditions;
   return res;
 };
 
@@ -282,6 +319,46 @@ let parseHistoryEvents = (history, schedule) => {
     })
   );
   return tasksToShow;
+};
+
+// Emit LaTeX itemize listing, for each wakeup / start event captured in
+// history.conditions, the vrt clamp + canonical preemption check
+// v = vrt + omega / lambda against state.curr.vrt. See ADR 0001.
+let printConditions = (history, schedule) => {
+  let conds = _.filter(history.conditions || [], c => c.kind === "wakeup");
+  if (conds.length === 0) {
+    return `\\begin{itemize}\n\\item (nessun evento di risveglio registrato)\n\\end{itemize}`;
+  }
+  let fmtNum = x => (_.isUndefined(x) ? "-" : `${x}`);
+  // Derive a subscript-safe label from a task name like "$\tau_1$" -> "\tau_1".
+  let subOf = name => {
+    let m = /^\$(.+)\$$/.exec(name);
+    return m ? m[1] : name;
+  };
+  let items = _.map(conds, c => {
+    let sub = subOf(c.task);
+    let rho = `\\rho_{${sub}}`;
+    let clamp = `${rho} \\gets \\max(${fmtNum(c.vrtBefore)},\\; v_{min} - \\bar\\tau/2) = \\max(${fmtNum(c.vrtBefore)},\\; ${fmtNum(c.vminUsed)} - ${c.latency}/2) = ${fmtNum(c.vrtAfter)}`;
+    let vLine = `v_{${sub}} = ${rho} + \\omega/\\lambda_{${sub}} = ${fmtNum(c.vrtAfter)} + ${c.omega}/${c.lambda} = ${fmtNum(c.v)}`;
+    let cmp;
+    if (_.isUndefined(c.currVrt)) {
+      cmp = `\\text{nessun task corrente} \\Rightarrow \\text{schedula } ${c.task}`;
+    } else {
+      let mark = c.decision === "preempt" ? "\\checkmark" : "\\times";
+      let rel = c.decision === "preempt" ? "<" : "\\not<";
+      let currSub = subOf(c.currTask);
+      cmp = `v_{${sub}} ${rel} \\rho_{${currSub}}:\\; ${fmtNum(c.v)} ${rel} ${fmtNum(c.currVrt)} \\quad ${mark}`;
+    }
+    return [
+      `\\item \\textbf{Risveglio} di ${c.task} a $t=${c.time}$:`,
+      `\\begin{align*}`,
+      `& ${clamp} \\\\`,
+      `& ${vLine} \\\\`,
+      `& ${cmp}`,
+      `\\end{align*}`
+    ].join("\n");
+  });
+  return `\\begin{itemize}\n${items.join("\n")}\n\\end{itemize}`;
 };
 
 let printData = (history, schedule, finalschedule, options) => {
@@ -465,6 +542,13 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       "standalone",
       "pdflatex",
       "-r varwidth"
+    ),
+    latexArtifact(
+      printConditions(history, origschedule),
+      "wakeup conditions",
+      "standalone",
+      "pdflatex",
+      "-r varwidth"
     )
   ];
   if (!options.save) {
@@ -480,4 +564,4 @@ let runAndSave = (options, schedule) => {
   saveIt(options, history, origschedule, schedule);
 };
 
-module.exports = { eventLoop, saveIt, runAndSave };
+module.exports = { eventLoop, saveIt, runAndSave, printConditions };
