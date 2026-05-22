@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
-
 let lib = require("../lib");
+
+const SUBNAME = "netlist";
+
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
@@ -94,9 +95,9 @@ let verilog2svg = (args, options) => {
     });
 };
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Produce a netlist diagram from a verilog file")
+    .command(SUBNAME, "Produce a netlist diagram from a verilog file")
     .argument("[file]", "source file (or stdin). Can be verilog or JSON")
     .option("-o, --output <filename>", "Output filename")
     .option(
@@ -140,7 +141,17 @@ let main = () => {
           logger.error(e);
         });
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

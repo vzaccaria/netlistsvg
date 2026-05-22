@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
-
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
@@ -25,9 +23,11 @@ let svg2pdf = _.curry((options, svgdata) => {
   );
 });
 
-let main = () => {
+const SUBNAME = "nomnom";
+
+let register = prog => {
   prog
-    .description("Produce a diagram from a nomnom file")
+    .command(SUBNAME, "Produce a diagram from a nomnom file")
     .argument("[file]", "source file (or stdin). ")
     .option(
       "-o, --output <filename>",
@@ -39,7 +39,17 @@ let main = () => {
       let file_p = args.file ? $fs.readFile(args.file, "utf-8") : $gstd();
       file_p.then(nom2svg(options)).then(svg2pdf(options));
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

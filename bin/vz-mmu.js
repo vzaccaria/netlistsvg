@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
 const _ = require("lodash");
+
+const SUBNAME = "mmu";
 
 let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 let { toLatexTable } = require("./lib/tex");
@@ -278,10 +279,9 @@ let produceAndSaveArtifacts = async (args, options) => {
   }
 };
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Cache utils")
-    .command("sim")
+    .command(`${SUBNAME} sim`, "MMU paging simulator")
     .argument(
       "<alist>",
       "comma separated list of virtual page accesses (e.g. 'p0,q1...')"
@@ -316,7 +316,17 @@ let main = () => {
       // checkConfig(config);
       // console.log(processSim(config));
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

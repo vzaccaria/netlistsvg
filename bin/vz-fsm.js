@@ -6,11 +6,11 @@ let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
 let { elaborateFSM, dumpEx } = require("./lib/fsm");
 
-const prog = require("caporal");
+const SUBNAME = "fsm";
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Swiss Knife tool for FSM synthesis")
+    .command(SUBNAME, "Swiss Knife tool for FSM synthesis")
     .argument("[json]", "JSON file or stdin")
     .option(
       "-s, --save <string>",
@@ -37,7 +37,17 @@ let main = () => {
         });
       }
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

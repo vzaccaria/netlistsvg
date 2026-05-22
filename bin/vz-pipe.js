@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
 let $fs = require("mz/fs");
 let { runAndSave } = require("./lib/vz-pipe/lib");
 
-let main = () => {
+const SUBNAME = "pipe";
+
+let register = prog => {
   prog
-    .description("Pipeline visualization generator")
-    .command("pipesim")
+    .command(`${SUBNAME} pipesim`, "Pipeline visualization generator")
     .argument(
       "<program>",
       `The instructions separated by commas e.g.: 'lw(2, 1),add(4, 2, 5)'`
@@ -36,12 +36,24 @@ let main = () => {
     )
     .action((args, options) => {
       runAndSave(options, args.program);
-    })
-    .command("preamble", "Print latex preamble")
+    });
+
+  prog
+    .command(`${SUBNAME} preamble`, "Print latex preamble")
     .action(() => {
       $fs.readFile(`${__dirname}/preambles/pipe.tex`, "utf8").then(console.log);
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

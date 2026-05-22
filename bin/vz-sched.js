@@ -2,15 +2,15 @@
 "use strict";
 
 const name = "vz-sched";
-const prog = require("caporal");
 const { runAndSave } = require("./lib/" + name + "/lib");
-// const { schedule } = require("./lib/" + name + "/fixtures");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
 
-let main = () => {
+const SUBNAME = "sched";
+
+let register = prog => {
   prog
-    .description("Swiss Knife tool schedule diagrams")
+    .command(SUBNAME, "Swiss Knife tool schedule diagrams")
     .argument("[json]", "JSON file or stdin")
     .option(
       "-s, --save <string>",
@@ -24,7 +24,17 @@ let main = () => {
         runAndSave(options, sched);
       });
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

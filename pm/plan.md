@@ -4,7 +4,7 @@ Last updated: 2026-05-22
 
 ## Active epics
 
-None — both epics from this session are closed (see Completed).
+None.
 
 ## Parked / future
 
@@ -16,6 +16,10 @@ None — both epics from this session are closed (see Completed).
 
 ## Completed (recent)
 
+- vzpac unified CLI (`netlistsvg-c0o`) — closed 2026-05-22. New
+  `bin/vzpac.js` dispatcher; each `bin/vz-*.js` exports `register(prog)`
+  and self-injects its SUBNAME when run standalone. `package.json`
+  exposes `vzpac` alongside all existing `vz-*` entries.
 - vz-sched scheduling correctness (`netlistsvg-yr5`) — closed 2026-05-22.
   Both bugs resolved (`yr5.1` formula, `yr5.2` vmin invariant verified).
   See `pm/adr/0001-vz-sched-preemption-math.md`.

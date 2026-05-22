@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
-
 let _ = require("lodash");
+
+const SUBNAME = "wave";
+
 let $fs = require("mz/fs");
 let { exec } = require("mz/child_process");
 let $gstd = require("get-stdin");
@@ -141,9 +142,9 @@ let processWhitelist = (wavedrom, options) => {
   }
 };
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Produce a wave diagram")
+    .command(SUBNAME, "Produce a wave diagram")
     .argument("[file]", "source Wavedrom/VCD file")
     .option("--end <integer>", "time ends at", prog.INTEGER, 10)
     .option("-s, --signals <string>", "comma separated list of signals")
@@ -227,7 +228,17 @@ let main = () => {
         });
       }
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

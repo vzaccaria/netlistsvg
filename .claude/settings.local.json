@@ -4,7 +4,10 @@
       "Bash(git add *)",
       "Bash(curl -sSL https://raw.githubusercontent.com/torvalds/linux/v6.5/kernel/sched/fair.c)",
       "Bash(awk 'NR>=600 && NR<=720')",
-      "Bash(awk 'NR>=4725 && NR<=4775')"
+      "Bash(awk 'NR>=4725 && NR<=4775')",
+      "Bash(git stash *)",
+      "Bash(npx jest *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

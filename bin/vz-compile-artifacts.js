@@ -6,11 +6,11 @@ let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
 let { compileArtifacts } = require("./lib/artifacts");
 
-const prog = require("caporal");
+const SUBNAME = "compile-artifacts";
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Produce pdf artifacts")
+    .command(SUBNAME, "Produce pdf artifacts")
     .argument("[json]", "JSON file or stdin")
     .option(
       "-p, --prefix <string>",
@@ -24,7 +24,17 @@ let main = () => {
         compileArtifacts(data.latex, options.prefix);
       });
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

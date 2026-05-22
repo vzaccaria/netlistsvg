@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
 const { execWithStringStdErr } = require("./lib/common.js");
 let $gstd = require("get-stdin");
 const _ = require("lodash");
 const { beautifyProg, run } = require("./lib/spim");
+
+const SUBNAME = "spim";
 
 let parseError = line => {
   let regexp = /spim: \(parser\) (?<error>[\w\s\']+) on line (?<line>\d+) of file (?<file>[\/\-\.\w\s]+)/;
@@ -56,10 +57,9 @@ let assemble = (filename, options, logger, program) => {
 
 let $fs = require("mz/fs");
 
-let main = () => {
+let register = prog => {
   prog
-    .description("SPIM utils")
-    .command("check", "Checks a source file for errors")
+    .command(`${SUBNAME} check`, "Checks a source file for errors")
     .argument("[file]", `Source file`)
     .option(
       "-b, --spim-binary <string>",
@@ -76,21 +76,35 @@ let main = () => {
       } catch (e) {
         console.log(e);
       }
-    })
-    .command("format", "format a source file")
+    });
+
+  prog
+    .command(`${SUBNAME} format`, "format a source file")
     .argument("[file]", `Source file`)
     .action(async args => {
       let program = await (args.file
         ? $fs.readFile(args.file, "utf-8")
         : $gstd());
       beautifyProg(program);
-    })
-    .command("run", "run a source file")
+    });
+
+  prog
+    .command(`${SUBNAME} run`, "run a source file")
     .argument("<file>", `Source file`)
     .action(async args => {
       console.log(await run(args.file));
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
 const _ = require("lodash");
+
+const SUBNAME = "cache";
 
 let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
 let { lab } = require("./lib/common");
@@ -415,10 +416,9 @@ let getEmptyConfig = (options) => {
   return e;
 };
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Cache utils")
-    .command("sim")
+    .command(`${SUBNAME} sim`, "Cache utils")
     .argument("<alist>", `comma sep. list of binary numbers (addresses)`)
     .option("-x, --save <prefix>", "save with prefix or dump json")
     .option("-m, --membits <num>", "main address size", prog.INT, 14)
@@ -456,7 +456,17 @@ let main = () => {
         );
       else console.log(JSON.stringify(simulate(options, e, args.alist), 0, 4));
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

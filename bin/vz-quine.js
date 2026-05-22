@@ -7,11 +7,11 @@ let $gstd = require("get-stdin");
 let { synthesize } = require("./lib/quine");
 let { saveArtifacts } = require("./lib/artifacts.js");
 
-const prog = require("caporal");
+const SUBNAME = "quine";
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Swiss Knife tool for boolean function minimization")
+    .command(SUBNAME, "Swiss Knife tool for boolean function minimization")
     .argument("<table>", "table")
     .option(
       "-s, --save <prefix>",
@@ -30,7 +30,17 @@ let main = () => {
         return saveArtifacts(s.latex, options.save);
       }
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

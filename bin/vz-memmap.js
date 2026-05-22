@@ -7,7 +7,7 @@ let { execWithString } = require("./lib/common");
 let { exec } = require("mz/child_process");
 let { latexArtifact } = require("./lib/artifacts");
 
-const prog = require("caporal");
+const SUBNAME = "memmap";
 
 let printResult = latex => {
   return {
@@ -23,10 +23,9 @@ let printResult = latex => {
   };
 };
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Memory map generator")
-    .command("generate")
+    .command(`${SUBNAME} generate`, "Memory map generator")
     .argument("[csvfile]")
     .option("-t, --latex")
     .action((args, options, logger) => {
@@ -43,14 +42,26 @@ let main = () => {
           }
         })
       );
-    })
-    .command("preamble")
+    });
+
+  prog
+    .command(`${SUBNAME} preamble`, "Print latex preamble")
     .action(() => {
       exec(`cat ${__dirname}/preambles/memmap.tex`).then(output => {
         console.log(output[0]);
       });
     });
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}

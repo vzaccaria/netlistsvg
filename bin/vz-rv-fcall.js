@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 "use strict";
 
-const prog = require("caporal");
 // const { execWithStringStdErr } = require("./lib/common");
+
+const SUBNAME = "rv-fcall";
 const sprintf = require("sprintf-js").sprintf;
 let { exec } = require("mz/child_process");
 let $gstd = require("get-stdin");
@@ -414,10 +415,9 @@ ${source}
   }
 };
 
-let main = () => {
+let register = prog => {
   prog
-    .description("Function call utils")
-    .command("diagram", "generates stack and register usage for a call")
+    .command(`${SUBNAME} diagram`, "generates stack and register usage for a call")
     .argument("[json]", `File describing the call sequence`)
     .option("-j, --json", `print sequence of cells instead of tikz diagram`)
     .option("-b, --blank", `blank diagram`)
@@ -429,15 +429,19 @@ let main = () => {
         if (!options.blank) console.log(gpdiag(data, state, stackAlloc), true);
         else console.log(gpdiag(data, state, stackAlloc, false));
       }
-    })
-    .command("asm", "generates asm prologue for callee")
+    });
+
+  prog
+    .command(`${SUBNAME} asm`, "generates asm prologue for callee")
     .argument("<json>", `File describing the call sequence`)
     .action(async (args, options) => {
       let dirname = path.dirname(path.resolve(args.json));
       let { state, data, stackAlloc } = await developCall(args, options);
       console.log(await produceAsm({ data, state, stackAlloc, dirname }, true));
-    })
-    .command("test", "invokes function with tests")
+    });
+
+  prog
+    .command(`${SUBNAME} test`, "invokes function with tests")
     .argument("<json>", `File describing the call sequence`)
     .option(
       "--cc <format>",
@@ -481,15 +485,27 @@ let main = () => {
         runExe = `${runExe} --log-instructions --log-operands`;
       }
       console.log(_.join(await exec(runExe), ""));
-    })
-    .command("artifact", "generates stack and register usage for a call")
+    });
+
+  prog
+    .command(`${SUBNAME} artifact`, "generates stack and register usage for a call")
     .argument("[json]", `File describing the call sequence`)
     .option(
       "-s, --save <string>",
       "save data with in files with prefix <string>"
     )
     .action(produceAndSaveArtifacts);
-  prog.parse(process.argv);
 };
 
-main();
+module.exports = { register };
+
+if (require.main === module) {
+  const prog = require("caporal");
+  register(prog);
+  prog.parse([
+    process.argv[0],
+    process.argv[1],
+    SUBNAME,
+    ...process.argv.slice(2)
+  ]);
+}
