@@ -5,7 +5,7 @@ let Table = require("easy-table");
 
 // let $fs = require("mz/fs");
 // let $gstd = require("get-stdin");
-const { latexArtifact, saveArtifacts } = require("../artifacts");
+const { latexArtifact, writeArtifacts } = require("../artifacts");
 
 let r2 = x => Math.round(x * 1000) / 1000;
 
@@ -521,40 +521,49 @@ let drawHistory = (history, schedule, finalschedule, options) => {
 };
 
 let saveIt = (options, history, origschedule, finalschedule) => {
+  let schedPkgs = ["tikz", "amsmath", "amssymb"];
+  let schedLibs = ["arrows", "positioning"];
   history.latex = [
     latexArtifact(
       drawHistory(history, origschedule, finalschedule, { blank: false }),
       "rt diagram",
       "standalone",
       "pdflatex",
-      "-r varwidth"
+      "-r varwidth",
+      schedPkgs,
+      schedLibs
     ),
     latexArtifact(
       drawHistory(history, origschedule, finalschedule, { blank: true }),
       "rt diagram blank",
       "standalone",
       "pdflatex",
-      "-r varwidth"
+      "-r varwidth",
+      schedPkgs,
+      schedLibs
     ),
     latexArtifact(
       printData(history, origschedule, finalschedule, {}),
       "data table",
       "standalone",
       "pdflatex",
-      "-r varwidth"
+      "-r varwidth",
+      schedPkgs
     ),
     latexArtifact(
       printConditions(history, origschedule),
       "wakeup conditions",
       "standalone",
       "pdflatex",
-      "-r varwidth"
+      "-r varwidth",
+      schedPkgs,
+      schedLibs
     )
   ];
   if (!options.save) {
     console.log(JSON.stringify(history, 0, 4));
   } else {
-    saveArtifacts(history.latex, options.save);
+    writeArtifacts(history.latex, options);
   }
 };
 

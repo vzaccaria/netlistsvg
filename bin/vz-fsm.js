@@ -5,11 +5,12 @@ let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
 let { elaborateFSM, dumpEx } = require("./lib/fsm");
+let { addCompileOptions } = require("./lib/artifacts");
 
 const SUBNAME = "fsm";
 
 let register = prog => {
-  prog
+  let cmd = prog
     .command(SUBNAME, "Swiss Knife tool for FSM synthesis")
     .argument("[json]", "JSON file or stdin")
     .option(
@@ -26,8 +27,8 @@ let register = prog => {
       "-e, --example <string>",
       "dump example for <string> = (moore|mealy)"
     )
-    .option("-w, --draw", "produce only latex code for drawing")
-    .action((args, options) => {
+    .option("-w, --draw", "produce only latex code for drawing");
+  addCompileOptions(cmd).action((args, options) => {
       if (options.example) {
         dumpEx(options.example);
       } else {

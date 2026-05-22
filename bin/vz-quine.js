@@ -5,12 +5,12 @@ let _ = require("lodash");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
 let { synthesize } = require("./lib/quine");
-let { saveArtifacts } = require("./lib/artifacts.js");
+let { writeArtifacts, addCompileOptions } = require("./lib/artifacts.js");
 
 const SUBNAME = "quine";
 
 let register = prog => {
-  prog
+  let cmd = prog
     .command(SUBNAME, "Swiss Knife tool for boolean function minimization")
     .argument("<table>", "table")
     .option(
@@ -18,18 +18,18 @@ let register = prog => {
       "Save data into specified prefix files (otw dump json)"
     )
     .option("-x, --var <prefix>", "Prefix of variables", prog.STRING, "x")
-    .option("-r, --vars <string>", "List of variables (Alternative to -x)")
-    .action((args, options) => {
-      let nvars = Math.ceil(Math.log2(args.table.length));
-      let vars = _.map(_.range(0, nvars), v => `${options.var}_${v}`);
-      if (options.vars) vars = options.vars.split(",");
-      let s = synthesize(args.table, vars);
-      if (!options.save) {
-        console.log(JSON.stringify(s, 0, 4));
-      } else {
-        return saveArtifacts(s.latex, options.save);
-      }
-    });
+    .option("-r, --vars <string>", "List of variables (Alternative to -x)");
+  addCompileOptions(cmd).action((args, options) => {
+    let nvars = Math.ceil(Math.log2(args.table.length));
+    let vars = _.map(_.range(0, nvars), v => `${options.var}_${v}`);
+    if (options.vars) vars = options.vars.split(",");
+    let s = synthesize(args.table, vars);
+    if (!options.save) {
+      console.log(JSON.stringify(s, 0, 4));
+    } else {
+      return writeArtifacts(s.latex, options);
+    }
+  });
 };
 
 module.exports = { register };

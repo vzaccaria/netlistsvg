@@ -1,6 +1,6 @@
 let _ = require("lodash");
 let $fs = require("mz/fs");
-let { latexArtifact, saveArtifacts } = require("./artifacts");
+let { latexArtifact, writeArtifacts } = require("./artifacts");
 let { quickSynth } = require("./quine");
 let { toLatexTable } = require("./tex");
 
@@ -505,7 +505,7 @@ let elaborateFSM = (fsm, options) => {
   } else {
     let data = { latex: formatResults(synthesize(fsm, options)) };
     if (options.save) {
-      return saveArtifacts(data.latex, options.save);
+      return writeArtifacts(data.latex, options);
     } else {
       console.log(JSON.stringify(data));
     }

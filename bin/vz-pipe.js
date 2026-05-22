@@ -3,11 +3,12 @@
 
 let $fs = require("mz/fs");
 let { runAndSave } = require("./lib/vz-pipe/lib");
+let { addCompileOptions } = require("./lib/artifacts");
 
 const SUBNAME = "pipe";
 
 let register = prog => {
-  prog
+  let cmd = prog
     .command(`${SUBNAME} pipesim`, "Pipeline visualization generator")
     .argument(
       "<program>",
@@ -33,10 +34,10 @@ let register = prog => {
       "Hazard tikz row separation",
       prog.DOUBLE,
       1.3
-    )
-    .action((args, options) => {
-      runAndSave(options, args.program);
-    });
+    );
+  addCompileOptions(cmd).action((args, options) => {
+    runAndSave(options, args.program);
+  });
 
   prog
     .command(`${SUBNAME} preamble`, "Print latex preamble")

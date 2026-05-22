@@ -12,7 +12,11 @@ let vcdParser = require("vcd-parser");
 
 let tmp = require("tmp-promise");
 let { execWithString } = require("./lib/common");
-let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+let {
+  latexArtifact,
+  writeArtifacts,
+  addCompileOptions
+} = require("./lib/artifacts");
 
 let wave2tikz = (options, wavedata) => {
   return execWithString(
@@ -143,7 +147,7 @@ let processWhitelist = (wavedrom, options) => {
 };
 
 let register = prog => {
-  prog
+  let cmd = prog
     .command(SUBNAME, "Produce a wave diagram")
     .argument("[file]", "source Wavedrom/VCD file")
     .option("--end <integer>", "time ends at", prog.INTEGER, 10)
@@ -167,8 +171,8 @@ let register = prog => {
       "Produce the wave in json format to be rendered elsewhere"
     )
     .option("-r, --regformat", "Use wavedrom register")
-    .option("-b, --bits <num>", "Number of bits for register", prog.INT, 32)
-    .action(async (args, options, logger) => {
+    .option("-b, --bits <num>", "Number of bits for register", prog.INT, 32);
+  addCompileOptions(cmd).action(async (args, options, logger) => {
       options.logger = logger;
       if (!options.regformat) {
         try {
@@ -207,7 +211,7 @@ let register = prog => {
             ];
             let result = { latex: artifacts };
             if (options.save) {
-              saveArtifacts(result.latex, options.save);
+              writeArtifacts(result.latex, options);
             } else {
               if (options.dumpTikz) {
                 console.log(complete);

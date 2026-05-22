@@ -3,13 +3,14 @@
 
 const name = "vz-sched";
 const { runAndSave } = require("./lib/" + name + "/lib");
+const { addCompileOptions } = require("./lib/artifacts");
 let $fs = require("mz/fs");
 let $gstd = require("get-stdin");
 
 const SUBNAME = "sched";
 
 let register = prog => {
-  prog
+  let cmd = prog
     .command(SUBNAME, "Swiss Knife tool schedule diagrams")
     .argument("[json]", "JSON file or stdin")
     .option(
@@ -17,13 +18,13 @@ let register = prog => {
       "save data with in files with prefix <string>"
     )
     .option("-w, --draw", "produce only latex code for drawing")
-    .option("-n, --num <int>", "which test schedule", prog.INT, 9)
-    .action((args, options) => {
-      let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
-      datap.then(JSON.parse).then(sched => {
-        runAndSave(options, sched);
-      });
+    .option("-n, --num <int>", "which test schedule", prog.INT, 9);
+  addCompileOptions(cmd).action((args, options) => {
+    let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
+    datap.then(JSON.parse).then(sched => {
+      runAndSave(options, sched);
     });
+  });
 };
 
 module.exports = { register };

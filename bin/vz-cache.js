@@ -5,7 +5,11 @@ const _ = require("lodash");
 
 const SUBNAME = "cache";
 
-let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+let {
+  latexArtifact,
+  writeArtifacts,
+  addCompileOptions
+} = require("./lib/artifacts");
 let { lab } = require("./lib/common");
 
 // check
@@ -206,7 +210,7 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
     ],
   };
   if (options.save) {
-    return saveArtifacts(result.latex, options.save);
+    return writeArtifacts(result.latex, options);
   } else {
     console.log(JSON.stringify(result));
   }
@@ -417,7 +421,7 @@ let getEmptyConfig = (options) => {
 };
 
 let register = prog => {
-  prog
+  let cmd = prog
     .command(`${SUBNAME} sim`, "Cache utils")
     .argument("<alist>", `comma sep. list of binary numbers (addresses)`)
     .option("-x, --save <prefix>", "save with prefix or dump json")
@@ -440,8 +444,8 @@ let register = prog => {
     .option(
       "-e, --empty <string>",
       "sequence of triplets for initializing cache"
-    )
-    .action(async (args, options) => {
+    );
+  addCompileOptions(cmd).action(async (args, options) => {
       let e = emptyCache(options);
       if (options.empty) {
         e = getEmptyConfig(options);

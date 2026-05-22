@@ -369,6 +369,9 @@ let synthesize = (data, vars) => {
   s.quicksynthk = kmap;
   s.funcname = `f(${_.join(vars, ",")})`;
 
+  // Packages mirror pac/exam-sheets/20260218/q-1.1/makefile.
+  let qPkgs = ["tikz", "longtable", "amsmath"];
+  let kmapPkgs = ["karnaugh-map", "tikz", "longtable", "amsmath"];
   s.latex = _.concat(
     [
       latexArtifact(
@@ -376,42 +379,48 @@ let synthesize = (data, vars) => {
         "implicants tables",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        qPkgs
       ),
       latexArtifact(
         sopForm(s),
         "sop form",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        qPkgs
       ),
       latexArtifact(
         implicantsChartsAll,
         "implicant charts complete",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        qPkgs
       ),
       latexArtifact(
         soluzione,
         "solution detailed",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        qPkgs
       ),
       latexArtifact(
         `$${symbolicSolution(vars, s)}$`,
         "solution expression",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        qPkgs
       ),
       latexArtifact(
         kmap,
         "karnaugh maps",
         "standalone",
         "pdflatex",
-        "--usepackage karnaugh-map -r varwidth"
+        "--usepackage karnaugh-map -r varwidth",
+        kmapPkgs
       )
     ],
     _.map(s.implicantsCharts, (c, i) => {
@@ -420,7 +429,8 @@ let synthesize = (data, vars) => {
         `implicant chart ${i}`,
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        qPkgs
       );
     })
   );

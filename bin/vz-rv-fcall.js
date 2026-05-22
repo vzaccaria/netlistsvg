@@ -10,7 +10,11 @@ let $gstd = require("get-stdin");
 const _ = require("lodash");
 const { beautifyString } = require("./lib/spim");
 const path = require("path");
-let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+let {
+  latexArtifact,
+  writeArtifacts,
+  addCompileOptions
+} = require("./lib/artifacts");
 
 let $fs = require("mz/fs");
 
@@ -362,10 +366,30 @@ let produceAndSaveArtifacts = async (args, options) => {
     dirname
   });
   let source = data.functionData.crefcontent;
+  // Packages mirror pac/exam-sheets/20260218/q-2.3/makefile.
+  let diagPkgs = ["tikz"];
+  let diagLibs = ["matrix", "chains", "calc"];
+  let mintedPkgs = ["minted"];
   let result = {
     latex: [
-      latexArtifact(diag, "complete diagram", "standalone", "pdflatex"),
-      latexArtifact(diagb, "blank diagram", "standalone", "pdflatex"),
+      latexArtifact(
+        diag,
+        "complete diagram",
+        "standalone",
+        "pdflatex",
+        undefined,
+        diagPkgs,
+        diagLibs
+      ),
+      latexArtifact(
+        diagb,
+        "blank diagram",
+        "standalone",
+        "pdflatex",
+        undefined,
+        diagPkgs,
+        diagLibs
+      ),
       latexArtifact(
         `
 \\begin{minted}[obeytabs=true,autogobble,baselinestretch=0.95,linenos=true]{asm}
@@ -374,7 +398,8 @@ ${asmFull}
         "asm source full",
         "standalone",
         "pdflatex",
-        "--usepackage minted -r varwidth"
+        "--usepackage minted -r varwidth",
+        mintedPkgs
       ),
       latexArtifact(
         `
@@ -384,7 +409,8 @@ ${asmEmpty}
         "asm source empty",
         "standalone",
         "pdflatex",
-        "--usepackage minted -r varwidth"
+        "--usepackage minted -r varwidth",
+        mintedPkgs
       ),
       latexArtifact(
         `
@@ -404,12 +430,13 @@ ${source}
         "c source",
         "standalone",
         "pdflatex",
-        "--usepackage minted -r varwidth"
+        "--usepackage minted -r varwidth",
+        mintedPkgs
       )
     ]
   };
   if (options.save) {
-    return saveArtifacts(result.latex, options.save);
+    return writeArtifacts(result.latex, options);
   } else {
     console.log(JSON.stringify(result));
   }
@@ -487,14 +514,15 @@ let register = prog => {
       console.log(_.join(await exec(runExe), ""));
     });
 
-  prog
-    .command(`${SUBNAME} artifact`, "generates stack and register usage for a call")
-    .argument("[json]", `File describing the call sequence`)
-    .option(
-      "-s, --save <string>",
-      "save data with in files with prefix <string>"
-    )
-    .action(produceAndSaveArtifacts);
+  addCompileOptions(
+    prog
+      .command(`${SUBNAME} artifact`, "generates stack and register usage for a call")
+      .argument("[json]", `File describing the call sequence`)
+      .option(
+        "-s, --save <string>",
+        "save data with in files with prefix <string>"
+      )
+  ).action(produceAndSaveArtifacts);
 };
 
 module.exports = { register };

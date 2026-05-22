@@ -17,7 +17,7 @@ let run = (options, program) => {
   return sim;
 };
 
-const { latexArtifact, saveArtifacts } = require("../artifacts");
+const { latexArtifact, writeArtifacts } = require("../artifacts");
 
 let _ = require("lodash");
 
@@ -378,7 +378,7 @@ let saveIt = (options, sim) => {
   if (!options.save) {
     console.log(JSON.stringify(results, 0, 4));
   } else {
-    saveArtifacts(results.latex, options.save);
+    writeArtifacts(results.latex, options);
   }
 };
 

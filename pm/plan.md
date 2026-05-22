@@ -16,6 +16,13 @@ None.
 
 ## Completed (recent)
 
+- compile-to-pdf for vz-* artifacts (`netlistsvg-6qo`) — closed
+  2026-05-22. `latexArtifact()` now carries per-artifact
+  `packages` / `tikzLibraries`; new `compileArtifactsXelatex` runs
+  xelatex+pdfcrop in a tmp dir so only the final `<pfx>-<sfx>.pdf`
+  lands in cwd. `-c/--compile` and `--font` wired across
+  sched / quine / fsm / cache / mmu / wave / pipe pipesim / rv-fcall
+  artifact. Packages backfilled for quine, rv-fcall, sched.
 - vzpac unified CLI (`netlistsvg-c0o`) — closed 2026-05-22. New
   `bin/vzpac.js` dispatcher; each `bin/vz-*.js` exports `register(prog)`
   and self-injects its SUBNAME when run standalone. `package.json`

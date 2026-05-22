@@ -5,7 +5,11 @@ const _ = require("lodash");
 
 const SUBNAME = "mmu";
 
-let { latexArtifact, saveArtifacts } = require("./lib/artifacts");
+let {
+  latexArtifact,
+  writeArtifacts,
+  addCompileOptions
+} = require("./lib/artifacts");
 let { toLatexTable } = require("./lib/tex");
 
 // let testobj = {
@@ -273,14 +277,14 @@ let produceAndSaveArtifacts = async (args, options) => {
     ]
   };
   if (options.save) {
-    return saveArtifacts(result.latex, options.save);
+    return writeArtifacts(result.latex, options);
   } else {
     console.log(JSON.stringify(result));
   }
 };
 
 let register = prog => {
-  prog
+  let cmd = prog
     .command(`${SUBNAME} sim`, "MMU paging simulator")
     .argument(
       "<alist>",
@@ -310,8 +314,8 @@ let register = prog => {
       "starting from <num> dont print anything in blank",
       prog.INTEGER,
       -1
-    )
-    .action(async (args, options) => {
+    );
+  addCompileOptions(cmd).action(async (args, options) => {
       produceAndSaveArtifacts(args, options);
       // checkConfig(config);
       // console.log(processSim(config));
