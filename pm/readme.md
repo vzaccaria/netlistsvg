@@ -21,8 +21,7 @@ quine-McCluskey minimization, wavedrom timing diagrams, and RISC-V traces.
   - `vz-fsm.js` — FSM diagrams.
   - `vz-quine.js` — Quine-McCluskey minimization.
   - `vz-wave.js` — wavedrom wrapper (uses standard `wavedrom-cli`).
-  - `vz-spim.js`, `vz-rv-fcall.js`, `vz-nomnom.js`,
-    `vz-compile-artifacts.js`.
+  - `vz-rv-fcall.js`, `vz-nomnom.js`, `vz-compile-artifacts.js`.
 - `bin/lib/` — shared modules: `common.js`, `quine.js`, `qmc.js`, `fsm.js`,
   `spim.js`, `tex.js`, `artifacts.js`, plus `vz-pipe/` and `vz-sched/`
   subpackages.
