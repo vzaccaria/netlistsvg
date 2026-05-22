@@ -52,11 +52,10 @@ let sopForm = res => {
   );
   let dcs = _.join(dc, ", ");
   if (!_.isUndefined(res.funcname)) {
-    return `\\begin{equation}${
-      res.funcname
-    } = (\\textsc{ON}_{\\textsc{set}}(${ons}), \\textsc{DC}_{\\textsc{set}} (${dcs})) \\end{equation}`;
+    return `\\begin{equation*}${res.funcname
+      } = (\\textsc{ON}_{\\textsc{set}}(${ons}), \\textsc{DC}_{\\textsc{set}} (${dcs})) \\end{equation*}`;
   } else {
-    return `\\begin{equation}(\\textsc{ON}_{\\textsc{set}}(${ons}), \\textsc{DC}_{\\textsc{set}} (${dcs})) \\end{equation}`;
+    return `\\begin{equation*}(\\textsc{ON}_{\\textsc{set}}(${ons}), \\textsc{DC}_{\\textsc{set}} (${dcs})) \\end{equation*}`;
   }
 };
 
@@ -114,7 +113,7 @@ ${_.join(_.map(titles, t => "{" + t + "}"), " & ")} \\\\
 `;
 
   let rows = _.join(
-    _.zipWith(...cols, function() {
+    _.zipWith(...cols, function () {
       return _.join(arguments, " & ");
     }),
     `\\\\ \n`
@@ -358,11 +357,10 @@ let synthesize = (data, vars) => {
     }),
     "\n"
   );
-  let soluzione = `\\noindent La soluzione ricavata con ${
-    s.implicantsCharts.length
-  } passaggi è la seguente: ${getSolutionTable(
-    s
-  )} ovvero \\[ ${symbolicSolution(vars, s)} \\]`;
+  let soluzione = `\\noindent La soluzione ricavata con ${s.implicantsCharts.length
+    } passaggi è la seguente: ${getSolutionTable(
+      s
+    )} ovvero \\[ ${symbolicSolution(vars, s)} \\]`;
 
   let kmap =
     nvars === 4 ? karnaugh(s, vars) : "only 4 variables maps are supported";
