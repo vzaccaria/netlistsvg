@@ -27,7 +27,7 @@ let register = prog => {
       "How many asm instructions to print (useful for initial parts of loops)",
       prog.INT
     )
-    .option("-c, --conflicts <string>", "Conflicts strings (comma separated)")
+    .option("--conflicts <string>", "Conflicts strings (comma separated)")
     .option("-d, --debug", "Debug print")
     .option(
       "--hrowsep <double>",
