@@ -31,6 +31,9 @@ listings/minted styling, language-specific highlighting.
 
 ## Completed (recent)
 
+- Backfill packages for vz-cache artifacts (`netlistsvg-2q7`) —
+  closed 2026-05-29. Trace artifacts now declare amssymb + xcolor;
+  `vz-cache sim ... -c` produces all 5 PDFs.
 - Backfill packages/tikzLibraries for vz-pipe artifacts
   (`netlistsvg-afb`) — closed 2026-05-29. `latexArtifact()` + `wrapTex`
   now accept a `preamble` field; vz-pipe artifacts declare tikz +

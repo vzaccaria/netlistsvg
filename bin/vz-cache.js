@@ -198,14 +198,16 @@ let produceAndSaveArtifacts = async (args, options, trace) => {
         "Complete trace",
         "standalone",
         "pdflatex",
-        "-r varwidth=20cm --usepackage amssymb,xcolor"
+        "-r varwidth=20cm --usepackage amssymb,xcolor",
+        ["amssymb", "xcolor"]
       ),
       latexArtifact(
         getCompleteTrace(trace, _.merge({}, { blank: true }, options)),
         "Blank trace",
         "standalone",
         "pdflatex",
-        "-r varwidth=20cm --usepackage amssymb"
+        "-r varwidth=20cm --usepackage amssymb",
+        ["amssymb", "xcolor"]
       ),
     ],
   };
