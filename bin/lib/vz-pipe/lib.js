@@ -18,8 +18,22 @@ let run = (options, program) => {
 };
 
 const { latexArtifact, writeArtifacts } = require("../artifacts");
+const fs = require("fs");
+const path = require("path");
 
 let _ = require("lodash");
+
+const pipePreamble = fs.readFileSync(
+  path.join(__dirname, "..", "..", "preambles", "pipe.tex"),
+  "utf8"
+);
+const pipePackages = ["tikz"];
+const pipeTikzLibraries = [
+  "shapes.geometric",
+  "positioning",
+  "calc",
+  "matrix"
+];
 
 let pipe = ({ n_fe, n_de, n_ee, n_me, n_we }) => {
   let prologue = _.repeat("-", n_fe);
@@ -336,42 +350,57 @@ let saveIt = (options, sim) => {
         "pipe sim complete",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        pipePackages,
+        pipeTikzLibraries,
+        pipePreamble
       ),
       latexArtifact(
         ps.blank,
         "pipe sim blank",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        pipePackages,
+        pipeTikzLibraries,
+        pipePreamble
       ),
       latexArtifact(
         hz.complete,
         "pipe hazards complete",
         "standalone",
         "pdflatex",
-        `-r varwidth -i ${__dirname}/preambles/pipe.tex`
+        `-r varwidth -i ${__dirname}/../../preambles/pipe.tex`,
+        pipePackages,
+        pipeTikzLibraries,
+        pipePreamble
       ),
       latexArtifact(
         hz.blank,
         "pipe hazards blank",
         "standalone",
         "pdflatex",
-        `-r varwidth -i ${__dirname}/preambles/pipe.tex`
+        `-r varwidth -i ${__dirname}/../../preambles/pipe.tex`,
+        pipePackages,
+        pipeTikzLibraries,
+        pipePreamble
       ),
       latexArtifact(
         asmCode(sim.table, options),
         "asm code",
         "standalone",
         "pdflatex",
-        "--usepackage minted -r varwidth"
+        "--usepackage minted -r varwidth",
+        ["minted"]
       ),
       latexArtifact(
         desc,
         "description",
         "standalone",
         "pdflatex",
-        "-r varwidth"
+        "-r varwidth",
+        pipePackages,
+        pipeTikzLibraries
       )
     ]
   };

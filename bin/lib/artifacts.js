@@ -13,13 +13,15 @@ let latexArtifact = (
   engine,
   addoptions,
   packages,
-  tikzLibraries
+  tikzLibraries,
+  preamble
 ) => {
   let sfx = _.kebabCase(name);
   if (_.isUndefined(clss)) clss = "standalone";
   if (_.isUndefined(engine)) engine = "pdflatex";
   if (_.isUndefined(packages)) packages = [];
   if (_.isUndefined(tikzLibraries)) tikzLibraries = [];
+  if (_.isUndefined(preamble)) preamble = "";
 
   return {
     code,
@@ -29,7 +31,8 @@ let latexArtifact = (
     engine,
     addoptions,
     packages,
-    tikzLibraries
+    tikzLibraries,
+    preamble
   };
 };
 
@@ -82,6 +85,7 @@ let wrapTex = (a, font) => {
     "\\usepackage[margin=.5cm]{geometry}",
     pkgLines,
     libLines,
+    a.preamble || "",
     "\\pagestyle{empty}",
     "\\begin{document}",
     a.code,
@@ -105,9 +109,9 @@ let compileArtifactXelatex = (pfx, a, opts) => {
         let texPath = path.join(workdir, texName);
         let pdfPath = path.join(workdir, `${outBase}.pdf`);
         await $fs.writeFile(texPath, wrapTex(a, font), "utf8");
-        let xelatex = `xelatex -interaction=nonstopmode -shell-escape -output-directory=${workdir} ${texPath}`;
+        let xelatex = `xelatex -interaction=nonstopmode -shell-escape ${texName}`;
         console.log(`XELATEX ${texName}`);
-        await exec(xelatex);
+        await exec(xelatex, { cwd: workdir });
         await exec(`pdfcrop ${pdfPath} ${outPdf}`);
         return outPdf;
       } finally {

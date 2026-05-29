@@ -4,24 +4,14 @@ Last updated: 2026-05-29
 
 ## Active epics
 
-### 1. vz-pipe artifacts missing packages/tikzLibraries (`netlistsvg-afb`)
-
-**Why:** netlistsvg-6qo backfilled packages for quine/rv-fcall/sched but
-vz-pipe `latexArtifact()` calls in `bin/lib/vz-pipe/lib.js:334-375` were
-missed. xelatex `--compile` pipeline emits a preamble lacking `tikz`, so
-all vz-pipe PDFs fail with `Environment tikzpicture undefined`.
-**Scope:** declare packages/tikzLibraries per artifact; fold
-`preambles/pipe.tex` into hazards artifacts. **Status:** open. Child:
-`netlistsvg-afb.1` (bug).
-
-### 2. vz-pipe-new short flag collision with shared compile options (`netlistsvg-n97`)
+### 1. vz-pipe-new short flag collision with shared compile options (`netlistsvg-n97`)
 
 **Why:** shared `-c/--compile` collides with pre-existing `-c, --conflicts`
 on vz-pipe and `-c, --is-vcd` on vz-wave. **Scope:** drop colliding short
 flags. **Status:** vz-pipe done (`n97.1` closed); vz-wave pending
 (`netlistsvg-n97.2`).
 
-### 3. xelatex font controls for vz-* artifacts (`netlistsvg-3ti`)
+### 2. xelatex font controls for vz-* artifacts (`netlistsvg-3ti`)
 
 **Why:** `--compile` pipeline only sets main font; verbatim/code blocks
 inherit default monospace and clash with chosen main font.
@@ -41,6 +31,11 @@ listings/minted styling, language-specific highlighting.
 
 ## Completed (recent)
 
+- Backfill packages/tikzLibraries for vz-pipe artifacts
+  (`netlistsvg-afb`) — closed 2026-05-29. `latexArtifact()` + `wrapTex`
+  now accept a `preamble` field; vz-pipe artifacts declare tikz +
+  shapes.geometric/positioning/calc/matrix and inline
+  `bin/preambles/pipe.tex` where needed.
 - compile-to-pdf for vz-* artifacts (`netlistsvg-6qo`) — closed
   2026-05-22. `latexArtifact()` now carries per-artifact
   `packages` / `tikzLibraries`; new `compileArtifactsXelatex` runs
