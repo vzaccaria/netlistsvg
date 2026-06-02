@@ -73,12 +73,7 @@ function processEntry(qdir, entry, opts) {
 function cleanEntry(qdir, entry) {
   if (entry === "manual" || (entry && entry.manual)) return;
   if (!entry) return;
-  const rm = p => fs.existsSync(p) && fs.rmSync(p, { recursive: true, force: true });
-  rm(path.join(qdir, "assets"));
-  rm(path.join(qdir, STAMP));
-  for (const fname of Object.keys(entry.inputs || {})) {
-    rm(path.join(qdir, fname));
-  }
+  if (fs.existsSync(qdir)) fs.rmSync(qdir, { recursive: true, force: true });
 }
 
 function run(ymlPath, opts) {
@@ -87,6 +82,10 @@ function run(ymlPath, opts) {
   const doc = yaml.load(fs.readFileSync(abs, "utf8")) || {};
 
   for (const [qdir, entry] of Object.entries(doc)) {
+    const isActionable =
+      entry && typeof entry === "object" &&
+      (entry.steps || entry.inputs || entry.cleanup || entry.manual);
+    if (!isActionable) continue;
     const full = path.join(root, qdir);
     if (opts.clean) {
       cleanEntry(full, entry);
