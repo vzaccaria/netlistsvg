@@ -20,7 +20,8 @@ const modules = [
   "./vz-wave",
   "./vz-rv-fcall",
   "./vz-nomnom",
-  "./vz-compile-artifacts"
+  "./vz-compile-artifacts",
+  "./vz-gen-assets"
 ];
 
 modules.forEach(m => {
