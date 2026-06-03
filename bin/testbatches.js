@@ -184,6 +184,15 @@ let cacheNewTestBatch = {
     {
       msg: `config exercise with constraints`,
       cmd: s => `${s} config --seed es2 -m 16 -b 4 -i 3 -w 2`
+    },
+    {
+      msg: `simulation trace with exact hits`,
+      cmd: s => `${s} sim --seed tr1 --hits 2 -n 6 -w 1 -m 12 -b 4`
+    },
+    {
+      msg: `simulation trace with hit range`,
+      cmd: s =>
+        `${s} sim --seed tr2 --min-hits 1 --max-hits 3 -n 6 -w 2 -m 12 -b 4`
     }
   ]
 };

@@ -136,9 +136,11 @@ let generateConfig = opts => {
 module.exports = {
   DEFAULT_RANGES,
   enumerateConfigs,
+  enrichConfig,
   generateConfig,
   getMemSize,
   isValid,
+  log2Exact,
   normalizeConstraints,
   seededRandom
 };

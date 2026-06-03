@@ -52,5 +52,8 @@ quine-McCluskey minimization, wavedrom timing diagrams, and RISC-V traces.
   `9c03489`); do not reintroduce a custom path.
 - Snapshots and fixtures are checked in under `bin/fixtures/` and
   `bin/lib/vz-*` subfolders.
+- `vz-cache-new` keeps exercise generation separate from legacy
+  `vz-cache sim`; `config` emits cache-configuration questions and `sim`
+  emits 4-block cache traces with generated hit/miss solutions.
 - Commit style: short `verb(scope): subject`, frequently
   `update: minor changes (<files>)` for incremental tweaks.

@@ -9,6 +9,7 @@ let {
   addCompileOptions
 } = require("./lib/artifacts");
 let { generateConfig } = require("./lib/vz-cache/config");
+let { generateSimulation } = require("./lib/vz-cache/sim");
 
 const SUBNAME = "cache-new";
 
@@ -85,6 +86,75 @@ let produceArtifacts = config => {
   };
 };
 
+let traceLine = row => {
+  return `${row.step} & \\texttt{${row.groupedAddress}}\\\\`;
+};
+
+let solutionLine = row => {
+  let result = row.expected === "hit" ? "\\textsc{H}" : "\\textsc{M}";
+  return [
+    row.step,
+    `\\texttt{${row.groupedAddress}}`,
+    result,
+    row.set,
+    row.tag,
+    row.action
+  ].join(" & ") + "\\\\";
+};
+
+let simExerciseLatex = sim => `
+\\begin{itemize}
+\\setlength\\itemsep{-.5em}
+\\item Dimensione della memoria di lavoro: ${bytes(sim.config.memoryBytes)}
+\\item Dimensione della cache: ${bytes(sim.config.cacheBytes)}
+\\item Dimensione del blocco: ${bytes(sim.config.blockBytes)}
+\\item Organizzazione: ${cacheKind(sim.config)}
+\\item Blocchi totali in cache: ${sim.config.numberOfBlocks}
+\\end{itemize}
+
+Completare la traccia indicando hit e miss.
+
+\\begin{tabular}{cl}
+Passo & Indirizzo\\\\
+\\hline
+${sim.trace.map(traceLine).join("\n")}
+\\end{tabular}
+`;
+
+let simSolutionLatex = sim => `
+\\begin{tabular}{clllll}
+Passo & Indirizzo & Esito & Insieme & Tag & Azione\\\\
+\\hline
+${sim.trace.map(solutionLine).join("\n")}
+\\end{tabular}
+
+\\[
+\\#hit = ${sim.hitCount},\\quad \\#miss = ${sim.missCount}
+\\]
+`;
+
+let produceSimulationArtifacts = sim => {
+  return {
+    simulation: sim,
+    latex: [
+      latexArtifact(
+        simExerciseLatex(sim),
+        "Cache simulation exercise",
+        "standalone",
+        "pdflatex",
+        "-r varwidth=16cm"
+      ),
+      latexArtifact(
+        simSolutionLatex(sim),
+        "Cache simulation solution",
+        "standalone",
+        "pdflatex",
+        "-r varwidth=18cm"
+      )
+    ]
+  };
+};
+
 let register = prog => {
   let cmd = prog
     .command(`${SUBNAME} config`, "Generate cache configuration exercises")
@@ -98,6 +168,26 @@ let register = prog => {
 
   addCompileOptions(cmd).action(async (args, options) => {
     let result = produceArtifacts(generateConfig(options));
+    if (options.save) {
+      return writeArtifacts(result.latex, options);
+    }
+    console.log(JSON.stringify(result));
+  });
+
+  let simCmd = prog
+    .command(`${SUBNAME} sim`, "Generate 4-block cache simulation exercises")
+    .option("--seed <value>", "seed for reproducible random generation")
+    .option("-x, --save <prefix>", "save with prefix or dump json")
+    .option("-n, --accesses <num>", "number of memory accesses", prog.INT, 6)
+    .option("--hits <num>", "exact number of hits to generate", prog.INT)
+    .option("--min-hits <num>", "minimum number of hits", prog.INT)
+    .option("--max-hits <num>", "maximum number of hits", prog.INT)
+    .option("-m, --membits <num>", "main address size", prog.INT)
+    .option("-b, --blockbits <num>", "log2 of block size", prog.INT)
+    .option("-w, --ways <num>", "cache associativity, as 1, 2, or 4", prog.INT);
+
+  addCompileOptions(simCmd).action(async (args, options) => {
+    let result = produceSimulationArtifacts(generateSimulation(options));
     if (options.save) {
       return writeArtifacts(result.latex, options);
     }

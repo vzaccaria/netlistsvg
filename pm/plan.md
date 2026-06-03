@@ -21,18 +21,6 @@ wire across vz-* CLIs that already accept `--font`. Out of scope:
 listings/minted styling, language-specific highlighting.
 **Status:** open. Child: `netlistsvg-3ti.1` (--font-mono flag).
 
-### 3. cache-new command tree for cache exercises (`netlistsvg-p0v`)
-
-**Why:** cache exercises need a clearer generation workflow for both simple
-configuration questions and simulation traces with controlled outcomes.
-**Scope:** study and define a `cache-new` flow with two subcommands:
-configuration exercises generated from minimal inputs plus random valid
-choices, and simulation exercises for caches with a total of 4 blocks with
-coarse control over hit count or hit range. Out of scope: general trace
-synthesis for arbitrary cache sizes until the 4-block workflow is proven.
-**Status:** configuration generator implemented (`netlistsvg-p0v.2`);
-simulation trace generator still open (`netlistsvg-p0v.1`).
-
 ## Parked / future
 
 - Untracked WIP in `bin/lib/quine.js` (modified, not staged) — review and
@@ -43,6 +31,10 @@ simulation trace generator still open (`netlistsvg-p0v.1`).
 
 ## Completed (recent)
 
+- cache-new command tree for cache exercises (`netlistsvg-p0v`) —
+  closed 2026-06-03. `cache-new config` generates seeded cache
+  configuration exercises; `cache-new sim` generates seeded 4-block cache
+  traces with exact or ranged hit-count control.
 - Backfill packages for vz-cache artifacts (`netlistsvg-2q7`) —
   closed 2026-05-29. Trace artifacts now declare amssymb + xcolor;
   `vz-cache sim ... -c` produces all 5 PDFs.
