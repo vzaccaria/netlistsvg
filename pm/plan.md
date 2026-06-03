@@ -1,6 +1,6 @@
 # Development Plan
 
-Last updated: 2026-05-29
+Last updated: 2026-06-03
 
 ## Active epics
 
@@ -20,6 +20,18 @@ inherit default monospace and clash with chosen main font.
 wire across vz-* CLIs that already accept `--font`. Out of scope:
 listings/minted styling, language-specific highlighting.
 **Status:** open. Child: `netlistsvg-3ti.1` (--font-mono flag).
+
+### 3. cache-new command tree for cache exercises (`netlistsvg-p0v`)
+
+**Why:** cache exercises need a clearer generation workflow for both simple
+configuration questions and simulation traces with controlled outcomes.
+**Scope:** study and define a `cache-new` flow with two subcommands:
+configuration exercises generated from minimal inputs plus random valid
+choices, and simulation exercises for caches with a total of 4 blocks with
+coarse control over hit count or hit range. Out of scope: general trace
+synthesis for arbitrary cache sizes until the 4-block workflow is proven.
+**Status:** open. Children: `netlistsvg-p0v.2` (configuration generator),
+`netlistsvg-p0v.1` (simulation trace generator).
 
 ## Parked / future
 
