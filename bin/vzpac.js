@@ -13,6 +13,7 @@ const modules = [
   "./vz-sched",
   "./vz-pipe",
   "./vz-cache",
+  "./vz-cache-new",
   "./vz-mmu",
   "./vz-memmap",
   "./vz-fsm",

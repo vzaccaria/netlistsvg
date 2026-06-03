@@ -30,8 +30,8 @@ configuration exercises generated from minimal inputs plus random valid
 choices, and simulation exercises for caches with a total of 4 blocks with
 coarse control over hit count or hit range. Out of scope: general trace
 synthesis for arbitrary cache sizes until the 4-block workflow is proven.
-**Status:** open. Children: `netlistsvg-p0v.2` (configuration generator),
-`netlistsvg-p0v.1` (simulation trace generator).
+**Status:** configuration generator implemented (`netlistsvg-p0v.2`);
+simulation trace generator still open (`netlistsvg-p0v.1`).
 
 ## Parked / future
 

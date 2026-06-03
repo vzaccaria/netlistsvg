@@ -64,6 +64,7 @@ let rvfcallTestBatch = {
   ]
 };
 
+// eslint-disable-next-line no-unused-vars
 let mmapTestBatch = {
   name: "vz-memmap",
   scriptname: `${__dirname}/vz-memmap.js`,
@@ -171,6 +172,22 @@ let cacheTestBatch = {
   ]
 };
 
+let cacheNewTestBatch = {
+  name: "vz-cache-new",
+  scriptname: `${__dirname}/vz-cache-new.js`,
+  fixtures: `${__dirname}/fixtures/cache-new`,
+  tests: [
+    {
+      msg: `config exercise with seed`,
+      cmd: s => `${s} config --seed es1`
+    },
+    {
+      msg: `config exercise with constraints`,
+      cmd: s => `${s} config --seed es2 -m 16 -b 4 -i 3 -w 2`
+    }
+  ]
+};
+
 module.exports = [
   fsmTestBatch,
   quineTestBatch,
@@ -178,5 +195,6 @@ module.exports = [
   waveTestBatch,
   rvfcallTestBatch,
   cacheTestBatch,
+  cacheNewTestBatch,
   mmuTestBatch
 ];

@@ -55,6 +55,7 @@
     "vz-nomnom": "./bin/vz-nomnom.js",
     "vz-rv-fcall": "./bin/vz-rv-fcall.js",
     "vz-cache.js": "./bin/vz-cache.js",
+    "vz-cache-new": "./bin/vz-cache-new.js",
     "vz-mmu": "./bin/vz-mmu.js",
     "vz-gen-assets": "./bin/vz-gen-assets.js",
     "vz-rv-exec": "./bin/vz-rv-exec.js"
