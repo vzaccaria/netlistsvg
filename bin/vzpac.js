@@ -21,7 +21,8 @@ const modules = [
   "./vz-rv-fcall",
   "./vz-nomnom",
   "./vz-compile-artifacts",
-  "./vz-gen-assets"
+  "./vz-gen-assets",
+  "./vz-rv-exec"
 ];
 
 modules.forEach(m => {
