@@ -54,6 +54,7 @@ quine-McCluskey minimization, wavedrom timing diagrams, and RISC-V traces.
   `bin/lib/vz-*` subfolders.
 - `vz-cache-new` keeps exercise generation separate from legacy
   `vz-cache sim`; `config` emits cache-configuration questions and `sim`
-  emits 4-block cache traces with generated hit/miss solutions.
+  emits 4-block cache traces with generated hit/miss solutions rendered in
+  the legacy block-state table format.
 - Commit style: short `verb(scope): subject`, frequently
   `update: minor changes (<files>)` for incremental tweaks.

@@ -10,6 +10,9 @@ let {
 } = require("./lib/artifacts");
 let { generateConfig } = require("./lib/vz-cache/config");
 let { generateSimulation } = require("./lib/vz-cache/sim");
+let {
+  produceSimulationArtifacts
+} = require("./lib/vz-cache/render");
 
 const SUBNAME = "cache-new";
 
@@ -81,75 +84,6 @@ let produceArtifacts = config => {
         "standalone",
         "pdflatex",
         "-r varwidth=12cm"
-      )
-    ]
-  };
-};
-
-let traceLine = row => {
-  return `${row.step} & \\texttt{${row.groupedAddress}}\\\\`;
-};
-
-let solutionLine = row => {
-  let result = row.expected === "hit" ? "\\textsc{H}" : "\\textsc{M}";
-  return [
-    row.step,
-    `\\texttt{${row.groupedAddress}}`,
-    result,
-    row.set,
-    row.tag,
-    row.action
-  ].join(" & ") + "\\\\";
-};
-
-let simExerciseLatex = sim => `
-\\begin{itemize}
-\\setlength\\itemsep{-.5em}
-\\item Dimensione della memoria di lavoro: ${bytes(sim.config.memoryBytes)}
-\\item Dimensione della cache: ${bytes(sim.config.cacheBytes)}
-\\item Dimensione del blocco: ${bytes(sim.config.blockBytes)}
-\\item Organizzazione: ${cacheKind(sim.config)}
-\\item Blocchi totali in cache: ${sim.config.numberOfBlocks}
-\\end{itemize}
-
-Completare la traccia indicando hit e miss.
-
-\\begin{tabular}{cl}
-Passo & Indirizzo\\\\
-\\hline
-${sim.trace.map(traceLine).join("\n")}
-\\end{tabular}
-`;
-
-let simSolutionLatex = sim => `
-\\begin{tabular}{clllll}
-Passo & Indirizzo & Esito & Insieme & Tag & Azione\\\\
-\\hline
-${sim.trace.map(solutionLine).join("\n")}
-\\end{tabular}
-
-\\[
-\\#hit = ${sim.hitCount},\\quad \\#miss = ${sim.missCount}
-\\]
-`;
-
-let produceSimulationArtifacts = sim => {
-  return {
-    simulation: sim,
-    latex: [
-      latexArtifact(
-        simExerciseLatex(sim),
-        "Cache simulation exercise",
-        "standalone",
-        "pdflatex",
-        "-r varwidth=16cm"
-      ),
-      latexArtifact(
-        simSolutionLatex(sim),
-        "Cache simulation solution",
-        "standalone",
-        "pdflatex",
-        "-r varwidth=18cm"
       )
     ]
   };

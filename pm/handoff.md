@@ -1,6 +1,6 @@
 # Session Handoff
 
-Written: 2026-06-03 18:02 Author: Codex
+Written: 2026-06-03 18:10 Author: Codex
 
 ## What was done this session
 
@@ -8,8 +8,11 @@ Written: 2026-06-03 18:02 Author: Codex
   4-block cache simulation trace exercises.
 - Added `bin/lib/vz-cache/sim.js` for 4-block cache generation, LRU state
   tracking, hit/miss planning, and expected outcome traces.
-- Extended `bin/vz-cache-new.js` with simulation exercise and solution
-  artifacts.
+- Extended `bin/vz-cache-new.js` with simulation artifacts and then switched
+  them to the legacy `vz-cache sim` LaTeX shape: badge, cache data, blank
+  cache data, complete trace, and blank trace.
+- Added `bin/lib/vz-cache/render.js`, which adapts generated `cache-new sim`
+  traces into the old block-state trace table format.
 - Added snapshot tests for exact hit control and hit-range control.
 - Closed `netlistsvg-p0v.1`; `netlistsvg-p0v` is now complete.
 
@@ -20,7 +23,9 @@ Written: 2026-06-03 18:02 Author: Codex
   hit count.
 - `cache-new sim --seed <value> --min-hits <n> --max-hits <m>` emits a
   4-block trace with a generated hit count inside the range.
-- `cache-new sim -x <prefix>` saves exercise/solution `.tex` artifacts.
+- `cache-new sim -x <prefix>` saves the five legacy-style `.tex` artifacts.
+  Direct-mapped traces show `Block 0` through `Block 3`; associative traces
+  show set/way labels such as `Block 0.a`.
 - Existing dirty changes outside this work remain in
   `.claude/settings.local.json` and `bin/lib/vz-sched/lib.js`.
 
@@ -53,3 +58,5 @@ Written: 2026-06-03 18:02 Author: Codex
 - Trace generation builds an explicit hit/miss plan first, then chooses
   binary addresses that satisfy the plan using the current simulated cache
   state.
+- The rendered simulation output intentionally mirrors `vz-cache sim` rather
+  than the earlier simplified `cache-new sim` exercise/solution tables.
