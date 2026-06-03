@@ -206,12 +206,12 @@ let legacyTraceFromSimulation = sim => {
       type: row.expected,
       state: flattenState(config, sets, row.blockNumber),
       description: actionDescription(config, row),
-      access: row.groupedAddress
+      access: row.address
     });
   });
 
   return {
-    accesslist: _.map(sim.trace, row => row.groupedAddress),
+    accesslist: _.map(sim.trace, row => row.address),
     results: { actions }
   };
 };

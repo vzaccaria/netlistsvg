@@ -1,6 +1,6 @@
 # Session Handoff
 
-Written: 2026-06-03 18:10 Author: Codex
+Written: 2026-06-03 18:16 Author: Codex
 
 ## What was done this session
 
@@ -26,6 +26,8 @@ Written: 2026-06-03 18:10 Author: Codex
 - `cache-new sim -x <prefix>` saves the five legacy-style `.tex` artifacts.
   Direct-mapped traces show `Block 0` through `Block 3`; associative traces
   show set/way labels such as `Block 0.a`.
+- `Blank trace` intentionally prints compact binary addresses without
+  tag/index/offset spaces; `Complete trace` still colorizes the fields.
 - Existing dirty changes outside this work remain in
   `.claude/settings.local.json` and `bin/lib/vz-sched/lib.js`.
 
