@@ -4,15 +4,7 @@ Last updated: 2026-06-04
 
 ## Active epics
 
-### 1. xelatex font controls for vz-* artifacts (`netlistsvg-3ti`)
-
-**Why:** `--compile` pipeline only sets main font; verbatim/code blocks
-inherit default monospace and clash with chosen main font.
-**Scope:** extend `wrapTex` preamble + `registerCompileOptions` in
-`bin/lib/artifacts.js`; thread option through `compileArtifactsXelatex`;
-wire across vz-* CLIs that already accept `--font`. Out of scope:
-listings/minted styling, language-specific highlighting.
-**Status:** open. Child: `netlistsvg-3ti.1` (--font-mono flag).
+None.
 
 ## Parked / future
 
@@ -24,6 +16,9 @@ listings/minted styling, language-specific highlighting.
 
 ## Completed (recent)
 
+- xelatex font controls for vz-* artifacts (`netlistsvg-3ti`) — closed
+  2026-06-04. `--font-mono` now threads through shared compile options and
+  `wrapTex()` emits `\setmonofont{...}` only when requested.
 - vz-pipe-new short flag collision with shared compile options
   (`netlistsvg-n97`) — closed 2026-06-04. `vz-pipe-new` and `vz-wave`
   no longer collide with the shared `-c/--compile` option; `vz-wave`

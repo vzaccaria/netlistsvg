@@ -56,5 +56,8 @@ quine-McCluskey minimization, wavedrom timing diagrams, and RISC-V traces.
   `vz-cache sim`; `config` emits cache-configuration questions and `sim`
   emits 4-block cache traces with generated hit/miss solutions rendered in
   the legacy block-state table format.
+- `addCompileOptions()` now exposes `--font-mono` alongside `--font` for
+  compile-capable xelatex pipelines; `wrapTex()` only emits
+  `\setmonofont{...}` when the flag is provided.
 - Commit style: short `verb(scope): subject`, frequently
   `update: minor changes (<files>)` for incremental tweaks.
