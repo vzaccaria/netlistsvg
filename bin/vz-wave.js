@@ -153,7 +153,7 @@ let register = prog => {
     .option("--end <integer>", "time ends at", prog.INTEGER, 10)
     .option("-s, --signals <string>", "comma separated list of signals")
     .option("-a, --save <prefix>", "save with prefix")
-    .option("-c, --is-vcd", "input is a vcd file")
+    .option("--is-vcd", "input is a vcd file")
     .option("-p, --posedge-clock", "clock is posedge, otherwise negedge")
     .option("-n, --trim-names", "trim hierarchic path names")
     .option("--show-sigs", "show signals")

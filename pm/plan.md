@@ -1,17 +1,10 @@
 # Development Plan
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## Active epics
 
-### 1. vz-pipe-new short flag collision with shared compile options (`netlistsvg-n97`)
-
-**Why:** shared `-c/--compile` collides with pre-existing `-c, --conflicts`
-on vz-pipe and `-c, --is-vcd` on vz-wave. **Scope:** drop colliding short
-flags. **Status:** vz-pipe done (`n97.1` closed); vz-wave pending
-(`netlistsvg-n97.2`).
-
-### 2. xelatex font controls for vz-* artifacts (`netlistsvg-3ti`)
+### 1. xelatex font controls for vz-* artifacts (`netlistsvg-3ti`)
 
 **Why:** `--compile` pipeline only sets main font; verbatim/code blocks
 inherit default monospace and clash with chosen main font.
@@ -31,6 +24,10 @@ listings/minted styling, language-specific highlighting.
 
 ## Completed (recent)
 
+- vz-pipe-new short flag collision with shared compile options
+  (`netlistsvg-n97`) — closed 2026-06-04. `vz-pipe-new` and `vz-wave`
+  no longer collide with the shared `-c/--compile` option; `vz-wave`
+  keeps `--is-vcd` long-only.
 - cache-new command tree for cache exercises (`netlistsvg-p0v`) —
   closed 2026-06-03. `cache-new config` generates seeded cache
   configuration exercises; `cache-new sim` generates seeded 4-block cache
