@@ -72,17 +72,21 @@ let saveArtifacts = (data, pfx) => {
 // per-artifact `packages` and `tikzLibraries`. All intermediate files
 // (.tmp.tex, .aux, .log, _minted*) are kept in a temp dir; only the final
 // cropped `<pfx>-<sfx>.pdf` lands next to the user's prefix.
-let wrapTex = (a, font) => {
+let wrapTex = (a, font, fontMono) => {
   let pkgLines = _.map(a.packages, p => `\\usepackage{${p}}`).join("\n");
   let libLines = _.map(
     a.tikzLibraries,
     l => `\\usetikzlibrary{${l}}`
   ).join("\n");
-  return [
+  let monoLine = _.isUndefined(fontMono)
+    ? ""
+    : `\\setmonofont{${fontMono}}`;
+  return _.compact([
     "\\documentclass[a4paper,landscape]{article}",
     "\\usepackage{fontspec}",
     `\\setmainfont{${font}}`,
     "\\usepackage[margin=.5cm]{geometry}",
+    monoLine,
     pkgLines,
     libLines,
     a.preamble || "",
@@ -91,11 +95,12 @@ let wrapTex = (a, font) => {
     a.code,
     "\\end{document}",
     ""
-  ].join("\n");
+  ]).join("\n");
 };
 
 let compileArtifactXelatex = (pfx, a, opts) => {
   let font = (opts && opts.font) || "Minion Pro";
+  let fontMono = opts && opts.fontMono;
   // Resolve final output path; honour pfx that includes a directory.
   let outDir = path.resolve(path.dirname(pfx));
   let outBase = `${path.basename(pfx)}-${a.sfx}`;
@@ -108,7 +113,7 @@ let compileArtifactXelatex = (pfx, a, opts) => {
         let texName = `${outBase}.tex`;
         let texPath = path.join(workdir, texName);
         let pdfPath = path.join(workdir, `${outBase}.pdf`);
-        await $fs.writeFile(texPath, wrapTex(a, font), "utf8");
+        await $fs.writeFile(texPath, wrapTex(a, font, fontMono), "utf8");
         let xelatex = `xelatex -interaction=nonstopmode -shell-escape ${texName}`;
         console.log(`XELATEX ${texName}`);
         await exec(xelatex, { cwd: workdir });
@@ -129,7 +134,8 @@ let compileArtifactsXelatex = (data, pfx, opts) => {
 let writeArtifacts = (data, options) => {
   if (options.compile) {
     return compileArtifactsXelatex(data, options.save, {
-      font: options.font
+      font: options.font,
+      fontMono: options.fontMono
     });
   }
   return saveArtifacts(data, options.save);
@@ -147,6 +153,10 @@ let addCompileOptions = cmd => {
       "Main font for --compile (xelatex pipeline)",
       undefined,
       "Minion Pro"
+    )
+    .option(
+      "--font-mono <name>",
+      "Monospace font for --compile (xelatex pipeline)"
     );
 };
 
