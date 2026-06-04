@@ -7,7 +7,20 @@
       "Bash(awk 'NR>=4725 && NR<=4775')",
       "Bash(git stash *)",
       "Bash(npx jest *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Read(//private/tmp/n97-test/**)",
+      "Bash(rm -f sim-*)",
+      "Bash(node /Users/zaccaria/projects/github/vzaccaria/netlistsvg/bin/vz-pipe-new.js pipesim \"sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),beq\\(3\\)\\(4\\),sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),beq\\(3\\)\\(4\\)\" --fw --asm-ins 5 --is-loop -n 28 -c -s ./sim)",
+      "Bash(xelatex -interaction=nonstopmode -shell-escape sim-pipe-sim-blank.tex)",
+      "Bash(git push *)",
+      "Bash(/bin/rm -f sim-*)",
+      "Bash(node /Users/zaccaria/projects/github/vzaccaria/netlistsvg/bin/vz-pipe-new.js pipesim \"sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),beq\\(3\\)\\(4\\),sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),sw\\(4\\)\\(3\\),add\\(3\\)\\(4\\)\\(1\\),beq\\(3\\)\\(4\\)\" --fw --asm-ins 5 --is-loop -n 28 -s ./sim)",
+      "Bash(/bin/ls -la *.pdf)",
+      "Bash(awk '{print $5, $NF}')",
+      "Read(//private/tmp/afb2-test/**)",
+      "Bash(/bin/rm -f ese0-*)",
+      "Bash(node /Users/zaccaria/projects/github/vzaccaria/netlistsvg/bin/vz-cache.js sim '0.1,1.1,1.0,1.1' --simplesim 1011111001,1,0110101011,0 -c -x ./ese0 -b 9 -s 11 -m 20 -w 1)",
+      "Bash(/bin/ls /tmp/afb2-test/*.pdf)"
     ]
   }
 }

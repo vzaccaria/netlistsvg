@@ -7,7 +7,7 @@ let Table = require("easy-table");
 // let $gstd = require("get-stdin");
 const { latexArtifact, writeArtifacts } = require("../artifacts");
 
-let r2 = x => Math.round(x * 1000) / 1000;
+let r2 = (x) => Math.round(x * 1000) / 1000;
 
 let eventLoop = (options, schedule) => {
   let state = {
@@ -16,13 +16,13 @@ let eventLoop = (options, schedule) => {
     rbt: [],
     blocked: [],
     vmin: 0,
-    conditions: []
+    conditions: [],
   };
 
   let timer = {
     walltime: -schedule.timer,
     events: [],
-    show: [0, 1, 4, 6, 8, 9, 10, 11]
+    show: [0, 1, 4, 6, 8, 9, 10, 11],
   };
 
   let updateTimer = () => {
@@ -33,18 +33,21 @@ let eventLoop = (options, schedule) => {
 
     let firable_tt = _.remove(
       timer.events,
-      e => e.type === "_task_tick" && r2(e.deadline) <= timer.walltime
+      (e) => e.type === "_task_tick" && r2(e.deadline) <= timer.walltime,
     );
-    _.map(firable_tt, e => {
+    _.map(firable_tt, (e) => {
       e.func(e.arg);
     });
 
-    let firable = _.remove(timer.events, e => r2(e.deadline) <= timer.walltime);
-    _.map(firable, e => {
+    let firable = _.remove(
+      timer.events,
+      (e) => r2(e.deadline) <= timer.walltime,
+    );
+    _.map(firable, (e) => {
       e.func(e.arg);
     });
 
-    state.rbt = _.map(state.rbt, t => {
+    state.rbt = _.map(state.rbt, (t) => {
       t.q = schedslice(t);
       if (!_.isUndefined(state.curr) && state.curr.index == t.index) {
         t.R = "X";
@@ -55,27 +58,27 @@ let eventLoop = (options, schedule) => {
     });
 
     // if (_.includes(timer.show, timer.walltime)) {
-    console.log(`at time @${timer.walltime}`);
-    console.log(Table.print(state.rbt));
-    console.log(Table.print(state.blocked));
+    // console.log(`at time @${timer.walltime}`);
+    // console.log(Table.print(state.rbt));
+    // console.log(Table.print(state.blocked));
     // }
     let res = {
       rbt: _.cloneDeep(state.rbt),
       blocked: _.cloneDeep(state.blocked),
-      time: timer.walltime
+      time: timer.walltime,
     };
-    _.map(schedule.tasks, t => (t.vrtlwk = ""));
+    _.map(schedule.tasks, (t) => (t.vrtlwk = ""));
     return res;
   };
 
-  let resched = msg => {
-    console.log(msg);
+  let resched = (msg) => {
+    // console.log(msg);
     if (state.rbt.length > 0) {
       state.curr = state.rbt[0];
       state.curr.prev = state.curr.sum;
-      console.log(
-        `scheduled task ${state.curr.name} to run @${timer.walltime}`
-      );
+      // console.log(
+      //   `scheduled task ${state.curr.name} to run @${timer.walltime}`
+      // );
     } else {
       state.curr = undefined;
     }
@@ -83,19 +86,22 @@ let eventLoop = (options, schedule) => {
 
   let sumlambda = () => _.reduce(state.rbt, (a, t) => a + t.lambda, 0);
 
-  let schedslice = t => schedule.class.latency * (t.lambda / sumlambda());
+  let schedslice = (t) => schedule.class.latency * (t.lambda / sumlambda());
 
   // Canonical wakeup/start preemption value (ADR 0001):
   //   v = tw.vrt + omega / tw.lambda
   // Mirrors Linux CFS wakeup_gran(se) = calc_delta_fair(gran, se).
-  let wakeupV = tw => r2(tw.vrt + schedule.class.wgup / tw.lambda);
+  let wakeupV = (tw) => r2(tw.vrt + schedule.class.wgup / tw.lambda);
 
   let recordCondition = (kind, tw, vrtBefore, vminUsed) => {
     let v = wakeupV(tw);
     let currVrt = _.isUndefined(state.curr) ? undefined : state.curr.vrt;
     let currTask = _.isUndefined(state.curr) ? undefined : state.curr.name;
-    let decision =
-      _.isUndefined(currVrt) ? "no-curr" : v < currVrt ? "preempt" : "keep";
+    let decision = _.isUndefined(currVrt)
+      ? "no-curr"
+      : v < currVrt
+        ? "preempt"
+        : "keep";
     state.conditions.push({
       kind,
       time: timer.walltime,
@@ -109,11 +115,11 @@ let eventLoop = (options, schedule) => {
       v,
       currVrt: _.isUndefined(currVrt) ? undefined : r2(currVrt),
       currTask,
-      decision
+      decision,
     });
   };
 
-  let _start_task = t => {
+  let _start_task = (t) => {
     t.sum = 0;
     // on clone, dont use a lower vrt that would interrupt the current process
     state.rbt.push(t);
@@ -121,33 +127,35 @@ let eventLoop = (options, schedule) => {
     if (_.isUndefined(t.vrt)) {
       t.vrt = state.vmin + schedslice(t) / t.lambda;
     }
-    recordCondition("start", t, _.isUndefined(vrtBefore) ? t.vrt : vrtBefore, state.vmin);
-    if (
-      state.curr === undefined ||
-      wakeupV(t) < state.curr.vrt
-    ) {
+    recordCondition(
+      "start",
+      t,
+      _.isUndefined(vrtBefore) ? t.vrt : vrtBefore,
+      state.vmin,
+    );
+    if (state.curr === undefined || wakeupV(t) < state.curr.vrt) {
       resched(`starting task ${t.name} @${timer.walltime}`);
     }
   };
 
-  let removeFromRbt = task => {
-    state.rbt = _.filter(state.rbt, o => !(o.index == task.index));
+  let removeFromRbt = (task) => {
+    state.rbt = _.filter(state.rbt, (o) => !(o.index == task.index));
   };
 
-  let addBlocked = task => {
+  let addBlocked = (task) => {
     state.blocked.splice(0, 0, task);
   };
 
-  let removeBlocked = task => {
-    state.blocked = _.filter(state.blocked, o => !(o.index == task.index));
+  let removeBlocked = (task) => {
+    state.blocked = _.filter(state.blocked, (o) => !(o.index == task.index));
   };
 
-  let addToRbt = task => {
+  let addToRbt = (task) => {
     state.rbt.splice(_.sortedLastIndexBy(state.rbt, task, "vrt"), 0, task);
   };
 
-  let _wakeup = tw => {
-    console.log(`Call to wake up ${tw.name} at @${timer.walltime}`);
+  let _wakeup = (tw) => {
+    // console.log(`Call to wake up ${tw.name} at @${timer.walltime}`);
     let vrtBefore = tw.vrt;
     // vmin here excludes tw by construction: tw is still in 'blocked',
     // not in state.rbt (ADR 0001, decision #2).
@@ -162,7 +170,7 @@ let eventLoop = (options, schedule) => {
     }
     if (state.curr !== undefined && v < state.curr.vrt) {
       tw.vrtlwk = `(${v} < ${state.curr.vrt}) \\checkmark`;
-      console.log(`HEII ${v} ---- ${state.curr.vrt}`);
+      // console.log(`HEII ${v} ---- ${state.curr.vrt}`);
       removeFromRbt(state.curr);
       addToRbt(state.curr);
       resched(`Waking up task ${tw.name} @${timer.walltime}`);
@@ -196,7 +204,7 @@ let eventLoop = (options, schedule) => {
           removeFromRbt(state.curr);
           addToRbt(state.curr);
           resched(
-            `task ${state.curr.name} finished quantum @${timer.walltime}`
+            `task ${state.curr.name} finished quantum @${timer.walltime}`,
           );
         }
       }
@@ -210,7 +218,7 @@ let eventLoop = (options, schedule) => {
           _setTimeout(_wakeup, blocktime, ts, "_wakeup");
           ts.events = _.tail(_.tail(ts.events));
         } else {
-          let v = _.find(schedule.tasks, t => t.index === state.curr.index);
+          let v = _.find(schedule.tasks, (t) => t.index === state.curr.index);
           v.exited = timer.walltime;
         }
         resched(`putting task to sleep ${ts.name} @${timer.walltime}`);
@@ -218,20 +226,20 @@ let eventLoop = (options, schedule) => {
     }
   };
 
-  _.map(schedule.tasks, t => {
+  _.map(schedule.tasks, (t) => {
     _setTimeout(_start_task, t.start, t, "_start_task");
   });
   _setTimeout(_task_tick, 2 * schedule.timer, undefined, "_task_tick");
 
   let res = _.map(
     _.range(1, schedule.runfor / schedule.timer + 2),
-    updateTimer
+    updateTimer,
   );
   res.conditions = state.conditions;
   return res;
 };
 
-let wrapper = c => `
+let wrapper = (c) => `
 \\begin{tikzpicture}
 ${c}
 \\end{tikzpicture}
@@ -243,7 +251,7 @@ let parseHistoryEvents = (history, schedule) => {
     let { rbt, blocked } = _.find(history, ({ time }) => {
       return time === t;
     });
-    let findRunning = () => _.find(rbt, t => t.R === "X");
+    let findRunning = () => _.find(rbt, (t) => t.R === "X");
     let tr = findRunning();
     if (rbt.length > 0 && tr.index === task.index) {
       return {
@@ -255,11 +263,11 @@ let parseHistoryEvents = (history, schedule) => {
         sum: tr.sum,
         q: tr.q,
         p: tr.prev,
-        vrtlwk: tr.vrtlwk
+        vrtlwk: tr.vrtlwk,
       };
     } else {
       let tt;
-      if (!_.isUndefined((tt = _.find(rbt, t => t.index === task.index)))) {
+      if (!_.isUndefined((tt = _.find(rbt, (t) => t.index === task.index)))) {
         return {
           event: "RUNNABLE",
           tstart: t,
@@ -267,11 +275,11 @@ let parseHistoryEvents = (history, schedule) => {
           index: tt.index,
           vrt: tt.vrt,
           sum: tt.sum,
-          vrtlwk: tt.vrtlwk
+          vrtlwk: tt.vrtlwk,
         };
       } else {
         if (
-          !_.isUndefined((tt = _.find(blocked, t => t.index === task.index)))
+          !_.isUndefined((tt = _.find(blocked, (t) => t.index === task.index)))
         ) {
           if (_.isUndefined(tt.exited) || t < tt.exited) {
             return {
@@ -281,7 +289,7 @@ let parseHistoryEvents = (history, schedule) => {
               index: tt.index,
               vrt: tt.vrt,
               sum: tt.sum,
-              vrtlwk: tt.vrtlwk
+              vrtlwk: tt.vrtlwk,
             };
           } else {
             return {
@@ -291,7 +299,7 @@ let parseHistoryEvents = (history, schedule) => {
               index: tt.index,
               vrt: tt.vrt,
               sum: tt.sum,
-              vrtlwk: tt.vrtlwk
+              vrtlwk: tt.vrtlwk,
             };
           }
         }
@@ -300,15 +308,15 @@ let parseHistoryEvents = (history, schedule) => {
   };
   let tasksToShow = _.flattenDeep(
     _.map(history, ({ time }, i) => {
-      let ranOrBlockedAtTime = _.map(schedule.tasks, t =>
-        getTaskState(t, time)
+      let ranOrBlockedAtTime = _.map(schedule.tasks, (t) =>
+        getTaskState(t, time),
       );
       // _.filter(
       // _.map(schedule.tasks, t => getTaskState(t, time)),
       // ({ event }) => event !== "RUNNABLE"
       // );
       if (i < history.length - 1) {
-        ranOrBlockedAtTime = _.map(ranOrBlockedAtTime, t => {
+        ranOrBlockedAtTime = _.map(ranOrBlockedAtTime, (t) => {
           let nextState = getTaskState(t, r2(time + schedule.timer));
           t.vrtend = nextState.vrt;
           t.sumend = nextState.sum;
@@ -316,7 +324,7 @@ let parseHistoryEvents = (history, schedule) => {
         });
       }
       return ranOrBlockedAtTime;
-    })
+    }),
   );
   return tasksToShow;
 };
@@ -325,17 +333,17 @@ let parseHistoryEvents = (history, schedule) => {
 // history.conditions, the vrt clamp + canonical preemption check
 // v = vrt + omega / lambda against state.curr.vrt. See ADR 0001.
 let printConditions = (history, schedule) => {
-  let conds = _.filter(history.conditions || [], c => c.kind === "wakeup");
+  let conds = _.filter(history.conditions || [], (c) => c.kind === "wakeup");
   if (conds.length === 0) {
     return `\\begin{itemize}\n\\item (nessun evento di risveglio registrato)\n\\end{itemize}`;
   }
-  let fmtNum = x => (_.isUndefined(x) ? "-" : `${x}`);
+  let fmtNum = (x) => (_.isUndefined(x) ? "-" : `${x}`);
   // Derive a subscript-safe label from a task name like "$\tau_1$" -> "\tau_1".
-  let subOf = name => {
+  let subOf = (name) => {
     let m = /^\$(.+)\$$/.exec(name);
     return m ? m[1] : name;
   };
-  let items = _.map(conds, c => {
+  let items = _.map(conds, (c) => {
     let sub = subOf(c.task);
     let rho = `\\rho_{${sub}}`;
     let clamp = `${rho} \\gets \\max(${fmtNum(c.vrtBefore)},\\; \\rho_{min} - \\bar\\tau/2) = \\max(${fmtNum(c.vrtBefore)},\\; ${fmtNum(c.vminUsed)} - ${c.latency}/2) = ${fmtNum(c.vrtAfter)}`;
@@ -355,7 +363,7 @@ let printConditions = (history, schedule) => {
       `& ${clamp} \\\\`,
       `& ${vLine} \\\\`,
       `& ${cmp}`,
-      `\\end{align*}`
+      `\\end{align*}`,
     ].join("\n");
   });
   return `\\begin{itemize}\n${items.join("\n")}\n\\end{itemize}`;
@@ -363,23 +371,24 @@ let printConditions = (history, schedule) => {
 
 let printData = (history, schedule, finalschedule, options) => {
   let taskevents = _.join(
-    _.map(schedule.tasks, t => {
+    _.map(schedule.tasks, (t) => {
       return [
         `\\item task ${t.name} ($\\lambda=$${t.lambda}) inizia a ${t.start}, ` +
-        _.join(
-          _.map(t.events, (e, i) =>
-            i % 2 === 0 ? `gira per ${e}` : `in attesa per ${e}`
+          _.join(
+            _.map(t.events, (e, i) =>
+              i % 2 === 0 ? `gira per ${e}` : `in attesa per ${e}`,
+            ),
+            ", ",
           ),
-          ", "
-        )
       ];
     }),
-    "\n"
+    "\n",
   );
   let s = `
   \\begin{itemize}
-  \\item Dati scheduling: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${schedule.class.mingran
-    }, $\\omega$=${schedule.class.wgup}
+  \\item Dati scheduling: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
+    schedule.class.mingran
+  }, $\\omega$=${schedule.class.wgup}
   ${taskevents}
   \\end{itemize}`;
 
@@ -396,39 +405,43 @@ let drawHistory = (history, schedule, finalschedule, options) => {
   };
 
   let printAtConf = (time, index, m, conf) => {
-    return `\\node [${conf}] at(${hs * time}, ${index * hs +
-      0.5 * hh}) {\\tiny ${m}};`;
+    return `\\node [${conf}] at(${hs * time}, ${
+      index * hs + 0.5 * hh
+    }) {\\tiny ${m}};`;
   };
 
-  let pwrlk = r =>
+  let pwrlk = (r) =>
     !_.isUndefined(r.vrtlwk) && r.vrtlwk !== ""
       ? printAtConf(
-        r.tend,
-        r.index + 0.4,
-        `${r.vrtlwk}`,
-        `anchor=east, text=${r.vrtlwk.slice(-1) === "k" ? "blue" : "red"}`
-      )
+          r.tend,
+          r.index + 0.4,
+          `${r.vrtlwk}`,
+          `anchor=east, text=${r.vrtlwk.slice(-1) === "k" ? "blue" : "red"}`,
+        )
       : "";
 
-  let drawRan = r => {
+  let drawRan = (r) => {
     return [
-      `\\draw[draw=black] (${r.tstart * hs}, ${r.index *
-      vs}) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) node[pos=.5] {}; `,
+      `\\draw[draw=black] (${r.tstart * hs}, ${
+        r.index * vs
+      }) rectangle ++(${(r.tend - r.tstart) * hs},${hh}) node[pos=.5] {}; `,
       printAt(r.tend, r.index - 0.4, r.vrtend),
       // printAtConf(r.tend, r.index + 0.4, r.sumend, "color=gray!90"),
       printAt(r.tend - 0.25, r.index, `${r.sumend - r.p}/${r2(r.q)}`),
-      pwrlk(r)
+      pwrlk(r),
     ];
   };
-  let drawBlocked = r => {
+  let drawBlocked = (r) => {
     return [
-      `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${r.index *
-      vs}) rectangle ++(${(r.tend - r.tstart) *
-      hs},${hh}) node[pos=.5, text=white] {};`,
-      pwrlk(r)
+      `\\draw[draw=black, fill=gray] (${r.tstart * hs}, ${
+        r.index * vs
+      }) rectangle ++(${
+        (r.tend - r.tstart) * hs
+      },${hh}) node[pos=.5, text=white] {};`,
+      pwrlk(r),
     ];
   };
-  let drawRunnable = r => {
+  let drawRunnable = (r) => {
     return [pwrlk(r)];
   };
   history = parseHistoryEvents(history, schedule);
@@ -443,56 +456,59 @@ let drawHistory = (history, schedule, finalschedule, options) => {
   let tnames = _.flattenDeep([
     _.map(
       schedule.tasks,
-      t => `\\node at(${hs * -1}, ${t.index * hs + 0.5 * hh}) {${t.name}};`
+      (t) => `\\node at(${hs * -1}, ${t.index * hs + 0.5 * hh}) {${t.name}};`,
     ),
     _.map(
       schedule.tasks,
-      t => [
+      (t) => [
         printAt(-0.6, t.index - 0.4, `$\\rho=$${t.vrt}`),
-        printAt(-0.6, t.index - 0.2, `$\\lambda=$${t.lambda}`)
-      ]
+        printAt(-0.6, t.index - 0.2, `$\\lambda=$${t.lambda}`),
+      ],
       // `\\node at(${hs * -0.6}, ${t.index * hs + 0.3 * hh}) {\\tiny ${t.vrt}};`
-    )
+    ),
   ]);
   let grid = [
-    `\\draw[xstep=${schedule.timer
-    },gray!20,thin,shift={(0,-0.25)}] (0,0) grid (${schedule.runfor},${schedule.tasks.length
+    `\\draw[xstep=${
+      schedule.timer
+    },gray!20,thin,shift={(0,-0.25)}] (0,0) grid (${schedule.runfor},${
+      schedule.tasks.length
     });`,
-    _.map(_.range(0, schedule.runfor / schedule.timer + 1), i =>
+    _.map(_.range(0, schedule.runfor / schedule.timer + 1), (i) =>
       printAtConf(
         i * schedule.timer,
         -0.7,
         `\\emph{${i * schedule.timer}}`,
-        "text=gray"
-      )
-    )
+        "text=gray",
+      ),
+    ),
   ];
-  console.log(schedule.tasks);
+  // console.log(schedule.tasks);
 
-  let taskevents = _.map(schedule.tasks, t => {
+  let taskevents = _.map(schedule.tasks, (t) => {
     return [
       printAtConf(
         0,
         (-schedule.tasks.length + t.index) * 0.2 - 0.7,
         `task ${t.name}: starts at ${t.start}, ` +
-        _.join(
-          _.map(t.events, (e, i) =>
-            i % 2 === 0 ? `runs for ${e}` : `blocks for ${e}`
+          _.join(
+            _.map(t.events, (e, i) =>
+              i % 2 === 0 ? `runs for ${e}` : `blocks for ${e}`,
+            ),
+            ", ",
           ),
-          ", "
-        ),
-        "anchor=west"
+        "anchor=west",
       ),
-      `\\draw [->] (${t.start}, ${t.index} + 0.75) -- (${t.start}, ${t.index});`
+      `\\draw [->] (${t.start}, ${t.index} + 0.75) -- (${t.start}, ${t.index});`,
     ];
   });
 
-  let taskexits = _.map(finalschedule.tasks, t => {
+  let taskexits = _.map(finalschedule.tasks, (t) => {
     return !_.isUndefined(t.exited)
       ? [
-        `\\draw [<-] (${t.exited}, ${t.index} + 0.75) -- (${t.exited}, ${t.index
-        });`
-      ]
+          `\\draw [<-] (${t.exited}, ${t.index} + 0.75) -- (${t.exited}, ${
+            t.index
+          });`,
+        ]
       : [];
   });
 
@@ -500,22 +516,23 @@ let drawHistory = (history, schedule, finalschedule, options) => {
     printAtConf(
       -0.6,
       schedule.tasks.length,
-      `Schedule data: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${schedule.class.mingran
+      `Schedule data: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
+        schedule.class.mingran
       }, $\\omega$=${schedule.class.wgup}`,
-      "anchor=west"
-    )
+      "anchor=west",
+    ),
   ];
 
   if (_.isUndefined(options.blank) || !options.blank) {
     return wrapper(
       _.join(
         _.flattenDeep([grid, tnames, diag, taskevents, taskexits, data]),
-        "\n"
-      )
+        "\n",
+      ),
     );
   } else {
     return wrapper(
-      _.join(_.flattenDeep([grid, tnames, taskevents, data]), "\n")
+      _.join(_.flattenDeep([grid, tnames, taskevents, data]), "\n"),
     );
   }
 };
@@ -531,7 +548,7 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       "pdflatex",
       "-r varwidth",
       schedPkgs,
-      schedLibs
+      schedLibs,
     ),
     latexArtifact(
       drawHistory(history, origschedule, finalschedule, { blank: true }),
@@ -540,7 +557,7 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       "pdflatex",
       "-r varwidth",
       schedPkgs,
-      schedLibs
+      schedLibs,
     ),
     latexArtifact(
       printData(history, origschedule, finalschedule, {}),
@@ -548,7 +565,7 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       "standalone",
       "pdflatex",
       "-r varwidth",
-      schedPkgs
+      schedPkgs,
     ),
     latexArtifact(
       printConditions(history, origschedule),
@@ -557,8 +574,8 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       "pdflatex",
       "-r varwidth",
       schedPkgs,
-      schedLibs
-    )
+      schedLibs,
+    ),
   ];
   if (!options.save) {
     console.log(JSON.stringify(history, 0, 4));
