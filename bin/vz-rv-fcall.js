@@ -250,7 +250,11 @@ ${labels}
   `;
 };
 
-let produceAsm = async ({ data, state, stackAlloc, dirname }, withBody) => {
+let produceAsm = async (
+  { data, state, stackAlloc, dirname },
+  withBody,
+  section = "full"
+) => {
   let cee = data.functionData;
   if (data.functionData.body && withBody) {
     let nname = data.functionData.body.replace("$selfdir", dirname);
@@ -327,28 +331,40 @@ let produceAsm = async ({ data, state, stackAlloc, dirname }, withBody) => {
     ? `.section .rodata\n${additionalStrings}`
     : "";
 
-  let prog = `
-# Stack frame information for function '${fname}':
+  let stackInfo = `# Stack frame information for function '${fname}':
 ${parameters}
 ${labels}
 
-${rodata}
-
-# function prologue
-.text
+${rodata}`;
+  let prologue = `.text
 .globl ${fname}
-${fname}: 
+${fname}:
 ${enlargeStack}
 ${saveregs}
-${fpSet}
-# function body
-${data.functionData.bodycontent}
-# function epilogue
-${fname + "EPI"}:
+${fpSet}`;
+  let body = `${data.functionData.bodycontent}`;
+  let epilogue = `${fname + "EPI"}:
 ${restoreregs}
 ${shrinkStack}
-ret
+ret`;
+  let prog;
+  if (section === "prologue") {
+    prog = prologue;
+  } else if (section === "body") {
+    prog = body;
+  } else if (section === "epilogue") {
+    prog = epilogue;
+  } else {
+    prog = `${stackInfo}
+
+# function prologue
+${prologue}
+# function body
+${body}
+# function epilogue
+${epilogue}
 `;
+  }
   return beautifyString(prog);
 };
 
@@ -461,10 +477,22 @@ let register = prog => {
   prog
     .command(`${SUBNAME} asm`, "generates asm prologue for callee")
     .argument("<json>", `File describing the call sequence`)
+    .option(
+      "--section <s>",
+      "Which section to emit: full | prologue | body | epilogue",
+      prog.STRING,
+      "full"
+    )
     .action(async (args, options) => {
       let dirname = path.dirname(path.resolve(args.json));
       let { state, data, stackAlloc } = await developCall(args, options);
-      console.log(await produceAsm({ data, state, stackAlloc, dirname }, true));
+      console.log(
+        await produceAsm(
+          { data, state, stackAlloc, dirname },
+          true,
+          options.section
+        )
+      );
     });
 
   prog

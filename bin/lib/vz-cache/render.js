@@ -70,19 +70,20 @@ let encodeAddr = (config, address) => {
 let produceLine = _.curry((config, t, i) => {
   let acc = t.access ? `\\texttt{${_.trim(encodeAddr(config, t.access))}}` : "";
   let ttype = t.type ? (t.type === "hit" ? "\\textsc{H}" : "\\textsc{M}") : "";
+  let cells = _.map(t.state, getCacheBlock(i));
+  let desc = t.description || "";
   if (!config.blank || i === 0) {
-    return asTableLine(
-      _.flattenDeep([
-        i,
-        acc,
-        ttype,
-        _.map(t.state, getCacheBlock(i)),
-        t.description
-      ])
-    );
+    return asTableLine(_.flattenDeep([i, acc, ttype, cells, desc]));
   }
+  let ph = s => (s ? `\\phantom{${s}}` : "");
   return asTableLine(
-    _.flattenDeep([i, acc, "", _.map(t.state, () => ["", "", ""]), ""])
+    _.flattenDeep([
+      i,
+      acc,
+      ph(ttype),
+      _.map(cells, row => _.map(row, ph)),
+      ph(desc)
+    ])
   );
 });
 
@@ -216,6 +217,16 @@ let legacyTraceFromSimulation = sim => {
   };
 };
 
+let produceCombinedSheet = (config, trace, blank) => {
+  let cfg = _.merge({}, config, { blank });
+  return `${produceCacheData(cfg, blank)}
+
+\\vspace{0.5em}
+
+${getCompleteTrace(trace, cfg)}
+`;
+};
+
 let produceSimulationArtifacts = sim => {
   let trace = legacyTraceFromSimulation(sim);
   return {
@@ -256,6 +267,22 @@ let produceSimulationArtifacts = sim => {
         "standalone",
         "pdflatex",
         "-r varwidth=20cm --usepackage amssymb",
+        ["amssymb", "xcolor"]
+      ),
+      latexArtifact(
+        produceCombinedSheet(sim.config, trace, true),
+        "Combined blank",
+        "standalone",
+        "pdflatex",
+        "-r varwidth=20cm --usepackage amssymb,xcolor",
+        ["amssymb", "xcolor"]
+      ),
+      latexArtifact(
+        produceCombinedSheet(sim.config, trace, false),
+        "Combined complete",
+        "standalone",
+        "pdflatex",
+        "-r varwidth=20cm --usepackage amssymb,xcolor",
         ["amssymb", "xcolor"]
       )
     ]
