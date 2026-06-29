@@ -226,7 +226,26 @@ let eventLoop = (options, schedule) => {
     }
   };
 
-  _.map(schedule.tasks, (t) => {
+  // The runqueue is filled in the order tasks fire their _start_task; for
+  // same-start ties that is the registration order, i.e. the schedule.tasks
+  // order. `initialrq` (an array of task names or indices) overrides that so
+  // the initial runqueue can differ from how tasks are listed. Tasks absent
+  // from initialrq keep their original relative order, after the listed ones.
+  let startOrder = schedule.tasks;
+  if (!_.isUndefined(schedule.initialrq)) {
+    let matches = (t, k) => k === t.name || k === t.index;
+    let listed = _.compact(
+      _.map(schedule.initialrq, (k) =>
+        _.find(schedule.tasks, (t) => matches(t, k)),
+      ),
+    );
+    let rest = _.filter(
+      schedule.tasks,
+      (t) => !_.some(schedule.initialrq, (k) => matches(t, k)),
+    );
+    startOrder = _.concat(listed, rest);
+  }
+  _.map(startOrder, (t) => {
     _setTimeout(_start_task, t.start, t, "_start_task");
   });
   _setTimeout(_task_tick, 2 * schedule.timer, undefined, "_task_tick");

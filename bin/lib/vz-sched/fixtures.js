@@ -188,6 +188,21 @@ let schedule4 = {
   graphics: { vspace: 1, hspace: 1, barheight: 0.5 }
 };
 
+// Same tasks as schedule4 but the initial runqueue is reordered via
+// `initialrq`, so T runs first even though it is listed last.
+let schedule5 = {
+  timer: 0.5,
+  runfor: 16,
+  class: { type: "CFS", latency: 6.0, mingran: 0.75, wgup: 1 },
+  initialrq: ["T", "S", "R"],
+  tasks: [
+    { index: 0, name: "R", lambda: 4, start: 0, events: [8], vrt: 0.0 },
+    { index: 1, name: "S", lambda: 1, start: 0, events: [8], vrt: 0.0 },
+    { index: 2, name: "T", lambda: 1, start: 0, events: [8], vrt: 0.0 }
+  ],
+  graphics: { vspace: 1, hspace: 1, barheight: 0.5 }
+};
+
 let schedule = [
   schedule0,
   schedule1,
@@ -202,7 +217,8 @@ let schedule = [
   //   runfor: 21,
   //   tasks: [{ lambda: 0.5 }, { lambda: 1 }, { lambda: 1.5 }]
   // }),
-  schedule4
+  schedule4,
+  schedule5
 ];
 
 module.exports = { schedule };
