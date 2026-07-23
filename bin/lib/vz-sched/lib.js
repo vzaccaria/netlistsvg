@@ -155,6 +155,10 @@ let eventLoop = (options, schedule) => {
   };
 
   let _wakeup = (tw) => {
+    if (_.isEmpty(tw.events)) {
+      tw.exited = timer.walltime;
+      return;
+    }
     // console.log(`Call to wake up ${tw.name} at @${timer.walltime}`);
     let vrtBefore = tw.vrt;
     // vmin here excludes tw by construction: tw is still in 'blocked',
@@ -191,18 +195,14 @@ let eventLoop = (options, schedule) => {
     _setTimeout(_task_tick, schedule.timer, undefined, "_task_tick");
     if (state.curr !== undefined) {
       let delta = schedule.timer;
-      let burst = state.curr.events[0];
-      let openEnded = _.isUndefined(burst);
-      // No CPU burst after the final wait means the task runs indefinitely.
-      if (openEnded || burst >= delta) {
+      if (state.curr.events[0] >= delta) {
         state.curr.sum = r2(state.curr.sum + delta);
         state.curr.vrt = r2(state.curr.vrt + delta / state.curr.lambda);
         state.vmin = _.minBy(state.rbt, "vrt").vrt;
-        if (!openEnded)
-          state.curr.events[0] = r2(state.curr.events[0] - delta);
+        state.curr.events[0] = r2(state.curr.events[0] - delta);
         if (
           state.curr.sum - state.curr.prev == schedslice(state.curr) &&
-          (openEnded || state.curr.events[0] > 0)
+          state.curr.events[0] > 0
         ) {
           removeFromRbt(state.curr);
           addToRbt(state.curr);

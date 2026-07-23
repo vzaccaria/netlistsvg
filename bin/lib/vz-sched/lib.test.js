@@ -47,7 +47,7 @@ it("runqueue matches schedule.tasks order when initialrq is absent", () => {
   expect(_.map(res[0].rbt, "name")).toEqual(["A", "B", "C"]);
 });
 
-it("runs indefinitely after a final wait with no following CPU burst", () => {
+it("exits after a final wait with no following CPU burst", () => {
   const s = mk(["A"]);
   s.runfor = 2;
   s.tasks = [
@@ -55,10 +55,10 @@ it("runs indefinitely after a final wait with no following CPU burst", () => {
   ];
 
   const res = eventLoop({}, s);
-  const finalTask = _.find(res[res.length - 1].rbt, { name: "A" });
+  const finalTask = _.find(res[res.length - 1].blocked, { name: "A" });
 
-  expect(finalTask.R).toBe("X");
-  expect(finalTask.events).toEqual([]);
-  expect(finalTask.sum).toBe(1.5);
-  expect(res[res.length - 1].blocked).toEqual([]);
+  expect(finalTask.exited).toBe(1);
+  expect(finalTask.sum).toBe(0.5);
+  expect(res[res.length - 1].rbt).toEqual([]);
+  expect(_.filter(res.conditions, { kind: "wakeup" })).toEqual([]);
 });
