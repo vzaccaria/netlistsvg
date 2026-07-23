@@ -191,15 +191,18 @@ let eventLoop = (options, schedule) => {
     _setTimeout(_task_tick, schedule.timer, undefined, "_task_tick");
     if (state.curr !== undefined) {
       let delta = schedule.timer;
-
-      if (state.curr.events[0] >= delta) {
+      let burst = state.curr.events[0];
+      let openEnded = _.isUndefined(burst);
+      // No CPU burst after the final wait means the task runs indefinitely.
+      if (openEnded || burst >= delta) {
         state.curr.sum = r2(state.curr.sum + delta);
         state.curr.vrt = r2(state.curr.vrt + delta / state.curr.lambda);
         state.vmin = _.minBy(state.rbt, "vrt").vrt;
-        state.curr.events[0] = r2(state.curr.events[0] - delta);
+        if (!openEnded)
+          state.curr.events[0] = r2(state.curr.events[0] - delta);
         if (
           state.curr.sum - state.curr.prev == schedslice(state.curr) &&
-          state.curr.events[0] > 0
+          (openEnded || state.curr.events[0] > 0)
         ) {
           removeFromRbt(state.curr);
           addToRbt(state.curr);
