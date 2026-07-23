@@ -1,5 +1,5 @@
 const _ = require("lodash");
-const { eventLoop } = require("./lib");
+const { eventLoop, printData } = require("./lib");
 const { schedule } = require("./fixtures");
 
 _.map(schedule, (s, i) => {
@@ -61,4 +61,12 @@ it("exits after a final wait with no following CPU burst", () => {
   expect(finalTask.sum).toBe(0.5);
   expect(res[res.length - 1].rbt).toEqual([]);
   expect(_.filter(res.conditions, { kind: "wakeup" })).toEqual([]);
+});
+
+it("prints the resolved configured initial task order", () => {
+  const s = mk(["B"]);
+
+  expect(printData([], s, s, {})).toContain(
+    "Ordine iniziale: B $\\to$ A $\\to$ C"
+  );
 });

@@ -9,6 +9,27 @@ const { latexArtifact, writeArtifacts } = require("../artifacts");
 
 let r2 = (x) => Math.round(x * 1000) / 1000;
 
+// Resolve the configured initial runqueue. Unlisted tasks retain their
+// schedule.tasks order after the explicitly listed tasks.
+let initialTaskOrder = (schedule) => {
+  if (_.isUndefined(schedule.initialrq)) return schedule.tasks;
+
+  let matches = (t, k) => k === t.name || k === t.index;
+  let listed = _.compact(
+    _.map(schedule.initialrq, (k) =>
+      _.find(schedule.tasks, (t) => matches(t, k)),
+    ),
+  );
+  let rest = _.filter(
+    schedule.tasks,
+    (t) => !_.some(schedule.initialrq, (k) => matches(t, k)),
+  );
+  return _.concat(listed, rest);
+};
+
+let formatInitialTaskOrder = (schedule) =>
+  _.join(_.map(initialTaskOrder(schedule), "name"), " $\\to$ ");
+
 let eventLoop = (options, schedule) => {
   let state = {
     schedule: schedule,
@@ -229,25 +250,8 @@ let eventLoop = (options, schedule) => {
     }
   };
 
-  // The runqueue is filled in the order tasks fire their _start_task; for
-  // same-start ties that is the registration order, i.e. the schedule.tasks
-  // order. `initialrq` (an array of task names or indices) overrides that so
-  // the initial runqueue can differ from how tasks are listed. Tasks absent
-  // from initialrq keep their original relative order, after the listed ones.
-  let startOrder = schedule.tasks;
-  if (!_.isUndefined(schedule.initialrq)) {
-    let matches = (t, k) => k === t.name || k === t.index;
-    let listed = _.compact(
-      _.map(schedule.initialrq, (k) =>
-        _.find(schedule.tasks, (t) => matches(t, k)),
-      ),
-    );
-    let rest = _.filter(
-      schedule.tasks,
-      (t) => !_.some(schedule.initialrq, (k) => matches(t, k)),
-    );
-    startOrder = _.concat(listed, rest);
-  }
+  // Same-start tasks enter the runqueue in the configured initial order.
+  let startOrder = initialTaskOrder(schedule);
   _.map(startOrder, (t) => {
     _setTimeout(_start_task, t.start, t, "_start_task");
   });
@@ -411,6 +415,7 @@ let printData = (history, schedule, finalschedule, options) => {
   \\item Dati scheduling: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
     schedule.class.mingran
   }, $\\omega$=${schedule.class.wgup}
+  \\item Ordine iniziale: ${formatInitialTaskOrder(schedule)}
   ${taskevents}
   \\end{itemize}`;
 
@@ -540,7 +545,7 @@ let drawHistory = (history, schedule, finalschedule, options) => {
       schedule.tasks.length,
       `Schedule data: $\\bar{\\tau}$= ${schedule.class.latency}, $\\mu$=${
         schedule.class.mingran
-      }, $\\omega$=${schedule.class.wgup}`,
+      }, $\\omega$=${schedule.class.wgup}; initial order: ${formatInitialTaskOrder(schedule)}`,
       "anchor=west",
     ),
   ];
@@ -612,4 +617,10 @@ let runAndSave = (options, schedule) => {
   saveIt(options, history, origschedule, schedule);
 };
 
-module.exports = { eventLoop, saveIt, runAndSave, printConditions };
+module.exports = {
+  eventLoop,
+  saveIt,
+  runAndSave,
+  printConditions,
+  printData,
+};
