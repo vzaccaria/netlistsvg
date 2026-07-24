@@ -2,62 +2,39 @@
 
 ## Purpose
 
-Fork of `nturley/netlistsvg` extended with `vz-*` CLI tools used for teaching
-computer architecture / advanced OS courses. Original tool renders SVG
-schematics from Yosys JSON netlists via elkjs. Fork adds didactic generators
-for pipeline simulation, scheduling diagrams, FSMs, caches, MMU, memory maps,
-quine-McCluskey minimization, wavedrom timing diagrams, and RISC-V traces.
+Fork of `nturley/netlistsvg` with `vz-*` teaching tools for computer
+architecture and advanced operating-systems courses. It renders Yosys netlists
+and generates didactic diagrams, traces, exercises, and LaTeX artifacts.
 
 ## Architecture
 
-- `lib/` — upstream netlistsvg renderer (`index.js`) plus SVG skins
-  (`default.svg`, `analog.svg`, `vz-default*.svg`).
-- `bin/` — `vz-*` entry points, one CLI per topic:
-  - `vz-netlist.js` — netlistsvg wrapper.
-  - `vz-sched.js` — instruction scheduling / pipeline diagrams (LaTeX out).
-  - `vz-pipe.js` (`vz-pipe-new.js` symlink) — pipeline simulation + traces.
-  - `vz-cache.js` — cache simulation.
-  - `vz-cache-new.js` — cache exercise generation.
-  - `vz-mmu.js`, `vz-memmap.js` — MMU / memory map diagrams.
-  - `vz-fsm.js` — FSM diagrams.
-  - `vz-quine.js` — Quine-McCluskey minimization.
-  - `vz-wave.js` — wavedrom wrapper (uses standard `wavedrom-cli`).
-  - `vz-rv-fcall.js`, `vz-nomnom.js`, `vz-compile-artifacts.js`.
-- `bin/lib/` — shared modules: `common.js`, `quine.js`, `qmc.js`, `fsm.js`,
-  `spim.js`, `tex.js`, `artifacts.js`, plus `vz-cache/`, `vz-pipe/`, and
-  `vz-sched/` subpackages.
-- `bin/fixtures/` — per-tool fixtures (`cache/`, `cache-new/`, `fsm/`,
-  `memmap/`, `mmu/`, `pipe/`, `quine/`, `riscv/`, `wave/`).
-- `bin/test.js`, `bin/testartifacts.js`, `bin/testbatches.js`,
-  `bin/testcache.sh` — test entry points for the vz tools.
-- `test/` — upstream netlistsvg tests (`test-all.js`).
-- `demo/` — browser demo bundle.
+- `lib/` contains the upstream netlist-to-SVG renderer and skins.
+- `bin/vz-*.js` contains the topic-specific CLIs and the `vzpac` dispatcher.
+- `bin/lib/` contains shared CLI, artifact, TeX, and topic-domain logic,
+  including the scheduling, pipeline, and cache engines.
+- `bin/fixtures/` and `test/` contain vz-tool fixtures and upstream tests.
 
-## Build & Run
+Keep topic behavior in its domain package; put only genuinely cross-cutting
+CLI and artifact support in shared helpers.
+
+## Build & test
 
 - Install: `npm install`.
-- Upstream tests + lint: `npm test` (eslint + `test/test-all.js`).
-- vz tool tests: `node bin/test.js`, `node bin/testbatches.js`,
+- Upstream tests and lint: `npm test`.
+- vz-tool checks: `node bin/test.js`, `node bin/testbatches.js`,
   `bash bin/testcache.sh`.
 - Build demo: `npm run build-demo`.
-- CLIs are exposed via `package.json` `bin` entries (run via
-  `npx <name>` after install, or directly `node bin/<file>.js`).
+- Run a CLI directly with `node bin/<file>.js` or through its package `bin`.
 
-## Key conventions
+## Conventions
 
-- Each `vz-*` tool is self-contained; shared helpers live in `bin/lib/`.
-- LaTeX output (e.g. `vz-sched`) targets math-mode rendering — see commit
-  `824a179` for symbol/env handling.
-- Wavedrom integration delegates to the standard `wavedrom-cli` (commit
-  `9c03489`); do not reintroduce a custom path.
-- Snapshots and fixtures are checked in under `bin/fixtures/` and
-  `bin/lib/vz-*` subfolders.
-- `vz-cache-new` keeps exercise generation separate from legacy
-  `vz-cache sim`; `config` emits cache-configuration questions and `sim`
-  emits 4-block cache traces with generated hit/miss solutions rendered in
-  the legacy block-state table format.
-- `addCompileOptions()` now exposes `--font-mono` alongside `--font` for
-  compile-capable xelatex pipelines; `wrapTex()` only emits
-  `\setmonofont{...}` when the flag is provided.
-- Commit style: short `verb(scope): subject`, frequently
-  `update: minor changes (<files>)` for incremental tweaks.
+- Scheduling preemption invariants are documented in
+  `pm/adr/0001-vz-sched-preemption-math.md`.
+- LaTeX artifacts target math-mode rendering.
+- Wavedrom delegates to standard `wavedrom-cli`.
+- Checked-in snapshots and fixtures belong under their existing topic folder.
+- `vz-cache-new` exercise generation remains separate from legacy
+  `vz-cache sim`.
+- Compile-capable CLIs share `--font`, `--font-mono`, and artifact compilation
+  helpers; `\setmonofont` is emitted only when requested.
+- Preserve unrelated local changes.
