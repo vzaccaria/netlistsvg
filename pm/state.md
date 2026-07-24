@@ -6,12 +6,12 @@ Updated: 2026-07-24
 
 Active (children + detail in bd; run `bd show <id>`):
 
-1. `netlistsvg-1sf` — bugs. Correctness fixes for the teaching tools. Open: `netlistsvg-1sf.1` investigating the no-current-task scheduling case.
+None.
 
-Parked: legacy `bin/TODO.md` items need triage; unrelated local work must remain untouched.
+Parked: `netlistsvg-1sf` — generic bugs epic, no open children · legacy `bin/TODO.md` items need triage · unrelated local work must remain untouched.
 
 ## Handoff
 
 Written: 2026-07-24 · Codex
 
-Done: opened and started `netlistsvg-1sf.1`. State: investigation starting; no code changed or verification run yet. Next: 1) reproduce the no-current-task scheduling error 2) fix the empty comparison set at its source 3) run the focused scheduling scenario. Gotchas: scheduling preemption math is documented in `pm/adr/0001-vz-sched-preemption-math.md`; preserve unrelated local changes. Blockers: none.
+Done: resolved and closed `netlistsvg-1sf.1` as a documentation clarification; reopened the generic `netlistsvg-1sf` bugs epic after auto-close. State: ADR 0001 now defines `state.vmin` as retained across an empty runqueue and distinguishes wakeup placement from the omitted no-current preemption comparison; no runtime code changed. Next: 1) process the next child added under `netlistsvg-1sf` 2) keep children sequential. Gotchas: the retained value is not the minimum of an empty set. Blockers: none.

@@ -2,7 +2,8 @@
 
 Date: 2026-05-22
 Status: Accepted
-Related beads: `netlistsvg-yr5`, `netlistsvg-yr5.1`, `netlistsvg-yr5.2`
+Amended: 2026-07-24
+Related beads: `netlistsvg-yr5`, `netlistsvg-yr5.1`, `netlistsvg-yr5.2`, `netlistsvg-1sf.1`
 Reference: Linux v6.5 `kernel/sched/fair.c`
 ([wakeup_gran/wakeup_preempt_entity ~L7851-7900](https://github.com/torvalds/linux/blob/v6.5/kernel/sched/fair.c#L7851),
 [update_min_vruntime L607](https://github.com/torvalds/linux/blob/v6.5/kernel/sched/fair.c#L607),
@@ -98,10 +99,15 @@ place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial)
 }
 ```
 
-`update_min_vruntime` (fair.c:607) only considers `curr` and the
-leftmost entity in the rb-tree, so the waking entity — which has not
-been enqueued yet — is structurally excluded from `min_vruntime` at
-clamp time.
+`update_min_vruntime` (fair.c:607) starts from the stored
+`cfs_rq->min_vruntime`. If both `curr` and the leftmost rb-tree entity are
+absent, neither branch replaces that value; the final `max_vruntime` store
+preserves it. Thus `min_vruntime` remains defined across an idle interval
+instead of becoming the minimum of an empty set. When an entity is present,
+the same final store prevents `min_vruntime` from moving backwards.
+
+`place_entity` still reads this persistent value before enqueueing the waking
+entity, so that entity is structurally excluded from the placement reference.
 
 ## Decision
 
@@ -120,17 +126,21 @@ didactic artifacts (including the new `printConditions` artifact,
    task's own `lambda`; no `sumlambda()` factor is involved. This
    matches `wakeup_gran(se) = gran / weight(se)` in Linux CFS.
 
-2. **vmin invariant.** `state.vmin` represents the minimum virtual
-   runtime among tasks currently *competing for the CPU on the
-   ready-queue*. A task `tw` being woken up MUST NOT be included in
-   `state.vmin` at the moment its own `vrt` is clamped via
+2. **vmin invariant.** `state.vmin` is the scheduler's stored runqueue
+   reference, not an on-demand `min(state.rbt)` operation that becomes
+   undefined on an empty set. While tasks compete for the CPU it represents
+   their minimum virtual-runtime reference; when both `state.curr` and
+   `state.rbt` are empty, it retains its last defined value across the idle
+   interval. A waking task therefore still uses
    ```
    tw.vrt = max(tw.vrt, vmin - latency/2)
    ```
-   Operationally: the clamp must read/refresh `vmin` from
-   `state.rbt \ {tw}` before `addToRbt(tw)` runs. This mirrors Linux
-   CFS, where `place_entity` reads `cfs_rq->min_vruntime` before the
-   entity is enqueued into the rb-tree.
+   even when no task is currently executing. This placement clamp does not
+   compare the waking task with another task. The preemption comparison
+   `v < state.curr.vrt` is performed only when `state.curr` exists; otherwise
+   the waking task is scheduled directly. As before, `tw` MUST NOT contribute
+   to `state.vmin` until after its own clamp, matching Linux CFS
+   `place_entity`, which reads `cfs_rq->min_vruntime` before enqueueing it.
 
 3. **Single source of truth.** Both the preemption check inside the
    event loop and any LaTeX generator that prints these conditions
@@ -143,6 +153,8 @@ didactic artifacts (including the new `printConditions` artifact,
   existing snapshots under `bin/lib/vz-sched/__snapshots__/` will be
   regenerated. Past PDFs/slides built from those snapshots become
   out of date — acceptable: the prior outputs encoded a bug.
+- If the runqueue is empty, wakeup placement still uses the retained
+  `state.vmin`; only the preemption comparison is omitted.
 - `_wakeup` becomes responsible for ensuring `vmin` is fresh and
   excludes `tw` before line 120's clamp. A small helper
   (`vminExcluding(task)`) is the natural place for the rule.
