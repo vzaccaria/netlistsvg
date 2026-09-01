@@ -62,6 +62,7 @@
   },
   "scripts": {
     "test": "eslint lib/**/*.js bin/**/*.js && eslint --global=document demo/**/*.js && node test/test-all.js",
+    "test:sootty-mask": "eslint bin/vzpac.js bin/vz-sootty.js bin/lib/sootty-mask.js bin/lib/sootty-mask.test.js && mocha bin/lib/sootty-mask.test.js",
     "build-demo": "cp demo/index.html . && cp node_modules/elkjs/lib/elk.bundled.js . && browserify demo/demo.js > bundle.js"
   },
   "keywords": [

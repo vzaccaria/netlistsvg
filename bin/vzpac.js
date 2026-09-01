@@ -19,6 +19,7 @@ const modules = [
   "./vz-fsm",
   "./vz-quine",
   "./vz-wave",
+  "./vz-sootty",
   "./vz-rv-fcall",
   "./vz-nomnom",
   "./vz-compile-artifacts",
