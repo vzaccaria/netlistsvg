@@ -84,8 +84,15 @@ let hazardsToTikz = (sim, options) => {
 
     return ii;
   };
+  // A conflict naming an instruction past the program end would draw to an
+  // undefined TikZ node and break the whole picture: drop it with a warning.
+  let inRange = c => {
+    let ok = _.every(c.match(/[0-9]+/g), n => parseInt(n, 10) < sim.length);
+    if (!ok) console.error(`warning: conflict ${c} refers to a missing instruction, ignored`);
+    return ok;
+  };
   let tikzconflicts = options.conflicts
-    ? _.join(_.map(options.conflicts.split(","), dep), "\n")
+    ? _.join(_.map(_.filter(options.conflicts.split(","), inRange), dep), "\n")
     : "";
   let result = {
     complete: wrapperc(
