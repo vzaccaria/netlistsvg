@@ -109,9 +109,11 @@ const legacyTikzLibraries = [
 
 // Extract packages, TikZ libraries and preamble includes from the legacy
 // tikz2pdf option string stored in `addoptions`
-// (`--usepackage a,b`, `-z/--usetikzlibrary a,b`, `-i/--include f,g`).
+// (`--usepackage a,b`, `-z/--usetikzlibrary a,b`, `-i/--include f,g`), plus
+// the width of the standalone `varwidth` class option (`-r varwidth[=W]`),
+// which shrinks the box to its content (e.g. `center` environments).
 let parseAddOptions = addoptions => {
-  let res = { packages: [], tikzLibraries: [], includes: [] };
+  let res = { packages: [], tikzLibraries: [], includes: [], varwidth: "" };
   let toks = _.compact(_.split(addoptions || "", /\s+/));
   let list = i => _.compact(_.split(toks[i + 1] || "", ","));
   _.forEach(toks, (t, i) => {
@@ -119,6 +121,12 @@ let parseAddOptions = addoptions => {
     if (t === "--usetikzlibrary" || t === "-z")
       res.tikzLibraries.push(...list(i));
     if (t === "--include" || t === "-i") res.includes.push(...list(i));
+    if (t === "--options" || t === "-r") {
+      _.forEach(list(i), o => {
+        let m = o.match(/^varwidth(?:=(.+))?$/);
+        if (m) res.varwidth = m[1] || "\\linewidth";
+      });
+    }
   });
   return res;
 };
@@ -135,7 +143,12 @@ let isLuaArtifact = a => a.engine === "lualatex";
 let wrapTex = (a, font, fontMono) => {
   let legacy = parseAddOptions(a.addoptions);
   let packages = _.uniq(
-    _.concat(legacyPackages, a.packages || [], legacy.packages)
+    _.concat(
+      legacyPackages,
+      a.packages || [],
+      legacy.packages,
+      legacy.varwidth ? ["varwidth"] : []
+    )
   );
   let libraries = _.uniq(
     _.concat(legacyTikzLibraries, a.tikzLibraries || [], legacy.tikzLibraries)
@@ -175,7 +188,9 @@ let wrapTex = (a, font, fontMono) => {
     a.preamble || "",
     "\\pagestyle{empty}",
     "\\begin{document}",
+    legacy.varwidth ? `\\begin{varwidth}{${legacy.varwidth}}` : "",
     a.code,
+    legacy.varwidth ? "\\end{varwidth}" : "",
     "\\end{document}",
     ""
   ]).join("\n");
