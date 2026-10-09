@@ -1,3 +1,4 @@
+let fs = require("fs");
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let path = require("path");
@@ -52,8 +53,31 @@ let compileArtifact = _.curry((pfx, a) => {
   });
 });
 
+// Max concurrent LaTeX compilations per vzpac process (one engine per
+// artifact otherwise: FSM synthesis alone has ~66). Override: VZPAC_JOBS.
+let maxJobs = () => {
+  let n = parseInt(process.env.VZPAC_JOBS, 10);
+  return n > 0 ? n : 2;
+};
+
+// Like Promise.all(_.map(items, fn)) but with at most maxJobs() in flight;
+// results keep the input order.
+let mapLimited = (items, fn) => {
+  let list = _.values(items);
+  let results = new Array(list.length);
+  let next = 0;
+  let worker = async () => {
+    while (next < list.length) {
+      let i = next++;
+      results[i] = await fn(list[i]);
+    }
+  };
+  let n = Math.min(maxJobs(), list.length);
+  return Promise.all(_.times(n, worker)).then(() => results);
+};
+
 let compileArtifacts = (data, pfx) => {
-  return Promise.all(_.map(data, compileArtifact(pfx))).then(names => {
+  return mapLimited(data, compileArtifact(pfx)).then(names => {
     let cmd = `pdftk ${_.join(names, " ")} cat output ${pfx}-all.pdf`;
     console.log(cmd);
     return exec(cmd).then(() => {
@@ -67,16 +91,73 @@ let saveArtifacts = (data, pfx) => {
   return Promise.all(_.map(data, saveArtifact(pfx)));
 };
 
-// xelatex + pdfcrop pipeline that mirrors pac/exam-sheets assets.mk.
+// Packages and TikZ libraries that `tikz2pdf` (the legacy compiler of these
+// artifacts) always loads; artifact code relies on them (e.g. `stealth'`).
+const legacyPackages = ["tikz", "xcolor", "amsmath", "amssymb"];
+const legacyTikzLibraries = [
+  "arrows",
+  "chains",
+  "matrix",
+  "positioning",
+  "scopes",
+  "calc",
+  "arrows.meta",
+  "fit",
+  "shapes.geometric",
+  "circuits.logic.US"
+];
+
+// Extract packages, TikZ libraries and preamble includes from the legacy
+// tikz2pdf option string stored in `addoptions`
+// (`--usepackage a,b`, `-z/--usetikzlibrary a,b`, `-i/--include f,g`).
+let parseAddOptions = addoptions => {
+  let res = { packages: [], tikzLibraries: [], includes: [] };
+  let toks = _.compact(_.split(addoptions || "", /\s+/));
+  let list = i => _.compact(_.split(toks[i + 1] || "", ","));
+  _.forEach(toks, (t, i) => {
+    if (t === "--usepackage" || t === "-c") res.packages.push(...list(i));
+    if (t === "--usetikzlibrary" || t === "-z")
+      res.tikzLibraries.push(...list(i));
+    if (t === "--include" || t === "-i") res.includes.push(...list(i));
+  });
+  return res;
+};
+
+let isLuaArtifact = a => a.engine === "lualatex";
+
+// xelatex (lualatex for `engine: "lualatex"` artifacts, e.g. graphdrawing
+// FSM layouts) + pdfcrop pipeline that mirrors pac/exam-sheets assets.mk.
 // Wraps each artifact's `code` with a fontspec/geometry preamble plus the
-// per-artifact `packages` and `tikzLibraries`. All intermediate files
-// (.tmp.tex, .aux, .log, _minted*) are kept in a temp dir; only the final
-// cropped `<pfx>-<sfx>.pdf` lands next to the user's prefix.
+// legacy tikz2pdf defaults, the per-artifact `packages`/`tikzLibraries` and
+// those encoded in `addoptions`. All intermediate files (.tmp.tex, .aux,
+// .log, _minted*) are kept in a temp dir; only the final cropped
+// `<pfx>-<sfx>.pdf` lands next to the user's prefix.
 let wrapTex = (a, font, fontMono) => {
-  let pkgLines = _.map(a.packages, p => `\\usepackage{${p}}`).join("\n");
-  let libLines = _.map(
-    a.tikzLibraries,
-    l => `\\usetikzlibrary{${l}}`
+  let legacy = parseAddOptions(a.addoptions);
+  let packages = _.uniq(
+    _.concat(legacyPackages, a.packages || [], legacy.packages)
+  );
+  let libraries = _.uniq(
+    _.concat(legacyTikzLibraries, a.tikzLibraries || [], legacy.tikzLibraries)
+  );
+  let pkgLines = _.map(packages, p => `\\usepackage{${p}}`).join("\n");
+  let libLines = _.map(libraries, l => `\\usetikzlibrary{${l}}`).join("\n");
+  let gdLines = isLuaArtifact(a)
+    ? [
+        "\\usetikzlibrary{graphdrawing}",
+        "\\usetikzlibrary{graphs}",
+        "\\usegdlibrary{trees}",
+        "\\usegdlibrary{force}"
+      ].join("\n")
+    : "";
+  // Skip includes whose content is already inlined as `preamble`.
+  let includeLines = _.map(
+    _.filter(
+      legacy.includes,
+      f =>
+        !(a.preamble && fs.existsSync(f) && fs.readFileSync(f, "utf8") === a.preamble)
+    ),
+    f => `\\input{${f}}`
   ).join("\n");
   let monoLine = _.isUndefined(fontMono)
     ? ""
@@ -89,6 +170,8 @@ let wrapTex = (a, font, fontMono) => {
     monoLine,
     pkgLines,
     libLines,
+    gdLines,
+    includeLines,
     a.preamble || "",
     "\\pagestyle{empty}",
     "\\begin{document}",
@@ -114,9 +197,10 @@ let compileArtifactXelatex = (pfx, a, opts) => {
         let texPath = path.join(workdir, texName);
         let pdfPath = path.join(workdir, `${outBase}.pdf`);
         await $fs.writeFile(texPath, wrapTex(a, font, fontMono), "utf8");
-        let xelatex = `xelatex -interaction=nonstopmode -shell-escape ${texName}`;
-        console.log(`XELATEX ${texName}`);
-        await exec(xelatex, { cwd: workdir });
+        let engine = isLuaArtifact(a) ? "lualatex" : "xelatex";
+        let latex = `${engine} -interaction=nonstopmode -shell-escape ${texName}`;
+        console.log(`${_.toUpper(engine)} ${texName}`);
+        await exec(latex, { cwd: workdir });
         await exec(`pdfcrop ${pdfPath} ${outPdf}`);
         return outPdf;
       } finally {
@@ -126,7 +210,7 @@ let compileArtifactXelatex = (pfx, a, opts) => {
 };
 
 let compileArtifactsXelatex = (data, pfx, opts) => {
-  return Promise.all(_.map(data, a => compileArtifactXelatex(pfx, a, opts)));
+  return mapLimited(data, a => compileArtifactXelatex(pfx, a, opts));
 };
 
 // Dispatch helper for vz-* CLI tools: pick saveArtifacts (.tex) or

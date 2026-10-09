@@ -483,24 +483,26 @@ let synthesize = (fsm, options) => {
   return _.merge({}, { diagram }, { ttables });
 };
 
-let formatResults = d => {
-  return _.concat(
-    [
-      latexArtifact(
-        d.diagram,
-        "diagram",
-        "standalone",
-        "lualatex",
-        "-z automata,quotes"
-      )
-    ],
-    d.ttables
+let diagramArtifact = diagram =>
+  latexArtifact(
+    diagram,
+    "diagram",
+    "standalone",
+    "lualatex",
+    "-z automata,quotes"
   );
+
+let formatResults = d => {
+  return _.concat([diagramArtifact(d.diagram)], d.ttables);
 };
 
 let elaborateFSM = (fsm, options) => {
   if (options.draw) {
-    console.log(drawFSM(fsm, options));
+    let diagram = drawFSM(fsm, options);
+    // With -s, save (or compile with -c) just `<prefix>-diagram`: drawing
+    // needs no synthesis, so FSMs without an `encoding` work too.
+    if (options.save) return writeArtifacts([diagramArtifact(diagram)], options);
+    console.log(diagram);
     return;
   } else {
     let data = { latex: formatResults(synthesize(fsm, options)) };
