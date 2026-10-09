@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
-import yaml
+try:
+    import yaml
+    load_data = yaml.safe_load
+except ImportError:
+    # Without PyYAML accept strict JSON (what vz-wave passes in).
+    import json
+    load_data = json.loads
 import argparse
 import sys
 import os.path
@@ -813,13 +819,19 @@ def render_help_lines(wavedrom):
     )
 
 
-def render_wavedrom(wavedrom):
-    hscale = wavedrom.get("config", {}).get("hscale",1)
-    return r"%s%s%s" % (TIKZ_HEADER.safe_substitute(size=hscale),
-                        render_help_lines(wavedrom),
-                        "\n".join(render_signal(signal_params)
-                                  for signal_params in wavedrom["signal"])
-                        )
+def render_wavedrom(wavedrom, standalone=False):
+    hscale = wavedrom.get("config", {}).get("hscale", 1)
+    body = render_help_lines(wavedrom) + "\n".join(
+        render_signal(signal_params) for signal_params in wavedrom["signal"])
+    if standalone:
+        # Goes inside the standalone document's tikzpicture.
+        return r"%s%s" % (TIKZ_HEADER.safe_substitute(size=hscale), body)
+    # Fragment for a document whose preamble already provides the macros
+    # (preambles/wavedrom2tikz.tex), as vz-wave's artifacts declare.
+    width = ("\\pgfmathsetlengthmacro{\\wavewidth}{%sem}\n" % hscale
+             if "hscale" in wavedrom.get("config", {}) else "")
+    return ("\\begin{tikzpicture}[thick]\n%s\\coordinate (last waveform);\n%s\n"
+            "\\end{tikzpicture}\n" % (width, body))
 
 
 def print_header(args):
@@ -827,13 +839,13 @@ def print_header(args):
 
 
 def print_render_signal(args):
-    print(render_signal(yaml.safe_load(" ".join(args.signal))))
+    print(render_signal(load_data(" ".join(args.signal))))
 
 
 def print_render_wavedrom(args):
 
     with open(args.path, 'r') as input_file:
-        wavedrom = render_wavedrom(yaml.safe_load(input_file.read()))
+        wavedrom = render_wavedrom(load_data(input_file.read()), args.standalone)
 
         if args.standalone:
             wavedrom = "\n".join(

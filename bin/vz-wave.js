@@ -221,7 +221,8 @@ let register = prog => {
             }
           }
         } catch (error) {
-          console.log(error);
+          console.error(error);
+          process.exitCode = 1;
         }
       } else {
         readWavedromReg(args, options).then((wavedrom) => {

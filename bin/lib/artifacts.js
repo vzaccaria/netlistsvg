@@ -201,7 +201,8 @@ let compileArtifactXelatex = (pfx, a, opts) => {
         let latex = `${engine} -interaction=nonstopmode -shell-escape ${texName}`;
         console.log(`${_.toUpper(engine)} ${texName}`);
         await exec(latex, { cwd: workdir });
-        await exec(`pdfcrop ${pdfPath} ${outPdf}`);
+        // pdfcrop writes tmp-pdfcrop-*.tex into its cwd: keep it in workdir.
+        await exec(`pdfcrop ${pdfPath} ${outPdf}`, { cwd: workdir });
         return outPdf;
       } finally {
         await cleanup();
