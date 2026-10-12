@@ -3,9 +3,20 @@
 const fs = require("fs");
 const path = require("path");
 const yaml = require("js-yaml");
+const { generateSimulation } = require("./sim");
 
 const SLOT = "%% cache-exercises %%";
 const DIMENSIONS = ["membits", "blockbits", "cachesizebits", "cacheways"];
+const GENERATE_FLAGS = {
+  seed: "--seed",
+  accesses: "--accesses",
+  hits: "--hits",
+  minHits: "--min-hits",
+  maxHits: "--max-hits",
+  membits: "--membits",
+  blockbits: "--blockbits",
+  ways: "--ways"
+};
 
 function fail(message) {
   throw new Error(`cache exercises: ${message}`);
@@ -178,6 +189,41 @@ function cacheEntry(id, params, manifestRoot) {
   };
 }
 
+function generatedEntry(id, raw, manifestRoot) {
+  const label = `${id}.generate`;
+  const options = Object.assign(Object.create(null), { seed: id }, mapping(raw, label));
+  for (const [name, value] of Object.entries(options)) {
+    if (!Object.prototype.hasOwnProperty.call(GENERATE_FLAGS, name)) {
+      fail(`${label}: unknown option ${name}`);
+    }
+    if (name === "seed") {
+      if (!(typeof value === "string" && value.trim()) && !Number.isSafeInteger(value)) {
+        fail(`${label}.seed must be a non-empty string or a safe integer`);
+      }
+    } else if (!Number.isSafeInteger(value)) {
+      fail(`${label}.${name} must be an integer`);
+    }
+  }
+  // Validate with the real generator before replacing either output. The asset
+  // command receives the same seed, so configuration and trace stay identical.
+  try {
+    generateSimulation(options);
+  } catch (error) {
+    fail(`${label}: ${error.message || error}`);
+  }
+  const vars = { prefix: shellQuote(path.join(manifestRoot, id, "assets", id)) };
+  const flags = [];
+  for (const [name, flag] of Object.entries(GENERATE_FLAGS)) {
+    if (options[name] === undefined) continue;
+    vars[name] = name === "seed" ? shellQuote(String(options[name])) : options[name];
+    flags.push(name === "seed" ? `${flag}={${name}}` : `${flag} {${name}}`);
+  }
+  return {
+    vars,
+    steps: [`vzpac cache-new sim ${flags.join(" ")} -c -x {prefix}`]
+  };
+}
+
 function writeIfChanged(filename, content) {
   if (fs.existsSync(filename) && fs.readFileSync(filename, "utf8") === content) return;
   fs.mkdirSync(path.dirname(filename), { recursive: true });
@@ -232,9 +278,13 @@ function generate(input, output, manifest) {
       if (ids.has(id)) fail(`duplicate exercise id ${id}`);
       if (baseIds.has(id) || occupied.has(path.join(manifestRoot, id))) fail(`exercise id ${id} collides with a base manifest asset directory`);
       ids.add(id);
-      const params = validateParams(exercise.params, id);
+      const explicit = exercise.params !== undefined;
+      const generated = exercise.generate !== undefined;
+      if (explicit === generated) fail(`${id}: provide exactly one of params or generate`);
       const intro = exercise.intro === undefined ? template.intro : text(exercise.intro, `${id}.intro`);
-      combined[id] = cacheEntry(id, params, manifestRoot);
+      combined[id] = explicit
+        ? cacheEntry(id, validateParams(exercise.params, id), manifestRoot)
+        : generatedEntry(id, exercise.generate, manifestRoot);
       return interpolate(template.body, {
         id, intro, tag,
         assets: markdownPath(path.relative(outputRoot, path.join(manifestRoot, id, "assets", id))),

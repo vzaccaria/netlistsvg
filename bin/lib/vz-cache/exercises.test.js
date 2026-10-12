@@ -14,12 +14,13 @@ function quote(value) {
   return "'" + value.replace(/'/g, "'\\''") + "'";
 }
 
-// Execute the emitted entry with the real legacy simulator, asking for JSON
-// instead of compiling figures. No renderer or simulator mocks are involved.
+// Execute the emitted entry with the real simulator, asking for JSON rather
+// than compiling figures. No renderer or simulator mocks are involved.
 function simulateEntry(entry) {
+  const jsonOptions = entry.steps[0].startsWith("vzpac cache-new sim ") ? "" : " --json";
   const command = entry.steps[0]
     .replace(/^vzpac/, quote(process.execPath) + " " + quote(path.resolve(__dirname, "../../vzpac.js")))
-    .replace(" -c -x {prefix}", " --json")
+    .replace(" -c -x {prefix}", jsonOptions)
     .replace(/\{(\w+)\}/g, (match, name) => String(entry.vars[name]));
   return JSON.parse(childProcess.execSync(command, { shell: "/bin/bash", encoding: "utf8" }));
 }
@@ -46,7 +47,9 @@ function params() {
   };
 }
 
-describe("cache exercise generation", () => {
+describe("cache exercise generation", function () {
+  // Real subprocesses load the full dispatcher, including unrelated renderers.
+  this.timeout(60000);
   let directory;
   let input;
   let output;
@@ -111,6 +114,52 @@ describe("cache exercise generation", () => {
       "miss", "miss", "miss", "miss", "hit", "miss", "miss"
     ]);
     expect(trace.results.cache.map(block => block.data)).to.deep.equal([0, 4, 1, 3]);
+  });
+
+  it("keeps generated cases reproducible without requiring a seed in each row", () => {
+    doc.sections[0].exercises[0] = {
+      id: "example", generate: { ways: 2, membits: 12, blockbits: 4, accesses: 6, hits: 3 }
+    };
+    const first = simulateEntry(generateFixture().example).simulation;
+    const second = simulateEntry(generateFixture().example).simulation;
+    expect(second).to.deep.equal(first);
+    expect(first.config.associativity).to.equal(2);
+    expect(first.trace[0].expected).to.equal("miss");
+    expect(first.trace.filter(row => row.expected === "hit")).to.have.lengthOf(3);
+  });
+
+  it("treats numeric seed zero and quoted seed zero as the same reproducible case", () => {
+    const instance = { id: "example", generate: { seed: 0, ways: 1, hits: 2 } };
+    doc.sections[0].exercises[0] = instance;
+    const numeric = simulateEntry(generateFixture().example).simulation;
+    instance.generate.seed = "0";
+    expect(simulateEntry(generateFixture().example).simulation).to.deep.equal(numeric);
+  });
+
+  it("preserves option-like seeds as data rather than invoking CLI help", () => {
+    doc.sections[0].exercises[0] = { id: "example", generate: { seed: "--help", ways: 1, hits: 2 } };
+    const simulation = simulateEntry(generateFixture().example).simulation;
+    expect(simulation.seed).to.equal("--help");
+    expect(simulation.hitCount).to.equal(2);
+  });
+
+  [
+    { name: "both explicit and generated modes", instance: { params: params(), generate: {} } },
+    { name: "neither explicit nor generated mode", instance: {} },
+    { name: "unknown generator options", instance: { generate: { cacheways: 1 } } },
+    { name: "fractional access counts", instance: { generate: { accesses: 4.5 } } },
+    { name: "hits on every access of a cold cache", instance: { generate: { accesses: 3, hits: 3 } } },
+    { name: "reversed hit bounds", instance: { generate: { minHits: 4, maxHits: 2 } } }
+  ].forEach(example => {
+    it(`rejects ${example.name} without replacing the last valid chapter or manifest`, () => {
+      generateFixture();
+      const previousOutput = fs.readFileSync(output, "utf8");
+      const previousManifest = fs.readFileSync(manifest, "utf8");
+      doc.sections[0].exercises[0] = Object.assign({ id: "example" }, example.instance);
+      expect(generateFixture).to.throw(Error);
+      expect(fs.readFileSync(output, "utf8")).to.equal(previousOutput);
+      expect(fs.readFileSync(manifest, "utf8")).to.equal(previousManifest);
+    });
   });
 
   it("keeps static chapter images readable through a symlinked output directory", () => {
