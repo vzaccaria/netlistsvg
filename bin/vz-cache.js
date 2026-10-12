@@ -423,6 +423,7 @@ let getEmptyConfig = (options) => {
 };
 
 let register = prog => {
+  require("./lib/vz-cache/exercises").register(prog);
   let cmd = prog
     .command(`${SUBNAME} sim`, "Cache utils")
     .argument("<alist>", `comma sep. list of binary numbers (addresses)`)
