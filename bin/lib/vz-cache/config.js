@@ -30,7 +30,7 @@ let seededRandom = seed => {
 };
 
 let assertPowerOfTwo = (name, value) => {
-  if (value < 1 || value & (value - 1)) {
+  if (!Number.isSafeInteger(value) || value < 1 || Math.pow(2, Math.round(Math.log2(value))) !== value) {
     throw `${name} must be a positive power of two`;
   }
 };
@@ -41,7 +41,11 @@ let log2Exact = (name, value) => {
 };
 
 let optionValue = (opts, key) => {
-  return _.isUndefined(opts[key]) ? undefined : parseInt(opts[key]);
+  let value = opts[key];
+  if (value === undefined) return undefined;
+  if (typeof value === "string" && /^[+-]?\d+$/.test(value)) value = Number(value);
+  if (!Number.isSafeInteger(value)) throw `${key} must be a safe integer`;
+  return value;
 };
 
 let normalizeConstraints = opts => {
@@ -50,7 +54,7 @@ let normalizeConstraints = opts => {
     let value = optionValue(opts, key);
     if (!_.isUndefined(value)) c[key] = value;
   });
-  if (!_.isUndefined(opts.ways)) c.cacheways = log2Exact("ways", opts.ways);
+  if (!_.isUndefined(opts.ways)) c.cacheways = log2Exact("ways", optionValue(opts, "ways"));
   if (!_.isUndefined(c.indexbits)) {
     c.blockindexbits = c.indexbits;
     delete c.indexbits;
@@ -92,7 +96,8 @@ let enrichConfig = config => {
 };
 
 let isValid = config => {
-  if (config.blockbits <= 0) return false;
+  if (![config.membits, config.blockbits, config.blockindexbits, config.cacheways, config.cachesizebits].every(Number.isSafeInteger)) return false;
+  if (config.blockbits < 0) return false;
   if (config.blockindexbits < 0) return false;
   if (config.cacheways < 0) return false;
   if (config.membits <= config.blockbits + config.blockindexbits) return false;

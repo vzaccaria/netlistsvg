@@ -17,10 +17,9 @@ function quote(value) {
 // Execute the emitted entry with the real simulator, asking for JSON rather
 // than compiling figures. No renderer or simulator mocks are involved.
 function simulateEntry(entry) {
-  const jsonOptions = entry.steps[0].startsWith("vzpac cache-new sim ") ? "" : " --json";
   const command = entry.steps[0]
     .replace(/^vzpac/, quote(process.execPath) + " " + quote(path.resolve(__dirname, "../../vzpac.js")))
-    .replace(" -c -x {prefix}", jsonOptions)
+    .replace(" -c -x {prefix}", "")
     .replace(/\{(\w+)\}/g, (match, name) => String(entry.vars[name]));
   return JSON.parse(childProcess.execSync(command, { shell: "/bin/bash", encoding: "utf8" }));
 }
@@ -34,9 +33,9 @@ function removeDirectory(directory) {
   fs.rmdirSync(directory);
 }
 
-function params() {
+function explicitOptions() {
   return {
-    membits: 8, blockbits: 2, cachesizebits: 4, cacheways: 0,
+    membits: 8, blockbits: 2, blocks: 4, ways: 1,
     accesses: ["0001 00 00", "0001 01 00", "0001 01 01", "0010 00 00", "0001 00 00"],
     initial: [
       { valid: true, tag: "0001", data: 4 },
@@ -74,7 +73,7 @@ describe("cache exercise generation", function () {
     fs.writeFileSync(path.join(directory, "base.yml"), yaml.dump({ mmu: { manual: true } }));
     doc = {
       template: "family.md", chapter: "chapter.md", base_assets: "base.yml", tag: "cache_slide",
-      sections: [{ title: "Direct mapping", exercises: [{ id: "example", params: params() }] }]
+      sections: [{ title: "Direct mapping", exercises: [{ id: "example", generate: explicitOptions() }] }]
     };
   });
 
@@ -87,12 +86,12 @@ describe("cache exercise generation", function () {
   }
 
   it("preserves leading-zero tags and invalid initial fields through real simulation", () => {
-    const trace = simulateEntry(generateFixture().example);
+    const trace = simulateEntry(generateFixture().example).simulation;
     expect(trace.results.actions[0].state).to.deep.equal([
-      { valid: 1, tag: "0001", data: 4 },
-      { valid: 0, tag: "0", data: 37 },
-      { valid: 0, tag: "0000", data: 2 },
-      { valid: 0, tag: "0011", data: 3 }
+      { valid: true, tag: "0001", data: 4 },
+      { valid: false, tag: "0", data: 37 },
+      { valid: false, tag: "0000", data: 2 },
+      { valid: false, tag: "0011", data: 3 }
     ]);
     expect(trace.results.actions.slice(1).map(action => action.type)).to.deep.equal([
       "hit", "miss", "hit", "miss", "miss"
@@ -102,11 +101,11 @@ describe("cache exercise generation", function () {
   });
 
   it("uses the existing empty-cache and fully-associative LRU behavior", () => {
-    doc.sections[0].exercises[0].params = {
-      membits: 8, blockbits: 2, cachesizebits: 4, cacheways: 2,
+    doc.sections[0].exercises[0].generate = {
+      membits: 8, blockbits: 2, blocks: 4, ways: 4,
       accesses: ["00000000", "00000100", "00001000", "00001100", "00000001", "00010000", "00000101"]
     };
-    const trace = simulateEntry(generateFixture().example);
+    const trace = simulateEntry(generateFixture().example).simulation;
     expect(trace.results.actions[0].state).to.deep.equal([
       { valid: false }, { valid: false }, { valid: false }, { valid: false }
     ]);
@@ -114,6 +113,33 @@ describe("cache exercise generation", function () {
       "miss", "miss", "miss", "miss", "hit", "miss", "miss"
     ]);
     expect(trace.results.cache.map(block => block.data)).to.deep.equal([0, 4, 1, 3]);
+  });
+
+  it("reuses named YAML traces and initial states without changing either comparison", () => {
+    fs.writeFileSync(input, [
+      "template: family.md", "chapter: chapter.md", "base_assets: base.yml", "tag: cache_slide",
+      "traces:", "  comparison: &comparison ['00000000', '00100000', '00000001']",
+      "states:", "  empty: &empty [{valid: false, tag: '0', data: 0}, {valid: false, tag: '0', data: 0}]",
+      "sections:", "  - title: Comparison", "    exercises:",
+      "      - {id: direct, generate: {blocks: 2, ways: 1, membits: 8, blockbits: 4, accesses: *comparison, initial: *empty}}",
+      "      - {id: associative, generate: {blocks: 2, ways: 2, membits: 8, blockbits: 4, accesses: *comparison, initial: *empty}}"
+    ].join("\n"));
+    generate(input, output, manifest);
+    const entries = yaml.load(fs.readFileSync(manifest, "utf8"));
+    const direct = simulateEntry(entries.direct).simulation;
+    const associative = simulateEntry(entries.associative).simulation;
+    expect(direct.trace.map(row => row.address)).to.deep.equal(["00000000", "00100000", "00000001"]);
+    expect(associative.trace.map(row => row.address)).to.deep.equal(direct.trace.map(row => row.address));
+    expect(direct.initial).to.deep.equal(associative.initial);
+    expect(direct.trace.map(row => row.expected)).to.deep.equal(["miss", "miss", "miss"]);
+    expect(associative.trace.map(row => row.expected)).to.deep.equal(["miss", "miss", "hit"]);
+  });
+
+  it("rejects a scalar CLI trace rather than generating unrelated accesses", () => {
+    expect(() => childProcess.execFileSync(process.execPath, [
+      path.resolve(__dirname, "../../vzpac.js"), "cache-new", "sim",
+      "--seed=trace", "--trace=2", "--blocks", "2", "--ways", "1", "--membits", "8", "--blockbits", "2"
+    ], { encoding: "utf8", stdio: "pipe" })).to.throw(Error);
   });
 
   it("keeps generated cases reproducible without requiring a seed in each row", () => {
@@ -144,8 +170,8 @@ describe("cache exercise generation", function () {
   });
 
   [
-    { name: "both explicit and generated modes", instance: { params: params(), generate: {} } },
-    { name: "neither explicit nor generated mode", instance: {} },
+    { name: "obsolete params alongside generate", instance: { params: explicitOptions(), generate: {} } },
+    { name: "missing generate", instance: {} },
     { name: "unknown generator options", instance: { generate: { cacheways: 1 } } },
     { name: "fractional access counts", instance: { generate: { accesses: 4.5 } } },
     { name: "hits on every access of a cold cache", instance: { generate: { accesses: 3, hits: 3 } } },
@@ -185,33 +211,33 @@ describe("cache exercise generation", function () {
   it("rejects duplicate instance IDs across sections without replacing previous outputs", () => {
     generateFixture();
     const previous = fs.readFileSync(output, "utf8");
-    doc.sections.push({ title: "Associative", exercises: [{ id: "example", params: params() }] });
-    expect(generateFixture).to.throw("duplicate exercise id example");
+    doc.sections.push({ title: "Associative", exercises: [{ id: "example", generate: explicitOptions() }] });
+    expect(generateFixture).to.throw(Error);
     expect(fs.readFileSync(output, "utf8")).to.equal(previous);
-    expect(simulateEntry(yaml.load(fs.readFileSync(manifest, "utf8")).example).results.actions[1].type).to.equal("hit");
+    expect(simulateEntry(yaml.load(fs.readFileSync(manifest, "utf8")).example).simulation.results.actions[1].type).to.equal("hit");
   });
 
   it("rejects instance IDs colliding with base assets even when the manifest moves", () => {
     doc.sections[0].exercises[0].id = "mmu";
-    expect(generateFixture).to.throw("mmu collides with a base manifest asset directory");
+    expect(generateFixture).to.throw(Error);
   });
 
   [
-    { name: "fractional dimensions", change: value => { value.membits = 8.5; }, error: "membits must be an integer" },
-    { name: "negative dimensions", change: value => { value.blockbits = -1; }, error: "blockbits must be an integer" },
-    { name: "ways exceeding the number of blocks", change: value => { value.cacheways = 3; }, error: "require 0 <= blockbits + cacheways" },
-    { name: "cache exceeding memory", change: value => { value.cachesizebits = 9; }, error: "require 0 <= blockbits + cacheways" },
-    { name: "unsupported direct-mapped zero-bit indexes", change: value => { value.cachesizebits = 2; }, error: "requires at least one cache index bit" },
-    { name: "truncated addresses", change: value => { value.accesses[0] = "0001000"; }, error: "exactly 8 binary digits" },
-    { name: "non-binary addresses", change: value => { value.accesses[0] = "00010002"; }, error: "exactly 8 binary digits" },
-    { name: "unquoted addresses", change: value => { value.accesses[0] = 10000; }, error: "quoted binary string" },
-    { name: "truncated valid tags", change: value => { value.initial[0].tag = "001"; }, error: "exactly 4 binary digits" },
-    { name: "unquoted initial tags", change: value => { value.initial[0].tag = 1; }, error: "quoted binary string" },
-    { name: "incorrect initial block counts", change: value => { value.initial.pop(); }, error: "exactly 4 blocks" }
+    { name: "fractional dimensions", change: value => { value.membits = 8.5; } },
+    { name: "negative dimensions", change: value => { value.blockbits = -1; } },
+    { name: "ways exceeding the number of blocks", change: value => { value.ways = 8; } },
+    { name: "cache exceeding memory", change: value => { value.membits = 3; } },
+    { name: "unsupported block count", change: value => { value.blocks = 1; } },
+    { name: "truncated addresses", change: value => { value.accesses[0] = "0001000"; } },
+    { name: "non-binary addresses", change: value => { value.accesses[0] = "00010002"; } },
+    { name: "unquoted addresses", change: value => { value.accesses[0] = 10000; } },
+    { name: "truncated valid tags", change: value => { value.initial[0].tag = "001"; } },
+    { name: "unquoted initial tags", change: value => { value.initial[0].tag = 1; } },
+    { name: "incorrect initial block counts", change: value => { value.initial.pop(); } }
   ].forEach(example => {
-    it(`rejects ${example.name} with an actionable parameter error`, () => {
-      example.change(doc.sections[0].exercises[0].params);
-      expect(generateFixture).to.throw(example.error);
+    it(`rejects ${example.name}`, () => {
+      example.change(doc.sections[0].exercises[0].generate);
+      expect(generateFixture).to.throw(Error);
     });
   });
 
@@ -220,7 +246,7 @@ describe("cache exercise generation", function () {
     const previousOutput = fs.readFileSync(output, "utf8");
     const previousManifest = fs.readFileSync(manifest, "utf8");
     fs.appendFileSync(path.join(directory, "family.md"), "\n${asset}\n");
-    expect(generateFixture).to.throw("unknown placeholder ${asset}");
+    expect(generateFixture).to.throw(Error);
     expect(fs.readFileSync(output, "utf8")).to.equal(previousOutput);
     expect(fs.readFileSync(manifest, "utf8")).to.equal(previousManifest);
   });

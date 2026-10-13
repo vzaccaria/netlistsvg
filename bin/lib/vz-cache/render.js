@@ -141,82 +141,6 @@ let getCompleteTrace = (trace, config) =>
     config
   );
 
-let emptyCacheState = config =>
-  _.map(_.range(0, config.numberOfBlocks), () => ({ valid: false }));
-
-let flattenState = (config, sets, highlightBlock) => {
-  return _.flatten(
-    _.map(_.range(0, config.numberOfSets), setIndex =>
-      _.map(_.range(0, config.associativity), way => {
-        let line = sets[setIndex][way];
-        if (_.isUndefined(line)) return { valid: false };
-        return {
-          valid: true,
-          tag: line.tagBits,
-          data: line.blockNumber,
-          highlight: line.blockNumber === highlightBlock
-        };
-      })
-    )
-  );
-};
-
-let applyTraceAccess = (config, sets, row, step) => {
-  let set = sets[row.set];
-  let line = _.find(set, l => l.tag === row.tag);
-  if (!_.isUndefined(line)) {
-    line.last = step;
-    return;
-  }
-
-  let newLine = {
-    tag: row.tag,
-    tagBits: row.tagBits,
-    blockNumber: row.blockNumber,
-    last: step
-  };
-  if (set.length < config.associativity) {
-    set.push(newLine);
-  } else {
-    let victim = _.minBy(set, l => l.last);
-    let victimIndex = _.findIndex(set, l => l === victim);
-    set[victimIndex] = newLine;
-  }
-};
-
-let actionDescription = (config, row) => {
-  let verb = row.expected === "hit" ? "leggo" : "carico";
-  if (config.blockindexbits === 0) return `${verb} mem[${row.blockNumber}] in cache`;
-  return `${verb} mem[${row.blockNumber}] in cache[${row.set}]`;
-};
-
-let legacyTraceFromSimulation = sim => {
-  let config = sim.config;
-  let sets = _.map(_.range(0, config.numberOfSets), () => []);
-  let actions = [
-    {
-      type: "",
-      state: emptyCacheState(config),
-      description: "Situazione iniziale"
-    }
-  ];
-
-  _.forEach(sim.trace, row => {
-    applyTraceAccess(config, sets, row, row.step);
-    actions.push({
-      type: row.expected,
-      state: flattenState(config, sets, row.blockNumber),
-      description: actionDescription(config, row),
-      access: row.address
-    });
-  });
-
-  return {
-    accesslist: _.map(sim.trace, row => row.address),
-    results: { actions }
-  };
-};
-
 let produceCombinedSheet = (config, trace, blank) => {
   let cfg = _.merge({}, config, { blank });
   return `${produceCacheData(cfg, blank)}
@@ -228,7 +152,6 @@ ${getCompleteTrace(trace, cfg)}
 };
 
 let produceSimulationArtifacts = sim => {
-  let trace = legacyTraceFromSimulation(sim);
   return {
     simulation: sim,
     latex: [
@@ -254,7 +177,7 @@ let produceSimulationArtifacts = sim => {
         "-r varwidth=10cm"
       ),
       latexArtifact(
-        getCompleteTrace(trace, _.merge({}, sim.config, { blank: false })),
+        getCompleteTrace(sim, _.merge({}, sim.config, { blank: false })),
         "Complete trace",
         "standalone",
         "pdflatex",
@@ -262,7 +185,7 @@ let produceSimulationArtifacts = sim => {
         ["amssymb", "xcolor"]
       ),
       latexArtifact(
-        getCompleteTrace(trace, _.merge({}, sim.config, { blank: true })),
+        getCompleteTrace(sim, _.merge({}, sim.config, { blank: true })),
         "Blank trace",
         "standalone",
         "pdflatex",
@@ -270,7 +193,7 @@ let produceSimulationArtifacts = sim => {
         ["amssymb", "xcolor"]
       ),
       latexArtifact(
-        produceCombinedSheet(sim.config, trace, true),
+        produceCombinedSheet(sim.config, sim, true),
         "Combined blank",
         "standalone",
         "pdflatex",
@@ -278,7 +201,7 @@ let produceSimulationArtifacts = sim => {
         ["amssymb", "xcolor"]
       ),
       latexArtifact(
-        produceCombinedSheet(sim.config, trace, false),
+        produceCombinedSheet(sim.config, sim, false),
         "Combined complete",
         "standalone",
         "pdflatex",
@@ -291,7 +214,6 @@ let produceSimulationArtifacts = sim => {
 
 module.exports = {
   getCompleteTrace,
-  legacyTraceFromSimulation,
   produceCacheBadge,
   produceCacheData,
   produceSimulationArtifacts

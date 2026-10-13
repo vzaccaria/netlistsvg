@@ -1,217 +1,238 @@
 "use strict";
 
-let _ = require("lodash");
 let { enrichConfig, isValid, log2Exact, seededRandom } = require("./config");
 
-let optionValue = (opts, key) => {
-  return _.isUndefined(opts[key]) ? undefined : parseInt(opts[key]);
+let integerOption = (opts, key, fallback) => {
+  let value = opts[key];
+  if (value === undefined) return fallback;
+  if (typeof value === "string" && /^[+-]?\d+$/.test(value)) value = Number(value);
+  if (!Number.isSafeInteger(value)) throw `${key} must be a safe integer`;
+  return value;
 };
-
-let randInt = (random, min, max) => {
-  return min + Math.floor(random() * (max - min + 1));
-};
-
+let randInt = (random, min, max) => min + Math.floor(random() * (max - min + 1));
 let choose = (random, values) => values[randInt(random, 0, values.length - 1)];
-
 let shuffle = (random, values) => {
   let result = values.slice();
   for (let i = result.length - 1; i > 0; i--) {
     let j = randInt(random, 0, i);
-    let tmp = result[i];
-    result[i] = result[j];
-    result[j] = tmp;
+    [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
 };
+let bits = (value, width) => width === 0 ? "" : value.toString(2).padStart(width, "0");
+let normalizeSeed = opts => opts.seed === undefined ? `${Date.now()}` : `${opts.seed}`;
 
-let bits = (value, width) => {
-  if (width === 0) return "";
-  return value.toString(2).padStart(width, "0");
-};
-
-let normalizeSeed = opts => {
-  return _.isUndefined(opts.seed) ? `${Date.now()}` : `${opts.seed}`;
-};
-
-let makeFourBlockConfig = opts => {
-  opts = opts || {};
+let makeSimulationConfig = opts => {
   let seed = normalizeSeed(opts);
   let random = seededRandom(`${seed}:config`);
-  let ways = _.isUndefined(opts.ways) ? choose(random, [1, 2, 4]) : optionValue(opts, "ways");
+  let blocks = integerOption(opts, "blocks", 4);
+  if (blocks !== 2 && blocks !== 4) throw "blocks must be 2 or 4";
+  let ways = opts.ways === undefined ? choose(random, blocks === 2 ? [1, 2] : [1, 2, 4]) : integerOption(opts, "ways");
+  if (ways < 1 || blocks % ways !== 0) throw "ways must divide blocks";
   let cacheways = log2Exact("ways", ways);
-  if (cacheways > 2) {
-    throw "ways must be 1, 2, or 4 for a 4-block cache";
-  }
-
-  let blockindexbits = 2 - cacheways;
-  let blockbits = _.isUndefined(opts.blockbits)
-    ? randInt(random, 2, 10)
-    : optionValue(opts, "blockbits");
-  let minMemBlockBits = Math.max(3, blockindexbits + 1);
-  let minMembits = blockbits + minMemBlockBits;
-  let membits = _.isUndefined(opts.membits)
-    ? randInt(random, Math.max(10, minMembits), 20)
-    : optionValue(opts, "membits");
-  let config = {
-    seed,
-    membits,
-    blockbits,
-    blockindexbits,
-    cacheways,
-    cachesizebits: blockbits + 2
-  };
-
-  if (membits < minMembits) {
-    throw `membits must be at least ${minMembits} for a useful 4-block simulation`;
-  }
-  if (!isValid(config)) {
-    throw "invalid 4-block cache configuration";
-  }
-  config = enrichConfig(config);
-  if (config.numberOfBlocks !== 4) {
-    throw "simulation cache must contain exactly 4 blocks";
-  }
-  return config;
+  let blockindexbits = Math.log2(blocks) - cacheways;
+  let blockbits = opts.blockbits === undefined ? randInt(random, 2, 10) : integerOption(opts, "blockbits");
+  if (blockbits < 0 || blockbits > 51) throw "blockbits must be between 0 and 51";
+  let minMembits = Math.min(52, blockbits + Math.max(3, blockindexbits + 1));
+  let membits = opts.membits === undefined
+    ? randInt(random, Math.max(10, minMembits), Math.max(20, minMembits))
+    : integerOption(opts, "membits");
+  let config = { seed, membits, blockbits, blockindexbits, cacheways, cachesizebits: blockbits + Math.log2(blocks) };
+  if (membits > 52 || config.cachesizebits > membits || !isValid(config)) throw "invalid cache configuration: require cache <= memory, with index and tag bits within 52 address bits";
+  return enrichConfig(config);
 };
 
-let normalizeHitTarget = (opts, random, accesses) => {
-  let exact = optionValue(opts, "hits");
-  let minHits = _.isUndefined(exact)
-    ? (_.isUndefined(opts.minHits) ? 0 : optionValue(opts, "minHits"))
-    : exact;
-  let maxHits = _.isUndefined(exact)
-    ? (_.isUndefined(opts.maxHits) ? accesses - 1 : optionValue(opts, "maxHits"))
-    : exact;
-
-  if (accesses < 1) throw "accesses must be at least 1";
-  if (minHits < 0 || maxHits < 0) throw "hit constraints must be non-negative";
-  if (minHits > maxHits) throw "min-hits cannot be greater than max-hits";
-  if (maxHits > accesses - 1) {
-    throw "a cold empty cache cannot hit on the first access";
-  }
-  return randInt(random, minHits, maxHits);
+let makeInitial = (config, supplied) => {
+  if (supplied === undefined) return Array.from({ length: config.numberOfBlocks }, () => ({ valid: false }));
+  if (!Array.isArray(supplied) || supplied.length !== config.numberOfBlocks) throw "initial must contain exactly blocks entries";
+  let seen = new Set();
+  return supplied.map((line, slot) => {
+    if (!line || typeof line.valid !== "boolean" || typeof line.tag !== "string" || !/^[01]+$/.test(line.tag) || !Number.isSafeInteger(line.data)) {
+      throw "initial entries require boolean valid, binary string tag, and safe integer data";
+    }
+    if (line.valid) {
+      if (line.tag.length !== config.tagbits) throw "valid initial tags must have exactly tagbits bits";
+      let key = `${Math.floor(slot / config.associativity)}:${line.tag}`;
+      if (seen.has(key)) throw "initial cannot contain duplicate valid tags in a set";
+      seen.add(key);
+    }
+    return { valid: line.valid, tag: line.tag, data: line.data };
+  });
 };
 
-let buildPlan = (random, accesses, hits) => {
-  let misses = accesses - hits;
-  let rest = _.flatten([
-    _.map(_.range(0, hits), () => "hit"),
-    _.map(_.range(0, misses - 1), () => "miss")
-  ]);
-  return ["miss"].concat(shuffle(random, rest));
-};
-
-let makeState = config => {
-  return _.map(_.range(0, config.numberOfSets), () => []);
-};
-
-let residentLines = state => _.flatten(state);
-
-let refFromBlock = (config, random, blockNumber) => {
-  let set = config.numberOfSets === 1 ? 0 : blockNumber % config.numberOfSets;
-  let tag = Math.floor(blockNumber / config.numberOfSets);
-  let offset = randInt(random, 0, Math.pow(2, config.blockbits) - 1);
-  let tagBits = bits(tag, config.tagbits);
-  let indexBits = bits(set, config.blockindexbits);
-  let offsetBits = bits(offset, config.blockbits);
+let reference = (config, address) => {
+  if (typeof address !== "string" || !/^[01 ]+$/.test(address)) throw "accesses must contain quoted binary addresses (spaces allowed)";
+  let compact = address.replace(/ /g, "");
+  if (compact.length !== config.membits) throw `address must contain exactly ${config.membits} bits`;
+  let tagBits = compact.slice(0, config.tagbits);
+  let indexBits = compact.slice(config.tagbits, config.tagbits + config.blockindexbits);
+  let offsetBits = compact.slice(config.tagbits + config.blockindexbits);
+  let tag = parseInt(tagBits, 2);
+  let set = indexBits === "" ? 0 : parseInt(indexBits, 2);
   return {
-    tag,
-    set,
-    offset,
-    blockNumber,
-    tagBits,
-    indexBits,
-    offsetBits,
-    address: tagBits + indexBits + offsetBits,
-    groupedAddress: _.filter([tagBits, indexBits, offsetBits], x => x !== "").join(" ")
+    tag, set, offset: offsetBits === "" ? 0 : parseInt(offsetBits, 2),
+    blockNumber: tag * config.numberOfSets + set,
+    tagBits, indexBits, offsetBits, address,
+    groupedAddress: [tagBits, indexBits, offsetBits].filter(part => part !== "").join(" ")
   };
 };
-
-let isHit = (state, ref) => {
-  return !_.isUndefined(_.find(state[ref.set], line => line.tag === ref.tag));
-};
-
-let chooseMissRef = (config, state, random) => {
-  let maxBlock = Math.pow(2, config.membits - config.blockbits) - 1;
-  for (let i = 0; i < 1000; i++) {
-    let ref = refFromBlock(config, random, randInt(random, 0, maxBlock));
-    if (!isHit(state, ref)) return ref;
-  }
-  throw "could not find a miss candidate";
-};
-
-let chooseHitRef = (config, state, random) => {
-  let lines = residentLines(state);
-  if (_.isEmpty(lines)) throw "cannot generate a hit before any cache line is resident";
-  let line = choose(random, lines);
-  return refFromBlock(config, random, line.blockNumber);
-};
-
+let generatedReference = (config, tag, set, offset) => reference(config,
+  bits(tag, config.tagbits) + bits(set, config.blockindexbits) + bits(offset, config.blockbits));
+let setSlots = (config, set) => Array.from({ length: config.associativity }, (_, way) => set * config.associativity + way);
+let snapshot = (state, accessed) => state.map((line, slot) => {
+  let copy = { valid: line.valid };
+  if (line.tag !== undefined) copy.tag = line.tag;
+  if (line.data !== undefined) copy.data = line.data;
+  if (accessed !== undefined) copy.highlight = slot === accessed;
+  return copy;
+});
 let applyAccess = (config, state, ref, step) => {
-  let set = state[ref.set];
-  let line = _.find(set, l => l.tag === ref.tag);
-  if (!_.isUndefined(line)) {
-    line.last = step;
-    return "hit";
-  }
-
-  let newLine = {
-    tag: ref.tag,
-    set: ref.set,
-    blockNumber: ref.blockNumber,
-    last: step
-  };
-  if (set.length < config.associativity) {
-    set.push(newLine);
-  } else {
-    let victim = _.minBy(set, l => l.last);
-    let victimIndex = _.findIndex(set, l => l === victim);
-    set[victimIndex] = newLine;
-  }
-  return "miss";
+  let slots = setSlots(config, ref.set);
+  let slot = slots.find(index => state[index].valid && state[index].tag === ref.tagBits);
+  let type = slot === undefined ? "miss" : "hit";
+  let conflict = false;
+  if (slot === undefined) {
+    slot = slots.find(index => !state[index].valid);
+    if (slot === undefined) {
+      conflict = true;
+      slot = slots.reduce((best, index) => state[index].last < state[best].last ? index : best, slots[0]);
+    }
+    state[slot] = { valid: true, tag: ref.tagBits, data: ref.blockNumber, last: step };
+  } else state[slot].last = step;
+  return { type, slot, conflict };
 };
 
-let generateSimulation = opts => {
-  opts = opts || {};
+let buildPlan = (random, accesses, hits, populated = false) => {
+  let misses = accesses - hits;
+  let rest = Array(hits).fill("hit").concat(Array(misses - (populated ? 0 : 1)).fill("miss"));
+  return populated ? shuffle(random, rest) : ["miss"].concat(shuffle(random, rest));
+};
+
+// Select outside a finite exclusion set without sampling retries or enumerating memory.
+let availableTag = (random, count, excluded) => {
+  if (excluded.size >= count) return undefined;
+  let tag = randInt(random, 0, count - 1);
+  while (excluded.has(tag)) tag = (tag + 1) % count;
+  return tag;
+};
+let generationBudget = (opts, config, initial, accesses, random) => {
+  let conflicts = integerOption(opts, "conflicts", 0);
+  if (conflicts < 0) throw "conflicts must be non-negative";
+  let tagCount = Math.pow(2, config.tagbits);
+  let occupancy = Array.from({ length: config.numberOfSets }, (_, set) => setSlots(config, set).filter(slot => initial[slot].valid).length);
+  let populated = occupancy.some(count => count > 0);
+  let minMisses = populated ? 0 : 1;
+  let maxMisses = tagCount > config.associativity ? accesses : occupancy.reduce((sum, count) => sum + tagCount - count, 0);
+  let targetSet;
+  if (conflicts > 0) {
+    if (tagCount <= config.associativity) throw "conflicts are impossible when all tags fit in each set";
+    let fullest = Math.max(...occupancy);
+    targetSet = choose(random, occupancy.map((count, set) => count === fullest ? set : undefined).filter(set => set !== undefined));
+    minMisses = Math.max(minMisses, config.associativity - fullest + conflicts);
+  }
+  let exact = integerOption(opts, "hits", undefined);
+  let minHits = exact === undefined ? integerOption(opts, "minHits", 0) : exact;
+  let maxHits = exact === undefined ? integerOption(opts, "maxHits", accesses - (populated ? 0 : 1)) : exact;
+  if (minHits < 0 || maxHits < 0 || minHits > maxHits) throw "hit constraints must be non-negative with minHits <= maxHits";
+  if (maxHits > accesses - (populated ? 0 : 1)) throw "hit target exceeds accesses or requires a first-access hit in a cold cache";
+  let feasibleMin = Math.max(minHits, accesses - maxMisses);
+  let feasibleMax = Math.min(maxHits, accesses - minMisses);
+  if (feasibleMin > feasibleMax) throw "hit and conflict constraints cannot be satisfied by this cache and initial state";
+  return { hits: randInt(random, feasibleMin, feasibleMax), conflicts, targetSet, tagCount };
+};
+
+let generateSimulation = (opts = {}) => {
+  let explicit = Array.isArray(opts.accesses);
+  if (explicit) {
+    if (opts.accesses.length === 0) throw "accesses array must not be empty";
+    if (opts.membits === undefined || opts.blockbits === undefined) throw "explicit accesses require membits and blockbits";
+    for (let key of ["hits", "minHits", "maxHits", "conflicts"]) {
+      if (opts[key] !== undefined) throw `${key} is only supported for generated accesses`;
+    }
+  }
   let seed = normalizeSeed(opts);
   let random = seededRandom(`${seed}:trace`);
-  let config = makeFourBlockConfig(opts);
-  let accesses = _.isUndefined(opts.accesses) ? 6 : optionValue(opts, "accesses");
-  let hits = normalizeHitTarget(opts, random, accesses);
-  let plan = buildPlan(random, accesses, hits);
-  let state = makeState(config);
-  let trace = _.map(plan, (desired, i) => {
-    let ref = desired === "hit"
-      ? chooseHitRef(config, state, random)
-      : chooseMissRef(config, state, random);
-    let result = applyAccess(config, state, ref, i + 1);
-    if (result !== desired) {
-      throw `internal trace generation error: expected ${desired}, got ${result}`;
+  let config = makeSimulationConfig(Object.assign({}, opts, { seed }));
+  let initial = makeInitial(config, opts.initial);
+  let state = initial.map(line => Object.assign({}, line, { last: 0 }));
+  let accesses = explicit ? opts.accesses.length : integerOption(opts, "accesses", 6);
+  if (accesses < 1) throw "accesses must be at least 1";
+  let budget = explicit ? undefined : generationBudget(opts, config, initial, accesses, random);
+  let plan = explicit ? opts.accesses.map(address => reference(config, address)) : buildPlan(random, accesses, budget.hits, initial.some(line => line.valid));
+  let actions = [{ type: "", state: snapshot(state), description: "Situazione iniziale" }];
+  let trace = [];
+  let usedTags = new Set();
+  let usedMissTags = new Set();
+  let usedSets = new Set();
+  let usedOffsets = new Set();
+  let lastOffsets = new Map();
+  let conflictCount = 0;
+  let hitCount = 0;
+  let remainingMisses = accesses - (budget ? budget.hits : 0);
+  for (let i = 0; i < plan.length; i++) {
+    let ref;
+    if (explicit) ref = plan[i];
+    else if (plan[i] === "hit") {
+      let slots = state.map((line, slot) => line.valid ? slot : undefined).filter(slot => slot !== undefined);
+      let unvisited = slots.filter(slot => !usedSets.has(Math.floor(slot / config.associativity)));
+      let slot = choose(random, unvisited.length ? unvisited : slots);
+      let set = Math.floor(slot / config.associativity);
+      let tag = parseInt(state[slot].tag, 2);
+      let block = tag * config.numberOfSets + set;
+      let offsetCount = Math.pow(2, config.blockbits);
+      let previous = lastOffsets.has(block) ? lastOffsets.get(block) : 0;
+      let offset = offsetCount > 1 ? (previous + randInt(random, 1, offsetCount - 1)) % offsetCount : 0;
+      ref = generatedReference(config, tag, set, offset);
+    } else {
+      let candidates = Array.from({ length: config.numberOfSets }, (_, set) => set).filter(set =>
+        setSlots(config, set).filter(slot => state[slot].valid).length < budget.tagCount);
+      let required = budget.conflicts - conflictCount;
+      let set;
+      if (required > 0) {
+        let vacancies = setSlots(config, budget.targetSet).filter(slot => !state[slot].valid).length;
+        if (remainingMisses <= vacancies + required) set = budget.targetSet;
+      }
+      if (set === undefined) {
+        let unvisited = candidates.filter(candidate => !usedSets.has(candidate));
+        set = choose(random, unvisited.length ? unvisited : candidates);
+      }
+      let resident = new Set(setSlots(config, set).filter(slot => state[slot].valid).map(slot => parseInt(state[slot].tag, 2)));
+      let fresh = new Set([...resident, ...usedMissTags]);
+      let tag = availableTag(random, budget.tagCount, fresh);
+      if (tag === undefined) tag = availableTag(random, budget.tagCount, resident);
+      ref = generatedReference(config, tag, set, randInt(random, 0, Math.pow(2, config.blockbits) - 1));
+      remainingMisses--;
     }
-    return _.merge({}, ref, {
-      step: i + 1,
-      expected: result,
-      action: result === "hit" ? `leggo mem[${ref.blockNumber}]` : `carico mem[${ref.blockNumber}]`
+    let result = applyAccess(config, state, ref, i + 1);
+    if (result.type === "hit") hitCount++;
+    else usedMissTags.add(ref.tag);
+    if (result.conflict) conflictCount++;
+    usedTags.add(ref.tag);
+    usedSets.add(ref.set);
+    usedOffsets.add(ref.offset);
+    lastOffsets.set(ref.blockNumber, ref.offset);
+    let row = Object.assign({}, ref, {
+      step: i + 1, expected: result.type,
+      action: `${result.type === "hit" ? "leggo" : "carico"} mem[${ref.blockNumber}]`
     });
-  });
-
+    trace.push(row);
+    actions.push({
+      type: result.type, state: snapshot(state, result.slot), access: ref.address,
+      description: `${row.action} in cache${config.blockindexbits === 0 ? "" : `[${ref.set}]`}`
+    });
+  }
   return {
-    seed,
-    config,
+    seed, config, initial,
     constraints: {
-      accesses,
-      hits,
-      minHits: _.isUndefined(opts.minHits) ? undefined : optionValue(opts, "minHits"),
-      maxHits: _.isUndefined(opts.maxHits) ? undefined : optionValue(opts, "maxHits")
+      accesses, hits: budget ? budget.hits : undefined,
+      minHits: opts.minHits === undefined ? undefined : integerOption(opts, "minHits"),
+      maxHits: opts.maxHits === undefined ? undefined : integerOption(opts, "maxHits"),
+      conflicts: budget ? budget.conflicts : undefined
     },
-    hitCount: hits,
-    missCount: accesses - hits,
-    trace
+    hitCount, missCount: accesses - hitCount, conflictCount,
+    tagCount: usedTags.size, setCount: usedSets.size, offsetCount: usedOffsets.size,
+    trace, results: { actions, cache: snapshot(state) }
   };
 };
 
-module.exports = {
-  buildPlan,
-  generateSimulation,
-  makeFourBlockConfig
-};
+module.exports = { buildPlan, generateSimulation, makeSimulationConfig };

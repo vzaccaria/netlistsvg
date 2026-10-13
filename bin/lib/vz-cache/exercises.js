@@ -6,13 +6,15 @@ const yaml = require("js-yaml");
 const { generateSimulation } = require("./sim");
 
 const SLOT = "%% cache-exercises %%";
-const DIMENSIONS = ["membits", "blockbits", "cachesizebits", "cacheways"];
 const GENERATE_FLAGS = {
   seed: "--seed",
+  blocks: "--blocks",
   accesses: "--accesses",
   hits: "--hits",
   minHits: "--min-hits",
   maxHits: "--max-hits",
+  conflicts: "--conflicts",
+  initial: "--initial",
   membits: "--membits",
   blockbits: "--blockbits",
   ways: "--ways"
@@ -74,51 +76,6 @@ function markdownPath(value) {
   return value.split(path.sep).map(part => encodeURIComponent(part)).join("/");
 }
 
-function binary(value, width, label, allowShort) {
-  if (typeof value !== "string") fail(`${label} must be a quoted binary string (leading zeros matter)`);
-  const bits = value.replace(/ /g, "");
-  if (!/^[01]*$/.test(bits) || (!allowShort && bits.length !== width) || (allowShort && !bits.length)) {
-    fail(`${label} must contain ${allowShort ? "binary digits" : `exactly ${width} binary digits`} (spaces are allowed)`);
-  }
-  return bits;
-}
-
-function validateParams(raw, id) {
-  const params = mapping(raw, `${id}.params`);
-  const label = `${id}.params`;
-  for (const name of DIMENSIONS) {
-    if (!Number.isSafeInteger(params[name]) || params[name] < 0 || params[name] > 53) {
-      fail(`${label}.${name} must be an integer between 0 and 53`);
-    }
-  }
-  const { membits, blockbits, cachesizebits, cacheways } = params;
-  const indexbits = cachesizebits - blockbits - cacheways;
-  const tagbits = membits - blockbits - indexbits;
-  if (membits === 0 || blockbits > membits || cachesizebits > membits || indexbits < 0 || tagbits < 0) {
-    fail(`${label}: require 0 <= blockbits + cacheways <= cachesizebits <= membits, with membits > 0`);
-  }
-  if (cachesizebits - blockbits > 31) fail(`${label}: cache block count exceeds the simulator's array limit`);
-  if (cacheways === 0 && indexbits === 0) {
-    fail(`${label}: the existing direct-mapped simulator requires at least one cache index bit`);
-  }
-  if (!Array.isArray(params.accesses) || !params.accesses.length) fail(`${label}.accesses must be a non-empty array`);
-  params.accesses.forEach((access, i) => binary(access, membits, `${label}.accesses[${i}]`, false));
-  if (params.initial !== undefined) {
-    const count = Math.pow(2, cachesizebits - blockbits);
-    if (!Array.isArray(params.initial) || params.initial.length !== count) {
-      fail(`${label}.initial must have exactly ${count} blocks`);
-    }
-    params.initial.forEach((rawBlock, i) => {
-      const blockLabel = `${label}.initial[${i}]`;
-      const block = mapping(rawBlock, blockLabel);
-      if (typeof block.valid !== "boolean") fail(`${blockLabel}.valid must be a boolean`);
-      // Legacy exercises deliberately retain short tags and data in invalid blocks.
-      binary(block.tag, tagbits, `${blockLabel}.tag`, !block.valid);
-      if (!Number.isSafeInteger(block.data)) fail(`${blockLabel}.data must be a safe integer`);
-    });
-  }
-  return params;
-}
 
 function family(filename) {
   const source = readText(filename);
@@ -170,24 +127,6 @@ function rebaseMarkdown(body, from, to) {
       (match, opener, destination, closer) => opener + rebaseDestination(destination, from, to) + closer);
 }
 
-function cacheEntry(id, params, manifestRoot) {
-  const vars = {};
-  for (const name of DIMENSIONS) vars[name] = params[name];
-  vars.accesses = shellQuote(params.accesses.join(","));
-  vars.prefix = shellQuote(path.join(manifestRoot, id, "assets", id));
-  let initial = "";
-  if (params.initial !== undefined) {
-    vars.initial = shellQuote(params.initial.map(block => [
-      block.valid ? 1 : 0, block.tag.replace(/ /g, ""), block.data
-    ].join(",")).join(","));
-    initial = " --empty {initial}";
-  }
-  return {
-    vars,
-    steps: ["vzpac cache sim {accesses}" + initial +
-      " --membits {membits} --blockbits {blockbits} --cachesizebits {cachesizebits} --cacheways {cacheways} -c -x {prefix}"]
-  };
-}
 
 function generatedEntry(id, raw, manifestRoot) {
   const label = `${id}.generate`;
@@ -200,6 +139,8 @@ function generatedEntry(id, raw, manifestRoot) {
       if (!(typeof value === "string" && value.trim()) && !Number.isSafeInteger(value)) {
         fail(`${label}.seed must be a non-empty string or a safe integer`);
       }
+    } else if ((name === "accesses" || name === "initial") && Array.isArray(value)) {
+      continue;
     } else if (!Number.isSafeInteger(value)) {
       fail(`${label}.${name} must be an integer`);
     }
@@ -215,8 +156,11 @@ function generatedEntry(id, raw, manifestRoot) {
   const flags = [];
   for (const [name, flag] of Object.entries(GENERATE_FLAGS)) {
     if (options[name] === undefined) continue;
-    vars[name] = name === "seed" ? shellQuote(String(options[name])) : options[name];
-    flags.push(name === "seed" ? `${flag}={${name}}` : `${flag} {${name}}`);
+    const structured = name === "initial" || (name === "accesses" && Array.isArray(options[name]));
+    const flagName = name === "accesses" && structured ? "--trace" : flag;
+    vars[name] = structured ? shellQuote(JSON.stringify(options[name]))
+      : name === "seed" ? shellQuote(String(options[name])) : options[name];
+    flags.push(structured || name === "seed" ? `${flagName}={${name}}` : `${flagName} {${name}}`);
   }
   return {
     vars,
@@ -278,13 +222,10 @@ function generate(input, output, manifest) {
       if (ids.has(id)) fail(`duplicate exercise id ${id}`);
       if (baseIds.has(id) || occupied.has(path.join(manifestRoot, id))) fail(`exercise id ${id} collides with a base manifest asset directory`);
       ids.add(id);
-      const explicit = exercise.params !== undefined;
-      const generated = exercise.generate !== undefined;
-      if (explicit === generated) fail(`${id}: provide exactly one of params or generate`);
+      if (exercise.params !== undefined) fail(`${id}: params is no longer supported; use generate with blocks and ways`);
+      if (exercise.generate === undefined) fail(`${id}: provide generate`);
       const intro = exercise.intro === undefined ? template.intro : text(exercise.intro, `${id}.intro`);
-      combined[id] = explicit
-        ? cacheEntry(id, validateParams(exercise.params, id), manifestRoot)
-        : generatedEntry(id, exercise.generate, manifestRoot);
+      combined[id] = generatedEntry(id, exercise.generate, manifestRoot);
       return interpolate(template.body, {
         id, intro, tag,
         assets: markdownPath(path.relative(outputRoot, path.join(manifestRoot, id, "assets", id))),

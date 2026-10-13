@@ -89,6 +89,14 @@ let produceArtifacts = config => {
   };
 };
 
+let parseJsonOption = (name, value) => {
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    throw new Error(`${name} must contain valid JSON: ${error.message}`);
+  }
+};
+
 let register = prog => {
   let cmd = prog
     .command(`${SUBNAME} config`, "Generate cache configuration exercises")
@@ -109,19 +117,35 @@ let register = prog => {
   });
 
   let simCmd = prog
-    .command(`${SUBNAME} sim`, "Generate 4-block cache simulation exercises")
+    .command(`${SUBNAME} sim`, "Generate or replay 2/4-block cache simulation exercises")
     .option("--seed <value>", "seed for reproducible random generation")
     .option("-x, --save <prefix>", "save with prefix or dump json")
-    .option("-n, --accesses <num>", "number of memory accesses", prog.INT, 6)
+    .option("--blocks <num>", "total cache blocks, as 2 or 4 (default: 4)", prog.INT)
+    .option("-n, --accesses <num>", "generated memory access count (default: 6); incompatible with --trace", prog.INT)
+    .option("--trace <json>", "explicit JSON array of binary addresses; requires --membits and --blockbits")
+    .option("--initial <json>", "initial cache slots as a JSON array of {valid, tag, data}")
     .option("--hits <num>", "exact number of hits to generate", prog.INT)
-    .option("--min-hits <num>", "minimum number of hits", prog.INT)
-    .option("--max-hits <num>", "maximum number of hits", prog.INT)
+    .option("--min-hits <num>", "minimum number of hits to generate", prog.INT)
+    .option("--max-hits <num>", "maximum number of hits to generate", prog.INT)
+    .option("--conflicts <num>", "minimum full-set replacement misses to generate", prog.INT)
     .option("-m, --membits <num>", "main address size", prog.INT)
     .option("-b, --blockbits <num>", "log2 of block size", prog.INT)
-    .option("-w, --ways <num>", "cache associativity, as 1, 2, or 4", prog.INT);
+    .option("-w, --ways <num>", "cache associativity: 1, 2, or 4, dividing --blocks", prog.INT);
 
   addCompileOptions(simCmd).action(async (args, options) => {
-    let result = produceSimulationArtifacts(generateSimulation(options));
+    let simulationOptions = Object.assign({}, options);
+    if (options.trace !== undefined) {
+      if (options.accesses !== undefined) {
+        throw new Error("--accesses and --trace cannot be supplied together");
+      }
+      simulationOptions.accesses = parseJsonOption("--trace", options.trace);
+      if (!Array.isArray(simulationOptions.accesses)) throw new Error("--trace must be a JSON array of binary addresses");
+      delete simulationOptions.trace;
+    }
+    if (options.initial !== undefined) {
+      simulationOptions.initial = parseJsonOption("--initial", options.initial);
+    }
+    let result = produceSimulationArtifacts(generateSimulation(simulationOptions));
     if (options.save) {
       return writeArtifacts(result.latex, options);
     }
