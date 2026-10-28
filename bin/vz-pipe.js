@@ -8,6 +8,7 @@ let { addCompileOptions } = require("./lib/artifacts");
 const SUBNAME = "pipe";
 
 let register = prog => {
+  require("./lib/vz-pipe/exercises").register(prog);
   let cmd = prog
     .command(`${SUBNAME} pipesim`, "Pipeline visualization generator")
     .argument(
@@ -35,8 +36,8 @@ let register = prog => {
       prog.DOUBLE,
       1.3
     );
-  addCompileOptions(cmd).action((args, options) => {
-    runAndSave(options, args.program);
+  addCompileOptions(cmd).action(async (args, options) => {
+    await runAndSave(options, args.program);
   });
 
   prog

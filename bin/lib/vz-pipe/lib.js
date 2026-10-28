@@ -1,17 +1,20 @@
 let Table = require("easy-table");
+const { OPERANDS, MAX_CYCLES, MAX_CELLS, fail, parseProgram, normalizeOptions } = require("./program");
 
 let run = (options, program) => {
+  const rows = parseProgram(program);
+  options = normalizeOptions(options, rows.length);
+  const operations = { add, sub, or, lw, sw, beq, nop, anything };
+  const executable = rows.map(row => operations[row.op](...OPERANDS[row.op].map(field => row[field])));
   let sim = simulate({
     hasFw: options.fw,
     hasBranchPrediction: options.branchpred,
     hasBranchOptimization: options.branchopt
-  })(eval(`[${program}]`));
+  })(executable);
+  const cycles = Math.max(sim.table[sim.table.length - 1].n_we + 1, options.maxCycles || 0);
+  if (cycles > MAX_CYCLES || cycles * rows.length > MAX_CELLS) fail("pipeline geometry exceeds the bounded rendering grid");
   let ty = `${options.fw ? "FW" : ""} - ${options.branchopt ? "BO" : ""}`;
   let trace = Table.print(sim.table);
-  if (options.debug) {
-    console.log(ty);
-    console.log(trace);
-  }
   sim.type = ty;
   sim.trace = trace;
   return sim;
@@ -35,7 +38,7 @@ const pipeTikzLibraries = [
   "matrix"
 ];
 
-let pipe = ({ n_fe, n_de, n_ee, n_me, n_we }) => {
+let pipe = ({ n_fe, n_de, n_ee }) => {
   let prologue = _.repeat("-", n_fe);
   let ftch = _.repeat("f", n_de - n_fe - 1) + "F";
   let decode = _.repeat("d", n_ee - n_de - 1) + "D";
@@ -326,7 +329,9 @@ let lw = load("lw");
 let sw = store("sw");
 let beq = branch("beq");
 
-let saveIt = (options, sim) => {
+let assembleArtifacts = (options, state) => {
+  options = normalizeOptions(options, state.table.length);
+  const sim = _.cloneDeep(state);
   let desc = (() => {
     switch ("" + options.branchopt + ";" + options.fw) {
       case "true;true":
@@ -404,15 +409,26 @@ let saveIt = (options, sim) => {
       )
     ]
   };
-  if (!options.save) {
-    console.log(JSON.stringify(results, 0, 4));
-  } else {
-    writeArtifacts(results.latex, options);
+  return results;
+};
+
+// Pure generation is shared by the CLI and declarative exercise model.
+let generateArtifacts = (options, program) => assembleArtifacts(options, run(options, program));
+
+let saveIt = async (options, sim) => {
+  const results = assembleArtifacts(options, sim);
+  if (!options.save) console.log(JSON.stringify(results, 0, 4));
+  else await writeArtifacts(results.latex, options);
+  return results;
+};
+
+let runAndSave = async (options, program) => {
+  const sim = run(options, program);
+  if (options.debug) {
+    console.log(sim.type);
+    console.log(sim.trace);
   }
+  return saveIt(options, sim);
 };
 
-let runAndSave = (options, program) => {
-  return saveIt(options, run(options, program));
-};
-
-module.exports = { run, runAndSave, saveIt };
+module.exports = { run, generateArtifacts, runAndSave, saveIt };
