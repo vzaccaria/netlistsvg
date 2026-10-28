@@ -195,11 +195,13 @@ module.exports = function collection(name) {
         if (exercise.generate === undefined) fail(`${id}: provide generate`);
         const template = exercise.template === undefined ? sectionTemplate : getTemplate(exercise.template);
         if (!inline && !template) fail(`${id}: template is required outside inline mode`);
-        const generated = generatedEntry(id, exercise.generate, manifestRoot);
+        const assetName = exercise.asset_name === undefined ? id : text(exercise.asset_name, `${id}.asset_name`);
+        if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(assetName)) fail(`${id}.asset_name must be a basename containing letters, digits, underscores or hyphens`);
+        const generated = generatedEntry(id, exercise.generate, manifestRoot, assetName);
         combined[id] = generated.entry;
         const values = Object.assign({}, generated.values, {
-          id, tag,
-          assets: markdownPath(path.relative(outputRoot, path.join(manifestRoot, id, "assets", id))),
+          id, tag, asset_name: assetName,
+          assets: markdownPath(path.relative(outputRoot, path.join(manifestRoot, id, "assets", assetName))),
           source: markdownPath(path.relative(outputRoot, physicalFile(inputPath)))
         });
         const intro = exercise.intro === undefined ? template && template.intro : text(exercise.intro, `${id}.intro`);

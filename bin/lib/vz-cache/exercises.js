@@ -21,7 +21,7 @@ const GENERATE_FLAGS = {
 
 
 
-function generatedEntry(id, raw, manifestRoot) {
+function generatedEntry(id, raw, manifestRoot, assetName) {
   const label = `${id}.generate`;
   const options = Object.assign(Object.create(null), { seed: id }, mapping(raw, label));
   for (const [name, value] of Object.entries(options)) {
@@ -45,7 +45,7 @@ function generatedEntry(id, raw, manifestRoot) {
   } catch (error) {
     fail(`${label}: ${error.message || error}`);
   }
-  const vars = { prefix: shellQuote(path.join(manifestRoot, id, "assets", id)) };
+  const vars = { prefix: shellQuote(path.join(manifestRoot, id, "assets", assetName)) };
   const flags = [];
   for (const [name, flag] of Object.entries(GENERATE_FLAGS)) {
     if (options[name] === undefined) continue;

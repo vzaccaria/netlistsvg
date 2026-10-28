@@ -5,13 +5,13 @@ const { generateModel } = require("./model");
 const collection = require("../exercise-collection")("pipe");
 const { fail, shellQuote } = collection;
 
-function generatedEntry(id, raw, manifestRoot) {
+function generatedEntry(id, raw, manifestRoot, assetName) {
   let model;
   try { model = generateModel(raw); }
   catch (error) { fail(`${id}.generate: ${error.message || error}`); }
   const { options } = model;
   const vars = {
-    prefix: shellQuote(path.join(manifestRoot, id, "assets", id)),
+    prefix: shellQuote(path.join(manifestRoot, id, "assets", assetName)),
     program: shellQuote(model.program)
   };
   const flags = [];

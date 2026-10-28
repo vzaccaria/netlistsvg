@@ -1,7 +1,6 @@
 "use strict";
 
 let _ = require("lodash");
-let Table = require("easy-table");
 
 // let $fs = require("mz/fs");
 // let $gstd = require("get-stdin");
@@ -78,11 +77,6 @@ let eventLoop = (options, schedule) => {
       return t;
     });
 
-    // if (_.includes(timer.show, timer.walltime)) {
-    // console.log(`at time @${timer.walltime}`);
-    // console.log(Table.print(state.rbt));
-    // console.log(Table.print(state.blocked));
-    // }
     let res = {
       rbt: _.cloneDeep(state.rbt),
       blocked: _.cloneDeep(state.blocked),
@@ -92,8 +86,7 @@ let eventLoop = (options, schedule) => {
     return res;
   };
 
-  let resched = (msg) => {
-    // console.log(msg);
+  let resched = () => {
     if (state.rbt.length > 0) {
       state.curr = state.rbt[0];
       state.curr.prev = state.curr.sum;
@@ -155,7 +148,7 @@ let eventLoop = (options, schedule) => {
       state.vmin,
     );
     if (state.curr === undefined || wakeupV(t) < state.curr.vrt) {
-      resched(`starting task ${t.name} @${timer.walltime}`);
+      resched();
     }
   };
 
@@ -198,10 +191,10 @@ let eventLoop = (options, schedule) => {
       // console.log(`HEII ${v} ---- ${state.curr.vrt}`);
       removeFromRbt(state.curr);
       addToRbt(state.curr);
-      resched(`Waking up task ${tw.name} @${timer.walltime}`);
+      resched();
     } else {
       if (state.curr === undefined)
-        resched(`Waking up task ${tw.name} @${timer.walltime}`);
+        resched();
       else {
         tw.vrtlwk = `(${v} < ${state.curr.vrt}) $\\times$`;
       }
@@ -227,9 +220,7 @@ let eventLoop = (options, schedule) => {
         ) {
           removeFromRbt(state.curr);
           addToRbt(state.curr);
-          resched(
-            `task ${state.curr.name} finished quantum @${timer.walltime}`,
-          );
+          resched();
         }
       }
       if (state.curr.events[0] === 0) {
@@ -245,7 +236,7 @@ let eventLoop = (options, schedule) => {
           let v = _.find(schedule.tasks, (t) => t.index === state.curr.index);
           v.exited = timer.walltime;
         }
-        resched(`putting task to sleep ${ts.name} @${timer.walltime}`);
+        resched();
       }
     }
   };
@@ -331,6 +322,9 @@ let parseHistoryEvents = (history, schedule) => {
         }
       }
     }
+    // An arrival can follow the first timer sample. Keep its row pending,
+    // without inventing an execution or blocked interval before that arrival.
+    return { event: "NOT_STARTED", tstart: t, tend: t + schedule.timer, index: task.index };
   };
   let tasksToShow = _.flattenDeep(
     _.map(history, ({ time }, i) => {
@@ -358,7 +352,7 @@ let parseHistoryEvents = (history, schedule) => {
 // Emit LaTeX itemize listing, for each wakeup / start event captured in
 // history.conditions, the vrt clamp + canonical preemption check
 // v = vrt + omega / lambda against state.curr.vrt. See ADR 0001.
-let printConditions = (history, schedule) => {
+let printConditions = (history) => {
   let conds = _.filter(history.conditions || [], (c) => c.kind === "wakeup");
   if (conds.length === 0) {
     return `\\begin{itemize}\n\\item (nessun evento di risveglio registrato)\n\\end{itemize}`;
@@ -395,7 +389,7 @@ let printConditions = (history, schedule) => {
   return `\\begin{itemize}\n${items.join("\n")}\n\\end{itemize}`;
 };
 
-let printData = (history, schedule, finalschedule, options) => {
+let printData = (history, schedule) => {
   let taskevents = _.join(
     _.map(schedule.tasks, (t) => {
       return [
@@ -472,7 +466,7 @@ let drawHistory = (history, schedule, finalschedule, options) => {
     return [pwrlk(r)];
   };
   history = parseHistoryEvents(history, schedule);
-  let diag = _.map(history, (x, i) => {
+  let diag = _.map(history, (x) => {
     if (x.tstart < schedule.runfor) {
       if (x.event === "RAN") return drawRan(x);
       if (x.event === "BLOCKED") return drawBlocked(x);
@@ -564,10 +558,10 @@ let drawHistory = (history, schedule, finalschedule, options) => {
   }
 };
 
-let saveIt = (options, history, origschedule, finalschedule) => {
+let assembleArtifacts = (history, origschedule, finalschedule) => {
   let schedPkgs = ["tikz", "amsmath", "amssymb"];
   let schedLibs = ["arrows", "positioning"];
-  history.latex = [
+  return [
     latexArtifact(
       drawHistory(history, origschedule, finalschedule, { blank: false }),
       "rt diagram",
@@ -587,7 +581,7 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       schedLibs,
     ),
     latexArtifact(
-      printData(history, origschedule, finalschedule, {}),
+      printData(history, origschedule),
       "data table",
       "standalone",
       "pdflatex",
@@ -595,7 +589,7 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       schedPkgs,
     ),
     latexArtifact(
-      printConditions(history, origschedule),
+      printConditions(history),
       "wakeup conditions",
       "standalone",
       "pdflatex",
@@ -604,21 +598,38 @@ let saveIt = (options, history, origschedule, finalschedule) => {
       schedLibs,
     ),
   ];
+};
+
+let writeResult = (options, history) => {
   if (!options.save) {
     console.log(JSON.stringify(history, 0, 4));
   } else {
-    writeArtifacts(history.latex, options);
+    return writeArtifacts(history.latex, options);
   }
 };
 
+let saveIt = (options, history, origschedule, finalschedule) => {
+  history.latex = assembleArtifacts(history, origschedule, finalschedule);
+  return writeResult(options, history);
+};
+
+let generateArtifacts = (options, schedule) => {
+  const original = _.cloneDeep(schedule);
+  const finalSchedule = _.cloneDeep(schedule);
+  const history = eventLoop(options, finalSchedule);
+  history.latex = assembleArtifacts(history, original, finalSchedule);
+  return { history, conditions: history.conditions, latex: history.latex, finalSchedule };
+};
+
 let runAndSave = (options, schedule) => {
-  let origschedule = _.cloneDeep(schedule);
-  let history = eventLoop(options, schedule);
-  saveIt(options, history, origschedule, schedule);
+  const { history } = generateArtifacts(options, schedule);
+  return writeResult(options, history);
 };
 
 module.exports = {
   eventLoop,
+  generateArtifacts,
+  initialTaskOrder,
   saveIt,
   runAndSave,
   printConditions,

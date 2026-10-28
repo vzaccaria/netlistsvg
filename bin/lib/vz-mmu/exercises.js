@@ -5,7 +5,7 @@ const { generateSimulation } = require("./sim");
 const collection = require("../exercise-collection")("mmu");
 const { fail, shellQuote } = collection;
 
-function generatedEntry(id, options, manifestRoot) {
+function generatedEntry(id, options, manifestRoot, assetName) {
   let simulation;
   try {
     simulation = generateSimulation(options);
@@ -25,7 +25,7 @@ function generatedEntry(id, options, manifestRoot) {
     },
     entry: {
       vars: {
-        prefix: shellQuote(path.join(manifestRoot, id, "assets", id)),
+        prefix: shellQuote(path.join(manifestRoot, id, "assets", assetName)),
         alist: shellQuote(options.accesses.map(action => `${action.process}${action.npv}`).join(",")),
         processes: shellQuote(options.processes.join(",")),
         npvbits: options.npvbits,

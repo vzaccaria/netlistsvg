@@ -4,14 +4,10 @@ test:
 testartifacts:
 	./testartifacts.js
 
-jest:
-	jest lib/vz-sched/lib.test.js 
-	jest lib/vz-pipe/lib.test.js 
-
-jestu:
-	jest lib/vz-sched/lib.test.js -u
-	jest lib/vz-pipe/lib.test.js -u
+test-domains:
+	../node_modules/.bin/mocha lib/vz-cache/sim.test.js lib/vz-cache/exercises.test.js lib/vz-mmu/sim.test.js lib/vz-mmu/exercises.test.js lib/vz-pipe/lib.test.js lib/vz-pipe/model.test.js lib/vz-pipe/exercises.test.js lib/vz-sched/lib.test.js lib/vz-sched/model.test.js lib/vz-sched/exercises.test.js
 
 clean:
 	rm -rf tmp*
 
+.PHONY: test testartifacts test-domains clean
