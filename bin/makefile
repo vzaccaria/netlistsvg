@@ -5,7 +5,7 @@ testartifacts:
 	./testartifacts.js
 
 test-domains:
-	../node_modules/.bin/mocha lib/vz-cache/sim.test.js lib/vz-cache/exercises.test.js lib/vz-mmu/sim.test.js lib/vz-mmu/exercises.test.js lib/vz-pipe/lib.test.js lib/vz-pipe/model.test.js lib/vz-pipe/exercises.test.js lib/vz-sched/lib.test.js lib/vz-sched/model.test.js lib/vz-sched/exercises.test.js
+	../node_modules/.bin/mocha lib/vz-cache/sim.test.js lib/vz-cache/exercises.test.js lib/vz-mmu/sim.test.js lib/vz-mmu/exercises.test.js lib/vz-pipe/lib.test.js lib/vz-pipe/model.test.js lib/vz-pipe/exercises.test.js lib/vz-sched/lib.test.js lib/vz-sched/model.test.js lib/vz-sched/exercises.test.js lib/vz-memory/model.test.js lib/vz-memory/exercises.test.js
 
 clean:
 	rm -rf tmp*

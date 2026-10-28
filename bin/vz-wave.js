@@ -6,7 +6,7 @@ let _ = require("lodash");
 const SUBNAME = "wave";
 
 let $fs = require("mz/fs");
-let { exec } = require("mz/child_process");
+let { exec, execFile } = require("mz/child_process");
 let $gstd = require("get-stdin");
 let vcdParser = require("vcd-parser");
 
@@ -35,7 +35,7 @@ let reg2pdf = (options, regdata) => {
       { postfix: ".js", cleanup: false, logger: options.logger }
     )
       .then(() => {
-        return exec(`svg2pdf ${tmpsvg.path} ${options.dumpClassicPdf}`);
+        return execFile("svg2pdf", [tmpsvg.path, options.dumpClassicPdf]);
       })
       .then(() => {
         if (!options.keep) tmpsvg.cleanup();

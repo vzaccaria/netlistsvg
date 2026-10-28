@@ -40,8 +40,9 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
   }
   // Validate with the real generator before replacing either output. The asset
   // command receives the same seed, so configuration and trace stay identical.
+  let simulation;
   try {
-    generateSimulation(options);
+    simulation = generateSimulation(options);
   } catch (error) {
     fail(`${label}: ${error.message || error}`);
   }
@@ -56,6 +57,12 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
     flags.push(structured || name === "seed" ? `${flagName}={${name}}` : `${flagName} {${name}}`);
   }
   return {
+    values: {
+      blocks: simulation.config.numberOfBlocks,
+      ways: simulation.config.associativity,
+      initialValid: simulation.initial.filter(line => line.valid).length,
+      hits: simulation.hitCount
+    },
     entry: {
       vars,
       steps: [`vzpac cache-new sim ${flags.join(" ")} -c -x {prefix}`]
@@ -75,4 +82,4 @@ function register(prog) {
     .action((args, options) => generate(args.yml, options.output, options.manifest));
 }
 
-module.exports = { register, generate };
+module.exports = { register, generate, generatedEntry };

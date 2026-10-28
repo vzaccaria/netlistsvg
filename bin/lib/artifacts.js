@@ -2,7 +2,7 @@ let fs = require("fs");
 let _ = require("lodash");
 let $fs = require("mz/fs");
 let path = require("path");
-let { exec } = require("mz/child_process");
+let { exec, execFile } = require("mz/child_process");
 let tmp = require("tmp-promise");
 
 let re = require("replace-ext");
@@ -217,7 +217,7 @@ let compileArtifactXelatex = (pfx, a, opts) => {
         console.log(`${_.toUpper(engine)} ${texName}`);
         await exec(latex, { cwd: workdir });
         // pdfcrop writes tmp-pdfcrop-*.tex into its cwd: keep it in workdir.
-        await exec(`pdfcrop ${pdfPath} ${outPdf}`, { cwd: workdir });
+        await execFile("pdfcrop", [pdfPath, outPdf], { cwd: workdir });
         return outPdf;
       } finally {
         await cleanup();
