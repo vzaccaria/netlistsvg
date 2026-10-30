@@ -1,0 +1,2 @@
+# Native RISC-V execution used by vzpac rv-exec.
+vzpac-rv-exec:latest
