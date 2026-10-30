@@ -1,6 +1,6 @@
 # netlistsvg — State
 
-Updated: 2026-10-28
+Updated: 2026-10-30
 
 ## Roadmap
 
@@ -12,15 +12,15 @@ Parked: legacy `bin/TODO.md` items need triage · unrelated local work must rema
 
 ## Handoff
 
-Written: 2026-10-28 · Main
+Written: 2026-10-30 · Main
 
-Done: memory collection backend for PAC `mc-ewm0.5`. Mixed inline `kind: latency|address|cache` instances compute thresholds/address geometry or reuse the existing cache adapter; one chapter and combined manifest preserve original positions and artifact names. Analytical sizing supports 32 blocks independently of simulation limits.
+Done: Boolean collection backend for PAC `mc-ewm0.6`: one bounded AST model drives truth tables, verified proof steps, AND/OR costs and native simple/aig netlists. Shared collection support preserves multiple historical artifact directories and rebases their image paths for external variants.
 
-State: changed-file ESLint and all 214 cache/MMU/pipeline/CFS/memory behavior tests pass. Four cache cases preserve all 26 action/state transitions and 20 rebuilt PDF texts; address wave text unchanged. Existing seven collections and September exam unchanged. Extracted npm package generates and compiles three changed cases, including actual figures through apostrophe/space/shell-bearing output paths without injection. Classic wave conversion and shared pdfcrop now use argv for these paths.
+State: changed-file ESLint and all 332 domain tests pass. Consumer parity covers 25 exercises plus one asset-only bus mux, 13 historical RTL/PDF diagrams and 176 exhaustive RTL vectors. Extracted npm package CLI/gen-assets exercise changed Boolean inputs and arithmetic divisor without manual answer copies.
 
-Actual consumer builds 19 chapters, a 269-page book and 16 fingerprint-consistent decks. Missing new outputs recover with stamps present; all 16 derived outputs then retain exact bytes/timestamps. Real no-solutions PDF omits all three quantitative answers; PDF/Obsidian previews verified. Consumer renderer block-callout defect repaired upstream as `vz-clitools-bo7` (47 renderer regressions pass).
+Actual consumer builds 19 chapters, a 270-page book and 16 fingerprint-consistent decks. All 25 exercise families filter answers correctly in actual PDFs; PDF/Obsidian previews verified. Four missing derivatives recover; all 20 derived outputs preserve bytes/mtimes incrementally.
 
-Next: `.2` for upstream gates; `.3` for prediction, `.4` for initial arrival offsets and `.5` for non-grid quantum expiration only after scientific agreement with PAC `mc-gei`. Remaining family migrations stay in consumer tracker; no further migration started.
+Next: `.2` for upstream gates; `.3` for prediction, `.4` for initial arrival offsets and `.5` for non-grid quantum expiration only after scientific agreement with PAC `mc-gei`. Remaining migrations stay in consumer tracker; Karnaugh/Quine migration not started.
 
-Gotchas: PAC resolved its latency prompt/solution discrepancies with user approval in `mc-gei.3`: strict improvement uses rho>0.04; at most 5 ns uses rho>=0.99. Initial CFS start deadlines remain relative to walltime=-timer and quantum expiration uses exact equality. Generic `mdbook` URL decoding defect for percent-encoded local images is tracked separately as `vz-clitools-8it`; canonical consumer paths unaffected. General `npm test` remains the known 106-lint-error/stale-import failure; not rerun or suppressed. Blockers: none for this migration.
+Gotchas: Boolean costs exclude NOT/wiring; binary fan-in counts differ from n-input gates. No automatic minimizer or inferred encoder assumptions. Consumer preserves the historical zero exclusion in its multiples-of-four table pending `mc-gei.6`. CFS timing conventions and separate `mdbook` URL defect remain unchanged. General `npm test` remains the known lint/stale-import failure; not rerun or suppressed. Blockers: none.
 

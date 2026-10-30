@@ -167,6 +167,23 @@ module.exports = function collection(name) {
     const base = basePath === undefined ? {} : mapping(load(basePath), basePath);
     const combined = Object.create(null);
     const occupied = new Set();
+    const generatedDirectories = [];
+    function addGenerated(key, entry, label) {
+      if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(key)) fail(`${label}: asset id ${key} must be a safe directory basename`);
+      const directory = physicalFile(path.join(manifestRoot, key));
+      if (occupied.has(directory) || baseIds.has(key)) fail(`${label}: asset id ${key} collides with another manifest asset directory`);
+      mapping(entry, `${label}.${key}`);
+      if (entry.inputs !== undefined) {
+        for (const filename of Object.keys(mapping(entry.inputs, `${label}.${key}.inputs`))) {
+          if (!filename || filename === "." || filename === ".." || /[\\/]/.test(filename)) {
+            fail(`${label}.${key}: generated input ${filename} must be a file basename`);
+          }
+        }
+      }
+      occupied.add(directory);
+      generatedDirectories.push(directory);
+      combined[key] = entry;
+    }
     const baseIds = new Set();
     for (const [key, entry] of Object.entries(base)) {
       if (path.isAbsolute(key)) fail(`${basePath}: asset entry ${key} must be a relative directory`);
@@ -198,12 +215,23 @@ module.exports = function collection(name) {
         const assetName = exercise.asset_name === undefined ? id : text(exercise.asset_name, `${id}.asset_name`);
         if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(assetName)) fail(`${id}.asset_name must be a basename containing letters, digits, underscores or hyphens`);
         const generated = generatedEntry(id, exercise.generate, manifestRoot, assetName);
-        combined[id] = generated.entry;
+        addGenerated(id, generated.entry, id);
+        if (generated.entries !== undefined) {
+          for (const [key, entry] of Object.entries(mapping(generated.entries, `${id}.entries`))) {
+            addGenerated(key, entry, `${id}.entries`);
+          }
+        }
         const values = Object.assign({}, generated.values, {
           id, tag, asset_name: assetName,
           assets: markdownPath(path.relative(outputRoot, path.join(manifestRoot, id, "assets", assetName))),
           source: markdownPath(path.relative(outputRoot, physicalFile(inputPath)))
         });
+        if (generated.assetPaths !== undefined) {
+          for (const [key, filename] of Object.entries(mapping(generated.assetPaths, `${id}.assetPaths`))) {
+            if (Object.prototype.hasOwnProperty.call(values, key)) fail(`${id}: generated value collision ${key}`);
+            values[key] = markdownPath(path.relative(outputRoot, text(filename, `${id}.assetPaths.${key}`)));
+          }
+        }
         const intro = exercise.intro === undefined ? template && template.intro : text(exercise.intro, `${id}.intro`);
         const commentary = exercise.commentary === undefined ? "" : rebaseMarkdown(
           text(exercise.commentary, `${id}.commentary`), root, outputRoot);
@@ -216,6 +244,14 @@ module.exports = function collection(name) {
     if (physicalFile(outputPath) === physicalFile(manifestPath) ||
         physicalInputs.includes(physicalFile(outputPath)) || physicalInputs.includes(physicalFile(manifestPath))) {
       fail("output and manifest must be distinct files, and must not overwrite any input");
+    }
+    for (const directory of generatedDirectories) {
+      for (const filename of [...physicalInputs, physicalFile(outputPath), physicalFile(manifestPath)]) {
+        const relative = path.relative(directory, filename);
+        if (relative === "" || (!relative.startsWith(".." + path.sep) && relative !== ".." && !path.isAbsolute(relative))) {
+          fail(`generated asset directory ${directory} must not contain an input, output or manifest`);
+        }
+      }
     }
     const referenced = new Set();
     const resolving = new Set();
