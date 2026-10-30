@@ -76,16 +76,22 @@ module.exports = function collection(name) {
     return { intro: text(metadata.intro, `${filename} metadata.intro`), body: source.slice(header[0].length) };
   }
 
-  function interpolate(body, values, label, trim = true) {
+  function interpolate(body, values, label, trim = true, preserve = () => false) {
     const rendered = body.replace(/\$\{([^}]*)\}/g, (match, name, offset) => {
       const value = typeof values === "function" ? values(name) :
         Object.prototype.hasOwnProperty.call(values, name) ? values[name] : undefined;
-      if (value === undefined) fail(`${label}: unknown placeholder ${match}`);
+      if (value === undefined) {
+        if (preserve(name)) return match;
+        fail(`${label}: unknown placeholder ${match}`);
+      }
       const before = body.slice(body.lastIndexOf("\n", offset - 1) + 1, offset);
       const prefix = /^[ \t]*(?:>[ \t]*)*$/.test(before) ? before : "";
       return String(value).replace(/\n/g, "\n" + prefix);
     });
-    if (/\$\{/.test(rendered)) fail(`${label}: unresolved placeholder in rendered Markdown`);
+    for (const match of rendered.matchAll(/\$\{([^}]*)\}/g)) {
+      if (!preserve(match[1])) fail(`${label}: unresolved placeholder in rendered Markdown`);
+    }
+    if (/\$\{[^}]*$/.test(rendered)) fail(`${label}: unresolved placeholder in rendered Markdown`);
     return trim ? rendered.trim() : rendered;
   }
 
@@ -132,6 +138,15 @@ module.exports = function collection(name) {
     const doc = mapping(load(inputPath), inputPath);
     const inline = doc.mode === "inline";
     if (doc.mode !== undefined && !inline) fail("mode must be inline when specified");
+    const passthrough = new Set();
+    if (doc.passthrough !== undefined) {
+      if (!inline || !Array.isArray(doc.passthrough)) fail("passthrough must be an array of deferred exercise IDs in inline mode");
+      for (const id of doc.passthrough) {
+        if (typeof id !== "string" || !/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(id)) fail("passthrough IDs must be safe exercise identifiers");
+        if (passthrough.has(id)) fail(`duplicate passthrough id ${id}`);
+        passthrough.add(id);
+      }
+    }
     const chapterPath = relativeInput(root, doc.chapter, "chapter");
     const basePath = doc.base_assets === undefined ? undefined : relativeInput(root, doc.base_assets, "base_assets");
     const outputPath = path.resolve(text(output, "output (-o)"));
@@ -207,6 +222,7 @@ module.exports = function collection(name) {
         const id = text(exercise.id, "exercise.id");
         if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(id)) fail(`exercise.id ${id} must contain only letters, digits, underscores or hyphens and start with a letter or digit`);
         if (records.has(id)) fail(`duplicate exercise id ${id}`);
+        if (passthrough.has(id)) fail(`exercise id ${id} cannot also be a passthrough id`);
         if (baseIds.has(id) || occupied.has(physicalFile(path.join(manifestRoot, id)))) fail(`exercise id ${id} collides with a base manifest asset directory`);
         if (exercise.params !== undefined) fail(`${id}: params is no longer supported; use generate`);
         if (exercise.generate === undefined) fail(`${id}: provide generate`);
@@ -230,6 +246,12 @@ module.exports = function collection(name) {
           for (const [key, filename] of Object.entries(mapping(generated.assetPaths, `${id}.assetPaths`))) {
             if (Object.prototype.hasOwnProperty.call(values, key)) fail(`${id}: generated value collision ${key}`);
             values[key] = markdownPath(path.relative(outputRoot, text(filename, `${id}.assetPaths.${key}`)));
+          }
+        }
+        if (generated.markdown !== undefined) {
+          for (const [key, body] of Object.entries(mapping(generated.markdown, `${id}.markdown`))) {
+            if (Object.prototype.hasOwnProperty.call(values, key)) fail(`${id}: generated value collision ${key}`);
+            values[key] = interpolate(text(body, `${id}.markdown.${key}`), values, `${id}.markdown.${key}`);
           }
         }
         const intro = exercise.intro === undefined ? template && template.intro : text(exercise.intro, `${id}.intro`);
@@ -295,7 +317,11 @@ module.exports = function collection(name) {
     const rebased = rebaseMarkdown(chapter, path.dirname(chapterPath), outputRoot);
     let markdown;
     if (inline) {
-      markdown = interpolate(rebased, namespaced, chapterPath, false);
+      const preserve = key => {
+        const match = /^([A-Za-z0-9][A-Za-z0-9_-]*)\.([A-Za-z_][A-Za-z0-9_]*)$/.exec(key);
+        return match !== null && passthrough.has(match[1]);
+      };
+      markdown = interpolate(rebased, namespaced, chapterPath, false, preserve);
       for (const id of records.keys()) if (!referenced.has(id)) fail(`unreferenced exercise id ${id}`);
     } else {
       const renderedSections = sections.map(section =>

@@ -649,3 +649,105 @@ An optional `circuitFigure` path, relative to the input YAML, exposes
 figure without generating a new artifact or inventing an exercise solution.
 The domain test target includes native Icarus/vvp regressions for reset/edge
 semantics, mux X behavior, aliases, explicit timing and shell-safe paths.
+
+## Native FSM exercises
+
+`vzpac fsm exercises instances.yml -o chapter.md --manifest assets.yml`
+uses the shared inline collection; `vz-fsm exercises` is the standalone
+equivalent. Run `vzpac gen-assets assets.yml` to execute its native FSM jobs.
+There are no new Markdown templates or alternate synthesis algorithms.
+
+```yaml
+mode: inline
+chapter: notes.md
+tag: fsm
+passthrough: [sequential-example]
+sections:
+  - title: State machines
+    exercises:
+      - id: machine
+        asset_name: fsm
+        generate:
+          flipFlop: SR
+          fsm:
+            type: mealy
+            inputSize: 1
+            outputSize: 1
+            transitions:
+              - a: [{a: [0]}, {'b/b280': [1]}]
+              - b: [{a: [1]}, {b: [0]}]
+            encodingSize: 2
+            encoding: {a: [0, 0], b: [1, 1]}
+```
+
+`generate.fsm` is the native FSM JSON structure, not a second state-machine
+language. Transition columns follow binary input order, MSB first. Routing
+annotations such as `s_2/b280` and `graphics` labels/options are retained.
+Moore outputs are one vector per state; Mealy outputs belong to transitions.
+`initial` is optional: omission means no initial arrow, not an inferred initial
+state. Explicit unknown initial or destination states are rejected.
+Encoding codes must be unique numeric bit vectors covering exactly the states;
+unused codes intentionally remain native don't-cares.
+
+`draw: true` emits only the diagram and needs no encoding; `encodingSize` and
+`encoding` must be supplied together if either is present. Otherwise the native
+backend emits **all** D, SR, T and JK excitation tables, expressions and
+Karnaugh artifacts, plus transition/output/encoding tables. Optional
+`flipFlop: D|SR|T|JK` selects the requested prompt/answer fields, never removes
+native outputs. `randomSeed` defaults to 1. The collection bounds models to
+32 states, 1–4 input bits, 1–16 output bits, 1–5 encoding bits and, for full
+synthesis, at most 6 combined state/input bits. These bounds limit native
+exhaustive synthesis; the adapter neither completes missing transitions nor
+minimizes a different model.
+
+Each job writes `fsm.json`. Its output prefix is `<id>/assets/<asset_name>`,
+where `asset_name` defaults to the ID; e.g. `asset_name: fsm` preserves
+historical `results-*` diagram basenames. Native suffixes are unchanged.
+Inline values include `type`, `inputSize`, `outputSize`, `stateCount`,
+`encodingSize`, `encodingLatex` (bare math), `stateTableMarkdown`,
+`encodingTableMarkdown`, and the selected `flipFlop`.
+
+Rebased paths include `diagramAssets`, `stateEncodingAssets`,
+`transitionTableAssets`, `outputTableAssets`, and
+`dExcitationTableAssets`/`srExcitationTableAssets`/`tExcitationTableAssets`/
+`jkExcitationTableAssets`. Table fields also have `BlankAssets` and
+`ShortBlankAssets` variants. Per-bit fields include `d0ExpressionAssets`,
+`s0ExpressionAssets`, `r0ExpressionAssets`, `t0ExpressionAssets`,
+`j0ExpressionAssets`, `k0ExpressionAssets`, `o0ExpressionAssets` and corresponding
+`KarnaughAssets`. Append the desired `.pdf` or `.svg`.
+Selected aliases are `excitationTableAssets` (with blank variants) and
+`excitation0ExpressionAssets`, etc., in bit-major/pin order.
+`${ID.excitationExpressionsMarkdown}` renders the complete selected expression
+block, with rebased image/edit links and stable figure IDs; changing SR to D
+also changes the number of figures. Its pedagogical order is S bits then R bits
+for SR, and bit-major order for JK/D/T.
+
+For a prose-only request, use
+`generate: {kind: prose, request: {startSignal: start, completionCondition: 'the computation completes'}}`.
+The two fields interpolate the existing prompt. This row produces a manual
+manifest entry only: no inferred FSM, named completion signal, restart
+semantics, encoding or solution.
+
+To compose domains, the FSM collection first materializes an intermediate
+chapter and manifest. The sequential collection then uses that chapter and
+the FSM manifest as `base_assets`. An inline document may declare
+`passthrough: [exact-other-exercise-ids]`; only placeholders belonging to those
+IDs survive that pass. Owned/deferred ID overlap and other unknown fields
+remain errors, all owned rows must still be referenced, and the final pass
+must omit passthrough to reject unresolved placeholders. Relative paths
+rebase through both passes, including manifests outside the chapter directory.
+Adapters may provide `generated.markdown` fragments, resolved strictly against
+their own final values and rebased asset paths; field collisions are rejected.
+
+The shared native API is `createFSMArtifacts(fsm, {draw, randomSeed})`, returning
+the existing artifact array without file I/O, and `getTransition(fsm, row)`,
+the existing routing-aware transition parser. Both the CLI and adapter use
+that native implementation. In the PAC consumer, `sc-syn-exe6/7` remain
+independently declared HDL exercises reused by the FSM chapter: changing their
+linked FSM exercises also requires updating the corresponding HDL declaration.
+No automatic FSM synthesis from Verilog or automatic FSM-to-HDL conversion is
+claimed.
+
+Focused behavior tests live in `bin/lib/vz-fsm/{model,exercises}.test.js` and
+cover excitation invariants, don't-cares, transition/encoding mutations,
+draw-only models, selected-FF blocks, shell-safe paths and two-stage composition.

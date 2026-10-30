@@ -496,22 +496,21 @@ let formatResults = d => {
   return _.concat([diagramArtifact(d.diagram)], d.ttables);
 };
 
-let elaborateFSM = (fsm, options) => {
-  if (options.draw) {
-    let diagram = drawFSM(fsm, options);
-    // With -s, save (or compile with -c) just `<prefix>-diagram`: drawing
-    // needs no synthesis, so FSMs without an `encoding` work too.
-    if (options.save) return writeArtifacts([diagramArtifact(diagram)], options);
-    console.log(diagram);
-    return;
-  } else {
-    let data = { latex: formatResults(synthesize(fsm, options)) };
-    if (options.save) {
-      return writeArtifacts(data.latex, options);
-    } else {
-      console.log(JSON.stringify(data));
-    }
-  }
+// The CLI and exercise collections share the native synthesis and routing parser.
+// drawFSM adds its input words; keep that implementation detail off caller data.
+let createFSMArtifacts = (fsm, options = {}) => {
+  const model = Object.assign({}, fsm);
+  const settings = Object.assign({ randomSeed: 1 }, options);
+  return settings.draw ?
+    [diagramArtifact(drawFSM(model, settings))] :
+    formatResults(synthesize(model, settings));
 };
 
-module.exports = { elaborateFSM, dumpEx };
+let elaborateFSM = (fsm, options) => {
+  const latex = createFSMArtifacts(fsm, options);
+  if (options.save) return writeArtifacts(latex, options);
+  if (options.draw) console.log(latex[0].code);
+  else console.log(JSON.stringify({ latex }));
+};
+
+module.exports = { elaborateFSM, dumpEx, createFSMArtifacts, getTransition };
