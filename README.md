@@ -751,3 +751,102 @@ claimed.
 Focused behavior tests live in `bin/lib/vz-fsm/{model,exercises}.test.js` and
 cover excitation invariants, don't-cares, transition/encoding mutations,
 draw-only models, selected-FF blocks, shell-safe paths and two-stage composition.
+
+## Native ISA exercise collections
+
+`vzpac isa exercises instances.yml -o chapter.md --manifest isa-assets.yml`
+uses the shared inline collection adapter. Unlike diagram domains, it executes
+verification **during generation**: two independent statically linked RV64
+programs run through GCC/QEMU in `vzpac-rv-exec:latest`, the same native lifecycle
+used by `vzpac rv-exec program.s init.c`. The legacy CLI and its before/after
+stdout format are unchanged. The existing image inspection/build lifecycle is
+shared; image archive management remains an operator responsibility.
+
+```yaml
+mode: inline
+chapter: notes.md
+tag: isa
+sections:
+  - title: Signed arithmetic
+    exercises:
+      - id: addition
+        generate:
+          kind: program
+          parameters: { increment: 3 }
+          fragments:
+            c: "x += ${increment};"
+            asm: |
+              ld a0,x
+              addi a0,a0,${increment}
+              la t0,x
+              sd a0,0(t0)
+          verify:
+            - name: negative
+              declarations: "int64_t x = -5;"
+              asm: "${asm}"
+              reference: "${c}"
+              observe: [{ name: x, type: int64_t }]
+```
+
+The canonical chapter uses `${addition.c}`, `${addition.asm}` and
+`${addition.value_x}` (here `-2`). `parameters` are scalar values; quote all
+integers outside JavaScript's safe-integer range. `fragments` recursively
+interpolate parameters and other fragments, with missing/cyclic references
+rejected. Exactly one trailing newline is removed from fragments exposed to
+chapter interpolation, not from their internally composed executable sources.
+
+Every `program` requires nonempty `verify` cases with unique `name` values.
+Each case supplies typed C global `declarations`, a C function-body `reference`,
+and either an assembly body `asm` or complete `asmSource`. Complete sources use
+`entry` (default `main`), privately renamed to avoid the harness entry. Optional
+`helpers` are identical C definitions in both processes; optional `asmSupport`
+provides additional assembly definitions. Helper functions are explicit
+deterministic fixtures, not an assumption about every possible external
+function. Use the same named fragments for displayed and executable code.
+
+Optional `before`/`after` assembly binds pedagogical registers to initialized
+globals and captures results. These bindings are not ABI parameter claims.
+The wrapper preserves `ra` and all integer callee-saved registers in an aligned
+frame. Body `ret`/`jr ra` returns pass through result capture and restoration;
+the pedagogical `f:` entry does not shadow a separately linked helper `f`.
+Leading labelled string/data directives are relocated to `.rodata` without
+executing their bytes. Legacy `;;` comments are transported as GNU `#` comments.
+Complete function sources remain responsible for their own internal ABI/frame
+discipline; this is not a translator for arbitrary C or arbitrary assembly.
+
+`observe` entries have `name`, explicit `type` (`int8_t`/`uint8_t` through
+`int64_t`/`uint64_t`) and optional positive array `length`. C compile-time type
+checks reject incorrectly declared observation widths. State is transported
+as exact decimal text and range-checked with BigInt, never rounded through
+Number. Application stdout is compared exactly even when globals are observed.
+For stdout-only cases use `stdout: true`; include `stdio.h`, `stdint.h`,
+`inttypes.h`, `stddef.h` and `stdlib.h` implicitly in both harnesses.
+
+Results come from actual execution: `result` is the first case's final state as
+C declarations, `stdout` its application output, and `value_NAME` its scalar
+decimal value or comma-space-separated array values. Named cases also expose
+`result_CASE`, `stdout_CASE` and `value_CASE_NAME`. `verification` summarizes
+case evidence, **not a universal equivalence proof**. Domain/precondition
+justifications belong in the canonical chapter; do not hide erroneous
+exercises behind restricted fixtures.
+
+Legitimate incomplete/narrative listings use `kind: fragment` with a required
+`reason` and no `verify`. A verified program may additionally classify partial
+display stages with `stages: {fragmentName: reason}`. Fragment classification
+does not claim an executed result. The manifest records classification, actual
+state/stdout evidence, and complete reproducible native sources as manual
+inputs; no `gen-assets` step is required to obtain answers.
+
+Compilation, mismatch, missing observation and timeout failures abort generation
+before either output is written. `timeout` defaults to 10 seconds per native
+process (maximum 300); compilation has a separate outer deadline. Failed or
+timed-out containers and temporary sources are cleaned up. Legacy `rv-exec
+--keep` retains native sources for inspection.
+
+`make -C bin test-domains` includes pure model/collection contract tests.
+`make -C bin test-isa-native` explicitly runs GCC/QEMU behavioral regressions
+(requires Docker): high-bit unsigned branch mismatch, signed word width,
+exact 64-bit arrays, helper calls/register capture, literal data/stdout,
+complete `main` handling, observation type errors, timeout and
+publication only after native comparison. No simulator or Markdown template is
+introduced.

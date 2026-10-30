@@ -112,17 +112,102 @@ module.exports = function collection(name) {
     return angle ? `<${rebased}>` : rebased;
   }
 
+  function markdownCodeRanges(body) {
+    const fences = [];
+    const lines = /[^\n]*(?:\n|$)/g;
+    let fence;
+    let line;
+    while ((line = lines.exec(body)) && line[0]) {
+      const content = line[0].replace(/\r?\n$/, "");
+      const quoted = /^([ \t]*(?:>[ \t]*)*)(.*)$/.exec(content);
+      const depth = (quoted[1].match(/>/g) || []).length;
+      if (fence && depth < fence.depth) {
+        fences.push([fence.start, line.index]);
+        fence = undefined;
+      }
+      const delimiter = /^[ \t]*(`{3,}|~{3,})(.*)$/.exec(quoted[2]);
+      if (fence) {
+        if (delimiter && depth === fence.depth && delimiter[1][0] === fence.character &&
+            delimiter[1].length >= fence.length && /^[ \t]*$/.test(delimiter[2])) {
+          fences.push([fence.start, lines.lastIndex]);
+          fence = undefined;
+        }
+      } else if (delimiter && (delimiter[1][0] !== "`" || !delimiter[2].includes("`"))) {
+        fence = { start: line.index, depth, character: delimiter[1][0], length: delimiter[1].length };
+      }
+    }
+    if (fence) fences.push([fence.start, body.length]);
+
+    const ranges = [];
+    function inline(start, end) {
+      const ticks = /`+/g;
+      ticks.lastIndex = start;
+      let opening;
+      while ((opening = ticks.exec(body)) && opening.index < end) {
+        let backslashes = 0;
+        for (let index = opening.index - 1; index >= start && body[index] === "\\"; index--) backslashes++;
+        if (backslashes % 2) continue;
+        const afterOpening = ticks.lastIndex;
+        let closing;
+        let matched = false;
+        while ((closing = ticks.exec(body)) && closing.index < end) {
+          if (closing[0].length === opening[0].length) {
+            ranges.push([opening.index, ticks.lastIndex]);
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) ticks.lastIndex = afterOpening;
+      }
+    }
+    let start = 0;
+    for (const range of fences) {
+      inline(start, range[0]);
+      ranges.push(range);
+      start = range[1];
+    }
+    inline(start, body.length);
+    return ranges;
+  }
+
   function rebaseMarkdown(body, from, to) {
     from = physicalDirectory(from);
     to = physicalDirectory(to);
     if (from === to) return body;
-    return body
-      .replace(/(!?\[[^\]\n]*\]\()(<[^>\n]+>|[^\s)\n]+)(?=[\s)])/g,
-        (match, opener, destination) => opener + rebaseDestination(destination, from, to))
-      .replace(/^(\s*\[(?!\^)[^\]\n]+\]:\s*)(<[^>\n]+>|\S+)/gm,
-        (match, opener, destination) => opener + rebaseDestination(destination, from, to))
-      .replace(/(\b(?:src|href)=["'])([^"']+)(["'])/g,
-        (match, opener, destination, closer) => opener + rebaseDestination(destination, from, to) + closer);
+    // Search a same-length masked view, then edit only real destinations in the
+    // original text. Code inside a link label stays intact without hiding its URL.
+    const ranges = markdownCodeRanges(body);
+    const pieces = [];
+    let cursor = 0;
+    for (const [start, end] of ranges) {
+      pieces.push(body.slice(cursor, start), body.slice(start, end).replace(/[^\r\n]/g, " "));
+      cursor = end;
+    }
+    pieces.push(body.slice(cursor));
+    const visible = pieces.join("");
+    const edits = [];
+    function destinations(pattern) {
+      let match;
+      while ((match = pattern.exec(visible))) {
+        const start = match.index + match[1].length;
+        const end = start + match[2].length;
+        if (ranges.some(range => start < range[1] && end > range[0])) continue;
+        edits.push({ start, end, value: rebaseDestination(body.slice(start, end), from, to) });
+      }
+    }
+    destinations(/(!?\[[^\]\n]*\]\()(<[^>\n]+>|[^\s)\n]+)(?=[\s)])/g);
+    destinations(/^(\s*\[(?!\^)[^\]\n]+\]:\s*)(<[^>\n]+>|\S+)/gm);
+    destinations(/(\b(?:src|href)=["'])([^"']+)(["'])/g);
+    edits.sort((left, right) => left.start - right.start);
+    const result = [];
+    cursor = 0;
+    for (const edit of edits) {
+      if (edit.start < cursor) continue;
+      result.push(body.slice(cursor, edit.start), edit.value);
+      cursor = edit.end;
+    }
+    result.push(body.slice(cursor));
+    return result.join("");
   }
 
 

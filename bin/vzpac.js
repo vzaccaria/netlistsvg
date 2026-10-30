@@ -20,6 +20,7 @@ const modules = [
   "./vz-logic",
   "./vz-seq",
   "./vz-fsm",
+  "./vz-isa",
   "./vz-quine",
   "./vz-wave",
   "./vz-sootty",

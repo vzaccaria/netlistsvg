@@ -3,18 +3,9 @@
 
 const fs = require("fs");
 const path = require("path");
-const os = require("os");
-const { execSync, spawnSync } = require("child_process");
+const { executeNative } = require("./lib/rv-native");
 
 const SUBNAME = "rv-exec";
-const IMAGE = "vzpac-rv-exec:latest";
-
-const DOCKERFILE = `FROM debian:12-slim
-RUN apt-get update && apt-get install -y --no-install-recommends \\
-    gcc-riscv64-linux-gnu libc6-dev-riscv64-cross qemu-user-static && \\
-    rm -rf /var/lib/apt/lists/*
-WORKDIR /work
-`;
 
 function parseGlobals(src) {
   const out = [];
@@ -67,18 +58,6 @@ ${src}
 `;
 }
 
-function ensureImage(opts) {
-  try {
-    execSync(`docker image inspect ${IMAGE}`, { stdio: "ignore" });
-    if (opts.verbose) console.error(`[rv-exec] image ${IMAGE} present`);
-    return;
-  } catch {}
-  if (opts.verbose) console.error(`[rv-exec] building image ${IMAGE}…`);
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "rv-exec-build-"));
-  fs.writeFileSync(path.join(tmp, "Dockerfile"), DOCKERFILE);
-  const r = spawnSync("docker", ["build", "-t", IMAGE, tmp], { stdio: "inherit" });
-  if (r.status !== 0) throw new Error("docker build failed");
-}
 
 function run(args, opts) {
   const progPath = path.resolve(args.prog);
@@ -91,30 +70,12 @@ function run(args, opts) {
     console.error(`[rv-exec] globals: ${globals.map(g => g.kind === "array" ? `${g.name}[${g.size}]` : g.name).join(", ")}`);
   }
 
-  ensureImage(opts);
-
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "rv-exec-run-"));
-  fs.writeFileSync(path.join(tmp, "harness.c"), genHarness(initSrc, globals));
-  fs.writeFileSync(path.join(tmp, "prog.s"), wrapAsm(progSrc));
-
-  const cmd = [
-    "riscv64-linux-gnu-gcc -static -no-pie -O0 /work/harness.c /work/prog.s -o /work/exe",
-    "qemu-riscv64-static /work/exe"
-  ].join(" && ");
-
-  const r = spawnSync("docker",
-    ["run", "--rm", "-v", `${tmp}:/work`, IMAGE, "bash", "-c", cmd],
-    { stdio: ["ignore", "pipe", "inherit"] }
-  );
-
-  if (opts.keep) {
-    console.error(`[rv-exec] artifacts kept at ${tmp}`);
-  } else {
-    fs.rmSync(tmp, { recursive: true, force: true });
-  }
-
-  if (r.status !== 0) process.exit(r.status || 1);
-  process.stdout.write(r.stdout);
+  const [result] = executeNative({
+    "harness.c": genHarness(initSrc, globals),
+    "prog.s": wrapAsm(progSrc)
+  }, [{ sources: ["harness.c", "prog.s"] }], opts);
+  if (result.stderr) process.stderr.write(result.stderr);
+  process.stdout.write(result.stdout);
 }
 
 const register = prog => {
