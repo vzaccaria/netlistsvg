@@ -224,3 +224,74 @@ describe("bounded Boolean exercise model", () => {
     ["unknown diagram field", () => netlist({ script: "synth" }), /unknown option/]
   ]) it(`rejects netlist ${label}`, () => expect(() => generateModel(make())).to.throw(error));
 });
+
+describe("native Quine exercise model", () => {
+  const minimize = (table, extra = {}) => generateModel(Object.assign({
+    kind: "minimize", variables: ["a", "b", "c"], table
+  }, extra));
+
+  it("counts distinct minimum covers of a cyclic chart without inventing essentials", () => {
+    const model = minimize("01111110");
+    expect(model.values.primeCount).to.equal(6);
+    expect(model.values.essentialCount).to.equal(0);
+    expect(model.values.uncoveredCount).to.equal(6);
+    expect(model.values.minimumTermCount).to.equal(3);
+    expect(model.values.minimumCoverCount).to.equal(2);
+    expect(model.values.minimumLiteralCount).to.equal(6);
+    expect(model.values.minimumLiteralCoverCount).to.equal(2);
+    for (const [index, row] of model.rows.entries()) {
+      const covered = model.minimization.synthesis.coverSymbolic.some(term =>
+        term.implicantSymbol.every((bit, position) => bit === "-" || Number(bit) === row.inputs[position]));
+      expect(covered, `row ${index}`).to.equal(row.outputs.f === 1);
+    }
+  });
+
+  it("excludes don't-care-only primes and measures actual don't-care simplification", () => {
+    const model = minimize("1x00000x");
+    expect(model.values.primeCount).to.equal(1);
+    expect(model.values.essentialCount).to.equal(1);
+    expect(model.values.solutionLiteralCount).to.equal(2);
+    expect(model.values.dcTermSavings).to.equal(0);
+    expect(model.values.dcLiteralSavings).to.equal(1);
+    expect(model.values.minimumCoverCount).to.equal(1);
+    expect(minimize("xxxxxxxx").values.solutionCount).to.equal(0);
+    expect(minimize("00000000").values.minimumLiteralCount).to.equal(0);
+    expect(minimize("11111111").values.solutionLatex).to.equal("1");
+  });
+
+  it("checks the independent expression on care rows in declared variable order", () => {
+    const model = minimize("01x1", { variables: ["b", "a"], expression: "a" });
+    expect(model.rows.map(row => row.inputs)).to.deep.equal([[0, 0], [0, 1], [1, 0], [1, 1]]);
+    expect(() => minimize("01x1", { variables: ["b", "a"], expression: "b" })).to.throw(/expression differs.*row 1/);
+  });
+
+  it("keeps initial essentials separate from those introduced by dominance", () => {
+    const model = minimize("0100111001000111", { variables: ["a", "b", "c", "d"] });
+    expect(model.values.dominatingLabels).to.equal("(4,6), (14,15)");
+    expect(model.values.dominatedLabels).to.equal("(4,5), (13,15)");
+    expect(model.values.secondaryEssentialCount).to.equal(2);
+    expect(model.values.essentialCount).to.equal(1);
+  });
+
+  it("derives the corrected fan-in-limited critical path from the selected cover", () => {
+    const model = minimize("1011000110101110", { variables: ["a", "b", "c", "d"],
+      timing: { andFanIn: 3, andDelay: 2, orFanIn: 3, orDelay: 3 } });
+    expect(model.values.andLevels).to.equal(1);
+    expect(model.values.orLevels).to.equal(2);
+    expect(model.values.totalDelay).to.equal(8);
+    const wire = minimize("00001111", { timing: { andFanIn: 2, andDelay: 2, orFanIn: 2, orDelay: 3 } });
+    expect(wire.values.totalDelay).to.equal(0);
+  });
+
+  for (const [name, table, extra, error] of [
+    ["unquoted vector", 10010011, {}, /quoted native/],
+    ["foreign alphabet", "1001001-", {}, /quoted native/],
+    ["short vector", "1001001", {}, /exactly 8/],
+    ["overflow minterm", "x000x000x0x0x10x01xxx1xx001x0x001", { variables: ["a", "b", "c", "d", "e"] }, /exactly 32/],
+    ["empty domain", "1", { variables: [] }, /1 to 6/],
+    ["oversized domain", "1", { variables: ["a", "b", "c", "d", "e", "f", "g"] }, /1 to 6/],
+    ["unbounded fan-in", "10010011", { timing: { andFanIn: 1, andDelay: 2, orFanIn: 3, orDelay: 3 } }, /andFanIn/],
+    ["negative delay", "10010011", { timing: { andFanIn: 2, andDelay: -1, orFanIn: 3, orDelay: 3 } }, /andDelay/],
+    ["unsupported fields", "10010011", { expressions: { f: "a" } }, /unknown option/]
+  ]) it(`rejects ${name}`, () => expect(() => minimize(table, extra)).to.throw(error));
+});

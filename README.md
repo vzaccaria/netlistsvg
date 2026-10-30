@@ -490,3 +490,51 @@ It is also frequently common that you want to create a diagram only using AND an
 ```
 yosys -p "prep -top my_top_module; aigmap; write_json output.json" input.v
 ```
+
+## Declarative Quine/Karnaugh exercises
+
+`vzpac logic exercises instances.yml -o chapter.md --manifest assets.yml`
+accepts `generate.kind: minimize` alongside the existing Boolean and prose
+models. Each instance supplies ordered `variables` (MSB first, 1–6 identifiers)
+and a quoted native `table` containing exactly `2^variables.length` characters
+from `0`, `1`, and `x`. Extra rows are rejected, not truncated.
+
+```yaml
+generate:
+  kind: minimize
+  variables: [a, b, c, d]
+  table: '1011000110101110'
+  timing: {andFanIn: 3, andDelay: 2, orFanIn: 3, orDelay: 3}
+```
+
+The model calls the existing `quine.synthesize`, verifies its chosen cover on
+every care row, and emits the native asset command
+`vzpac quine TABLE -r VARS -c -s {qdir}/assets/ID`. Optional `expression`
+uses the existing scalar Boolean grammar and must agree on every care row.
+`expressionLatex` is rendered from that checked expression.
+
+Inline collection fields include `primeCount`, `essentialCount`,
+`nonessentialCount`, `essentialLatex`, `solutionLatex`, `solutionCount` (number
+of selected terms, **not** alternative solutions), `solutionLiteralCount`,
+`additionalCount`, and `uncoveredCount`. Essentials refer to the original
+full prime chart, not terms forced after dominance. `dominatingLabels`,
+`dominatedLabels`, and `secondaryEssentialCount` describe the native chart
+reductions. Teaching tables (`truthTable`, `orderZeroTable`,
+`markedOrderZeroTable`, `orderOneTable`), reduction pairs and prime labels
+come from the same native synthesis.
+
+`minimumCoverCount` counts all distinct prime subsets with the fewest terms,
+before dominance can discard equal-cost alternatives. Enumeration uses the
+native prime set and stops with an explicit error after 1,000,000 search nodes.
+`minimumTermCount`, `minimumLiteralCount`, and `minimumLiteralCoverCount`
+separately report the term optimum and the literal optimum among term-minimum
+covers. These statistics do not change the native selected cover or its
+historical tie-breaking. `dcTermSavings` and `dcLiteralSavings` compare these
+optima against a second native synthesis with don't-cares set to zero.
+
+Optional timing uses balanced AND/OR fan-in trees and excludes inversion
+delay (complemented inputs are supplied). Fan-ins must be integers from 2 to
+64; delays must be finite and non-negative. `andLevels`, `orLevels`,
+`totalDelay`, and `timingLatex` derive from the selected cover and the same
+declared delays. For the example above the critical path is
+`1 × 2 + 2 × 3 = 8`; no solution delay is stored independently of the prompt.

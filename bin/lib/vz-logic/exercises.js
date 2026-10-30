@@ -12,6 +12,9 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
   let entry = { manual: true };
   const values = Object.assign({}, model.values);
   const assetPaths = Object.create(null);
+  if (model.minimization) {
+    entry = { steps: [`vzpac quine ${model.minimization.table} -r ${model.variables.join(",")} -c -s {qdir}/assets/${assetName}`] };
+  }
   for (const [index, netlist] of model.netlists.entries()) {
     const name = netlist.id === id ? assetName : netlist.id;
     const directory = path.join(manifestRoot, netlist.id);
@@ -39,7 +42,7 @@ function generate(input, output, manifest) {
 }
 
 function register(prog) {
-  prog.command("logic exercises", "Generate Boolean exercises and their native netlist asset manifest")
+  prog.command("logic exercises", "Generate Boolean exercises and native netlist or Quine asset manifests")
     .argument("<yml>", "Logic instances YAML (paths are relative to this file)")
     .option("-o, --output <markdown>", "Generated Markdown chapter", undefined, undefined, true)
     .option("--manifest <yml>", "Combined gen-assets YAML", undefined, undefined, true)

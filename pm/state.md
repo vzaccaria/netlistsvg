@@ -14,13 +14,11 @@ Parked: legacy `bin/TODO.md` items need triage · unrelated local work must rema
 
 Written: 2026-10-30 · Main
 
-Done: Boolean collection backend for PAC `mc-ewm0.6`: one bounded AST model drives truth tables, verified proof steps, AND/OR costs and native simple/aig netlists. Shared collection support preserves multiple historical artifact directories and rebases their image paths for external variants.
+Done: PAC `mc-ewm0.7` Quine/Karnaugh adapter, con OK FINALE ADVISOR: `kind: minimize` riusa la sintesi nativa, verifica la copertura sul dominio e deriva conteggi/tabelle/ritardi. Nessun cambiamento al tie-break del sintetizzatore.
 
-State: changed-file ESLint and all 332 domain tests pass. Consumer parity covers 25 exercises plus one asset-only bus mux, 13 historical RTL/PDF diagrams and 176 exhaustive RTL vectors. Extracted npm package CLI/gen-assets exercise changed Boolean inputs and arithmetic divisor without manual answer copies.
+State: ESLint dei file modificati e 346 test di dominio verdi. CLI reale su 23 istanze, confronto di 92 PDF nativi, variante tabella/fan-in/ritardi e PDF con/senza soluzione verificati. Build PAC completa, libro 270 pagine; PDF e Obsidian ispezionati.
 
-Actual consumer builds 19 chapters, a 270-page book and 16 fingerprint-consistent decks. All 25 exercise families filter answers correctly in actual PDFs; PDF/Obsidian previews verified. Four missing derivatives recover; all 20 derived outputs preserve bytes/mtimes incrementally.
+Next: migrazione PAC sequenziale HDL `mc-ewm0.8`, poi FSM/ISA/calling convention, con gate ADVISOR per ogni bead. Bugs generici restano separati nel tracker locale.
 
-Next: `.2` for upstream gates; `.3` for prediction, `.4` for initial arrival offsets and `.5` for non-grid quantum expiration only after scientific agreement with PAC `mc-gei`. Remaining migrations stay in consumer tracker; Karnaugh/Quine migration not started.
-
-Gotchas: Boolean costs exclude NOT/wiring; binary fan-in counts differ from n-input gates. No automatic minimizer or inferred encoder assumptions. Consumer preserves the historical zero exclusion in its multiples-of-four table pending `mc-gei.6`. CFS timing conventions and separate `mdbook` URL defect remain unchanged. General `npm test` remains the known lint/stale-import failure; not rerun or suppressed. Blockers: none.
+Gotchas: `minimize` richiede vettore quotato di esattamente 2^n caratteri 01x, 1–6 variabili. Essenziali iniziali distinti da quelli successivi alla dominanza. Conteggio alternative minimo per termini, statistiche letterali separate; enumerazione limitata a un milione di nodi con errore esplicito. Correzioni PAC autorizzate in `mc-gei.7`: 8 ns e rimozione valore33 spurio. General `npm test` resta il guasto noto lint/import; non rieseguito o aggirato. CFS e `branchpred` invariati.
 

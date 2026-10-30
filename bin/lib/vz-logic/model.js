@@ -1,6 +1,9 @@
+/* global BigInt */
 "use strict";
 
 const MAX_VARIABLES = 10;
+const MAX_MINIMIZE_VARIABLES = 6;
+const MAX_COVER_SEARCH_NODES = 1000000;
 const MAX_EXPRESSIONS = 128;
 const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const ASSET_ID = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
@@ -167,11 +170,187 @@ function multipleAst(variables, spec) {
   return combine("|", terms, 0);
 }
 
+// Enumerate subsets of the native prime chart, not a second prime generator.
+// Essentials are mandatory; suffix coverage prunes impossible branches.
+function coverStatistics(primes, onSet, essentials, selectedCount) {
+  const mask = indices => indices.reduce((bits, index) => bits | (BigInt(1) << BigInt(index)), BigInt(0));
+  const target = mask(onSet);
+  const essentialSet = new Set(essentials);
+  const candidates = primes.filter(prime => !essentialSet.has(prime));
+  const masks = candidates.map(prime => mask(prime.values) & target);
+  const suffix = Array(candidates.length + 1).fill(BigInt(0));
+  for (let i = candidates.length - 1; i >= 0; i--) suffix[i] = suffix[i + 1] | masks[i];
+  let minimumTermCount = selectedCount, minimumCoverCount = 0;
+  let minimumLiteralCount = Infinity, minimumLiteralCoverCount = 0, nodes = 0;
+  function search(index, covered, count, literals) {
+    if (++nodes > MAX_COVER_SEARCH_NODES) fail(`minimum cover enumeration exceeds ${MAX_COVER_SEARCH_NODES} nodes`);
+    if (covered === target) {
+      if (count < minimumTermCount) {
+        minimumTermCount = count;
+        minimumCoverCount = 0;
+        minimumLiteralCount = Infinity;
+        minimumLiteralCoverCount = 0;
+      }
+      if (count === minimumTermCount) {
+        minimumCoverCount++;
+        if (literals < minimumLiteralCount) {
+          minimumLiteralCount = literals;
+          minimumLiteralCoverCount = 0;
+        }
+        if (literals === minimumLiteralCount) minimumLiteralCoverCount++;
+      }
+      return;
+    }
+    if (index === candidates.length || count >= minimumTermCount || (covered | suffix[index]) !== target) return;
+    if ((covered | masks[index]) !== covered) {
+      search(index + 1, covered | masks[index], count + 1, literals + candidates[index].literalCount);
+    }
+    search(index + 1, covered, count, literals);
+  }
+  search(0, essentials.reduce((bits, prime) => bits | mask(prime.values), BigInt(0)) & target,
+    essentials.length, essentials.reduce((sum, prime) => sum + prime.literalCount, 0));
+  return { minimumTermCount, minimumCoverCount, minimumLiteralCount, minimumLiteralCoverCount };
+}
+
+function minimizeModel(options) {
+  keys(options, ["kind", "variables", "table", "expression", "timing"], "generate");
+  const variables = names(options.variables, "variables");
+  if (!variables.length || variables.length > MAX_MINIMIZE_VARIABLES) fail(`minimize requires 1 to ${MAX_MINIMIZE_VARIABLES} variables`);
+  if (typeof options.table !== "string" || !/^[01x]+$/.test(options.table)) fail("table must be a quoted native 01x vector");
+  if (options.table.length !== 2 ** variables.length) fail(`table must contain exactly ${2 ** variables.length} entries for ${variables.length} variables`);
+  const expression = options.expression === undefined ? undefined : parseExpression(options.expression, variables);
+  let timing;
+  if (options.timing !== undefined) {
+    timing = mapping(options.timing, "timing");
+    keys(timing, ["andFanIn", "andDelay", "orFanIn", "orDelay"], "timing");
+    for (const name of ["andFanIn", "orFanIn"]) {
+      if (!Number.isSafeInteger(timing[name]) || timing[name] < 2 || timing[name] > 64) fail(`timing.${name} must be an integer between 2 and 64`);
+    }
+    for (const name of ["andDelay", "orDelay"]) {
+      if (typeof timing[name] !== "number" || !Number.isFinite(timing[name]) || timing[name] < 0) fail(`timing.${name} must be a non-negative finite number`);
+    }
+  }
+  const rows = Array.from(options.table, (bit, index) => {
+    const inputs = variables.map((_, position) => (index >> (variables.length - position - 1)) & 1);
+    const assignment = Object.fromEntries(variables.map((name, position) => [name, inputs[position]]));
+    if (expression && bit !== "x" && evaluate(expression, assignment) !== Number(bit)) fail(`expression differs from table at row ${index}: ${JSON.stringify(assignment)}`);
+    return { inputs, assignment, outputs: { f: bit === "x" ? "x" : Number(bit) } };
+  });
+  const { synthesize } = require("../quine");
+  function analyze(vector) {
+    const synthesis = synthesize(vector, variables);
+    const onSet = Array.from(vector, (bit, index) => bit === "1" ? index : -1).filter(index => index >= 0);
+    const primes = synthesis.allCoveringImplicants.map(prime => ({
+      values: prime.implicantValue,
+      symbols: prime.implicantSymbol,
+      literalCount: prime.implicantSymbol.filter(bit => bit !== "-").length
+    }));
+    // Native `essential` also includes terms forced after dominance reduction.
+    // The full chart alone defines the original function's essential primes.
+    const essentials = primes.filter(prime => onSet.some(index =>
+      prime.values.includes(index) && primes.every(other => other === prime || !other.values.includes(index))));
+    const selected = synthesis.coverSymbolic.map(term => {
+      const prime = primes.find(candidate => candidate.symbols.join("") === term.implicantSymbol.join(""));
+      if (!prime) fail("native synthesis selected an unknown prime");
+      return prime;
+    });
+    for (let index = 0; index < vector.length; index++) {
+      if (vector[index] === "x") continue;
+      const inputs = rows[index].inputs;
+      const covered = selected.some(prime => prime.symbols.every((bit, position) => bit === "-" || Number(bit) === inputs[position]));
+      if (covered !== (vector[index] === "1")) fail(`native synthesis does not cover table correctly at row ${index}`);
+    }
+    return { synthesis, primes, essentials, selected, onSet,
+      statistics: coverStatistics(primes, onSet, essentials, selected.length) };
+  }
+  const result = analyze(options.table);
+  const { synthesis, primes, essentials, selected, onSet, statistics } = result;
+  const formula = prime => prime.symbols.map((bit, index) =>
+    bit === "-" ? "" : bit === "1" ? variableLatex(variables[index]) : `\\bar{${variableLatex(variables[index])}}`).filter(Boolean).join(" ") || "1";
+  const label = indices => `(${indices.join(",")})`;
+  const essentialCoverage = new Set(essentials.flatMap(prime => prime.values));
+  const uncovered = onSet.filter(index => !essentialCoverage.has(index));
+  const values = Object.assign({
+    variablesLatex: variables.map(variableLatex).join(", "), variableCount: variables.length,
+    primeCount: primes.length, essentialCount: essentials.length, nonessentialCount: primes.length - essentials.length,
+    essentialLatex: essentials.map(formula).join(", "), primeLatex: primes.map(formula).join(", "),
+    solutionCount: selected.length, solutionLiteralCount: selected.reduce((sum, prime) => sum + prime.literalCount, 0),
+    additionalCount: selected.filter(prime => !essentials.includes(prime)).length,
+    uncoveredCount: uncovered.length, uncoveredLatex: uncovered.join(", "),
+    allEssential: essentials.length === primes.length, essentialsCover: uncovered.length === 0,
+    solutionLatex: synthesis.quicksynth,
+    onSetLatex: onSet.join(", "), dcSetLatex: Array.from(options.table, (bit, index) => bit === "x" ? index : -1).filter(index => index >= 0).join(", "),
+    canonicalLatex: onSet.map(index => formula({ symbols: rows[index].inputs.map(String) })).join(" + ") || "0",
+    truthTable: table([...variables, "f", ""], rows.map(row => [...row.inputs, row.outputs.f, row.outputs.f === 1 ? "$\\leftarrow$" : ""])),
+    primeLabels: primes.map(prime => label(prime.values)).join(", ")
+  }, statistics);
+  const charts = synthesis.implicantsCharts;
+  const dominancePairs = [];
+  if (charts.length > 1) {
+    const [first, second] = charts;
+    for (const removed of first.rows) {
+      if (essentials.some(prime => label(prime.values) === label(removed)) || second.rows.some(row => label(row) === label(removed))) continue;
+      const remaining = removed.filter(index => second.cols.includes(index));
+      if (!remaining.length) continue;
+      const dominating = second.rows.find(row => remaining.every(index => row.includes(index)));
+      if (dominating) dominancePairs.push({ dominating, dominated: removed });
+    }
+  }
+  values.dominatingLabels = dominancePairs.map(pair => label(pair.dominating)).join(", ");
+  values.dominatedLabels = dominancePairs.map(pair => label(pair.dominated)).join(", ");
+  values.secondaryEssentialCount = new Set(charts.slice(1).flatMap(chart => chart.highlight.map(item => label(item.row)))).size;
+  if (expression) values.expressionLatex = latex(expression);
+  const groups = synthesis.implicantsTables;
+  const orderZero = groups[0] || [], orderOne = groups[1] || [];
+  const implicantTable = (group, marked) => table([...(marked ? [""] : []), "impl. numero", ...variables],
+    group.map(implicant => [...(marked ? [implicant.prime ? "" : "$\\checkmark$"] : []),
+      label(implicant.values), ...implicant.string.map(bit => bit === "-" ? "\\-" : bit)]));
+  values.orderZeroTable = implicantTable(orderZero, false);
+  values.markedOrderZeroTable = implicantTable(orderZero, true);
+  values.orderOneTable = implicantTable(orderOne, false);
+  values.reductionPairs = orderOne.map(implicant =>
+    `- la coppia ${implicant.values.map(index => label([index])).join(" e ")}, che dà luogo ad una riduzione $${implicant.string.join("")}$`).join("\n") || "nessuna";
+  const nonReducible = [];
+  for (let left = 0; left < orderZero.length; left++) {
+    for (let right = left + 1; right < orderZero.length; right++) {
+      const a = orderZero[left], b = orderZero[right];
+      if (!orderOne.some(implicant => a.values.every(index => implicant.values.includes(index)) && b.values.every(index => implicant.values.includes(index)))) {
+        nonReducible.push(`${label(a.values)} e ${label(b.values)}`);
+      }
+    }
+  }
+  values.nonReduciblePairs = nonReducible.join("; ") || "nessuna";
+  values.reductionOrderCount = Math.max(0, groups.length - 1);
+  values.reductionTableCount = groups.length;
+  values.nextReductionCount = (groups[2] || []).length;
+  const withoutDc = options.table.includes("x") ? analyze(options.table.replace(/x/g, "0")).statistics : statistics;
+  values.withoutDcTermCount = withoutDc.minimumTermCount;
+  values.withoutDcLiteralCount = withoutDc.minimumLiteralCount;
+  values.dcTermSavings = withoutDc.minimumTermCount - statistics.minimumTermCount;
+  values.dcLiteralSavings = withoutDc.minimumLiteralCount - statistics.minimumLiteralCount;
+  if (timing) {
+    // Balanced fan-in trees; complemented literals are supplied, NOT delay excluded.
+    const levels = (inputs, fanIn) => {
+      let depth = 0;
+      while (inputs > 1) { inputs = Math.ceil(inputs / fanIn); depth++; }
+      return depth;
+    };
+    const andLevels = Math.max(0, ...selected.map(prime => levels(prime.literalCount, timing.andFanIn)));
+    const orLevels = levels(selected.length, timing.orFanIn);
+    const totalDelay = andLevels * timing.andDelay + orLevels * timing.orDelay;
+    if (!Number.isFinite(totalDelay)) fail("timing total delay must be finite");
+    Object.assign(values, timing, { andLevels, orLevels, totalDelay,
+      timingLatex: `${andLevels}\\cdot ${timing.andDelay} + ${orLevels}\\cdot ${timing.orDelay} = ${totalDelay}` });
+  }
+  return { values, variables, rows, costs: {}, netlists: [], minimization: { table: options.table, synthesis } };
+}
+
 function generateModel(raw) {
   const options = mapping(raw, "generate");
+  if (options.kind === "minimize") return minimizeModel(options);
   keys(options, ["kind", "variables", "expressions", "columns", "steps", "checks", "costs", "parameters", "specification", "netlists", "restrictions", "variableLabels", "latexVariants"], "generate");
   const kind = options.kind === undefined ? "boolean" : options.kind;
-  if (kind !== "boolean" && kind !== "prose") fail("kind must be boolean or prose");
+  if (kind !== "boolean" && kind !== "prose") fail("kind must be boolean, prose or minimize");
   const variables = names(options.variables === undefined && kind === "prose" ? [] : options.variables, "variables");
   let spec;
   if (options.specification !== undefined) {
@@ -334,4 +513,4 @@ function generateModel(raw) {
   return { values, variables, rows, costs, netlists };
 }
 
-module.exports = { generateModel, MAX_VARIABLES };
+module.exports = { generateModel, MAX_VARIABLES, MAX_MINIMIZE_VARIABLES };
