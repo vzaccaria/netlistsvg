@@ -18,6 +18,7 @@ const modules = [
   "./vz-memmap",
   "./vz-memory",
   "./vz-logic",
+  "./vz-seq",
   "./vz-fsm",
   "./vz-quine",
   "./vz-wave",

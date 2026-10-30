@@ -538,3 +538,114 @@ delay (complemented inputs are supplied). Fan-ins must be integers from 2 to
 `totalDelay`, and `timingLatex` derive from the selected cover and the same
 declared delays. For the example above the critical path is
 `1 × 2 + 2 × 3 = 8`; no solution delay is stored independently of the prompt.
+
+## Native sequential exercises
+
+`vzpac seq exercises instances.yml -o chapter.md --manifest assets.yml`
+uses the shared exercise collection, including `mode: inline`, canonical
+chapter placeholders and `base_assets`. Then run `vzpac gen-assets assets.yml`.
+One simulation supplies both the answer and masked waveform; illustrations
+that are not exercises can remain in the base manifest.
+
+An HDL row supplies this structured `generate` mapping:
+
+```yaml
+generate:
+  kind: sequential
+  circuit:
+    inputs: [I, clk, rst]
+    outputs: [Z]
+    wires: [d, q]
+    equations: {d: 'I ^ q', Z: 'q'}
+    flops:
+      - {type: dffms, name: ff, ports: [d, clk, rst, q]}
+    latexVariants:
+      time: {I: 'I_t', q: 'Q_t'}
+  testbench:
+    regs: {clk: 0, i: 0, rst: 0}
+    wires: [z]
+    ports: [i, clk, rst, z]
+    clock: {signal: clk, halfPeriod: 2}
+    events:
+      - {delay: 0, set: {rst: 1}}
+      - {delay: 1, set: {rst: 0}}
+      - {delay: 4, set: {i: 1}}
+      - {delay: 12, finish: true}
+  wave:
+    renderer: wave
+    signals: [test.i, test.z, test.dut.d, test.dut.q, test.clk, test.rst]
+    end: 18
+    whitelist: [I, CLK, RST]
+```
+
+The fixed hierarchy is `test.dut` (`test0` circuit module). Primitive instances,
+unused wires/registers, port ordering, initial values and zero-delay events are
+retained. Events use **relative** delays; assignments in a `set` occur in mapping
+order after that delay. The final event must be `finish: true`.
+Bits accept `0`, `1`, `'x'`, `'z'`. Clock half-period is a positive integer;
+delays and total simulation duration are bounded at 1,000,000 time units.
+There are at most 128 scalar declarations, 32 flip-flops and 4,096 events.
+
+Primitive types are `dffms` (reset 0), `dffmsn` (reset 1), `rsffms` and
+`tffms` (both reset 0). They intentionally retain two independent processes:
+`always @(rst)` resetting only when asserted, and `always @(negedge clk)`
+updating state. **No reset priority is introduced.** The RS primitive retains
+`if (s | r) Q <= !r & s; else Q <= Q`; T holds when low. Optional
+`circuit.primitivePorts: {dffms: [d, clk, rst, Q]}` preserves legacy formal
+spelling positionally without changing its semantics.
+
+Equations use the existing scalar Boolean AST (`~`, `&`, `^`, `|`, parentheses,
+0/1), producing both Verilog and LaTeX. Each expression may reference at most
+10 scalar signals; unrelated clock/reset/unused declarations do not consume
+that bound. There is no JavaScript sequential simulator: Icarus/vvp is truth.
+For native four-state multiplexing use
+`F: {mux: {select: sel, whenTrue: q, whenFalse: I}}`: the formula is derived
+from those expressions, while RTL retains `?:` rather than an SOP rewrite.
+Inline fields include `${ID.dLatex}`, `${ID.dFunctionalLatex}`,
+`${ID.dTimeLatex}` (the declared `time` variant), and `${ID.qReset}`.
+The Boolean model's additive `compiledExpressions` result exposes rendered
+`verilog`/`latex`, not its AST.
+
+The adapter emits `test.v`, `test_cb.v`, and the historical artifact basenames:
+`${ID.diagramAssets}.pdf` → `test-diag.pdf`,
+`${ID.waveAssets}.pdf` → `test-wave.pdf`, and
+`${ID.maskedWaveAssets}.pdf` → `test-wave-whitelisted.pdf`.
+`wave` is the default renderer; omitting `signals` preserves the native
+all-signals command. Its whitelist uses the renderer's uppercase display names;
+legacy unmatched whitelist names are retained. Netlist generation has no extra
+flags by default. Explicit `netlist: {mode: simple, ffIndices: [0, 1]}` enables
+the corresponding native options (`aig` is also supported). `mode: techmap`
+selects the current sequential preset `-v -k --script 'prep -auto-top; techmap; opt;'`. Optional
+`netlist.skin` is a path relative to the input YAML. Paths and command arguments
+use the collection's quoting/rebasing helpers.
+
+For packed-bus waveforms, add e.g.
+`circuit.buses: {stateBus: [q1, q0], inputBus: [i1, i0]}` (MSB first,
+2–32 scalar members), and set:
+
+```yaml
+wave:
+  renderer: sootty
+  signals: [inputBus, stateBus]
+  whitelist: [inputBus]
+  end: 28
+  radix: 2
+```
+
+This emits native vector aliases, runs `sootty`, masks the non-whitelisted
+rows with `vzpac sootty mask`, then converts both SVGs with `cairosvg`.
+Sootty chooses row order; input order is not promised. Selection and whitelist
+names are case-sensitive **basenames only**. Each selected basename must be
+unique across every VCD declaration, including unselected primitive aliases.
+Thus `clk` and primitive `Q` are often ambiguous and are rejected rather than
+masking a potentially wrong row. Choose distinctive bus aliases. Scalar `wave`
+does not render packed buses; select scalar signals explicitly if aliases exist.
+Sootty/cairosvg are needed only for this renderer.
+
+Prose-only rows use `kind: prose` with the existing Boolean
+`variables`, `expressions`, `latexVariants` and/or meaningful `parameters`.
+An optional `circuitFigure` path, relative to the input YAML, exposes
+`${ID.circuitFigure}` rebased to the output chapter. It references the canonical
+figure without generating a new artifact or inventing an exercise solution.
+The domain test target includes native Icarus/vvp regressions for reset/edge
+semantics, mux X behavior, aliases, explicit timing and shell-safe paths.

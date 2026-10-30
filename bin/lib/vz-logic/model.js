@@ -510,7 +510,10 @@ function generateModel(raw) {
     const declarations = [...ports.map(port => `input ${port}`), ...Object.keys(outputs).map(port => `output ${port}`)];
     return { id: netlist.id, mode: netlist.mode, variables: ports.slice(), outputs: Object.fromEntries(Object.entries(outputs)), rtl: `module test(${declarations.join(", ")});\n${assignments.join("\n")}\nendmodule\n` };
   });
-  return { values, variables, rows, costs, netlists };
+  const compiledExpressions = Object.fromEntries(expressionNames.map(name => [name, {
+    verilog: verilog(asts[name]), latex: latex(asts[name])
+  }]));
+  return { values, variables, rows, costs, netlists, compiledExpressions };
 }
 
 module.exports = { generateModel, MAX_VARIABLES, MAX_MINIMIZE_VARIABLES };

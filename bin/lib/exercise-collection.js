@@ -214,7 +214,7 @@ module.exports = function collection(name) {
         if (!inline && !template) fail(`${id}: template is required outside inline mode`);
         const assetName = exercise.asset_name === undefined ? id : text(exercise.asset_name, `${id}.asset_name`);
         if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(assetName)) fail(`${id}.asset_name must be a basename containing letters, digits, underscores or hyphens`);
-        const generated = generatedEntry(id, exercise.generate, manifestRoot, assetName);
+        const generated = generatedEntry(id, exercise.generate, manifestRoot, assetName, root);
         addGenerated(id, generated.entry, id);
         if (generated.entries !== undefined) {
           for (const [key, entry] of Object.entries(mapping(generated.entries, `${id}.entries`))) {
@@ -308,5 +308,5 @@ module.exports = function collection(name) {
   }
 
 
-  return { generate, fail, mapping, shellQuote };
+  return { generate, fail, mapping, shellQuote, relativeInput };
 };
