@@ -83,7 +83,7 @@ function printState(observe) {
 
 function harness(spec, observe, reference) {
   const checks = observe.map(item => `_Static_assert(_Generic((${item.name}${item.length === undefined ? "" : "[0]"}), ${item.type}: 1, default: 0), "observation type mismatch: ${item.name}");`).join("\n");
-  return `#include <stdint.h>\n#include <inttypes.h>\n#include <stdio.h>\n#include <stddef.h>\n#include <stdlib.h>\n${spec.declarations || ""}\n${spec.helpers || ""}\n${checks}\n${reference ? `static void __vzpac_run(void) {\n${spec.reference}\n}` : "extern void __vzpac_run(void);"}\nint main(void) {\n  __vzpac_run();\n  fflush(stdout);\n${printState(observe)}\n  return 0;\n}\n`;
+  return `#include <stdint.h>\n#include <inttypes.h>\n#include <stdio.h>\n#include <stddef.h>\n#include <stdlib.h>\n${spec.declarations || ""}\n${spec.helpers || ""}\n${checks}\n${reference ? `${spec.referenceSource || ""}\nstatic void __vzpac_run(void) {\n${spec.reference}\n}` : "extern void __vzpac_run(void);"}\nint main(void) {\n  __vzpac_run();\n  fflush(stdout);\n${printState(observe)}\n  return 0;\n}\n`;
 }
 
 function renameEntry(source, entry) {
@@ -145,7 +145,7 @@ function executeCase(raw) {
   if ((spec.asm === undefined) === (spec.asmSource === undefined)) throw new Error(`${spec.name}: provide exactly one of asm or asmSource`);
   text(spec.asm === undefined ? spec.asmSource : spec.asm, `${spec.name} assembly`);
   text(spec.reference, `${spec.name} reference`);
-  for (const key of ["declarations", "helpers", "before", "after", "asmSupport"]) if (spec[key] !== undefined) text(spec[key], `${spec.name}.${key}`, true);
+  for (const key of ["declarations", "helpers", "before", "after", "asmSupport", "referenceSource"]) if (spec[key] !== undefined) text(spec[key], `${spec.name}.${key}`, true);
   const observe = observations(spec.observe, spec.stdout);
   const sources = { "reference.c": harness(spec, observe, true), "harness.c": harness(spec, observe, false), "program.s": assembly(spec) };
   const [reference, actual] = executeNative(sources, [

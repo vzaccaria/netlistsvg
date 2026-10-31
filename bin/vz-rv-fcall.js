@@ -205,6 +205,10 @@ let gpstate = data => {
 let developCall = async args => {
   let data = await (args.json ? $fs.readFile(args.json, "utf8") : $gstd());
   data = JSON.parse(data);
+  return prepareCall(data);
+};
+
+let prepareCall = data => {
   let state = gpstate(data);
   let stackAlloc = _.sum(
     _.map(
@@ -215,7 +219,7 @@ let developCall = async args => {
   return { state, data, stackAlloc };
 };
 
-let produceBlankTable = async ({ data, state }) => {
+let produceBlankTable = ({ data, state }) => {
   let cee = data.functionData;
   let parameters = _.join(
     _.filter(
@@ -250,24 +254,21 @@ ${labels}
   `;
 };
 
-let produceAsm = async (
-  { data, state, stackAlloc, dirname },
-  withBody,
-  section = "full"
-) => {
+let readSources = async (data, dirname, withBody = true) => {
+  const body = data.functionData.body && withBody
+    ? await $fs.readFile(data.functionData.body.replace("$selfdir", dirname), "utf8") : "";
+  const source = data.functionData.cref
+    ? await $fs.readFile(data.functionData.cref.replace("$selfdir", dirname), "utf8") : "no source given";
+  return { body, source };
+};
+
+let produceAsm = async (call, withBody, section = "full") => {
+  const { body } = await readSources(call.data, call.dirname, withBody);
+  return renderAsm(call, body, section);
+};
+
+let renderAsm = ({ data, state, stackAlloc }, bodySource, section = "full") => {
   let cee = data.functionData;
-  if (data.functionData.body && withBody) {
-    let nname = data.functionData.body.replace("$selfdir", dirname);
-    data.functionData.bodycontent = await $fs.readFile(nname, "utf8");
-  } else {
-    data.functionData.bodycontent = "";
-  }
-  if (data.functionData.cref) {
-    let nname = data.functionData.cref.replace("$selfdir", dirname);
-    data.functionData.crefcontent = await $fs.readFile(nname, "utf8");
-  } else {
-    data.functionData.crefcontent = "no source given";
-  }
   let parameters = _.join(
     _.filter(
       _.map(cee.parameters, l => {
@@ -342,7 +343,7 @@ ${fname}:
 ${enlargeStack}
 ${saveregs}
 ${fpSet}`;
-  let body = `${data.functionData.bodycontent}`;
+  let body = bodySource;
   let epilogue = `${fname + "EPI"}:
 ${restoreregs}
 ${shrinkStack}
@@ -368,20 +369,16 @@ ${epilogue}
   return beautifyString(prog);
 };
 
-let produceAndSaveArtifacts = async (args, options) => {
-  let { state, data, stackAlloc } = await developCall(args, options);
+// The native CLI and declarative collections share this renderer and its
+// educational eight-byte layout; source strings never require temporary files.
+let render = (layout, body, source) => {
+  const call = prepareCall(layout);
+  const { state, data, stackAlloc } = call;
   let diag = gpdiag(data, state, stackAlloc, true);
   let diagb = gpdiag(data, state, stackAlloc, false);
-  let dirname = path.dirname(path.resolve(args.json));
-  let asmFull = await produceAsm({ data, state, stackAlloc, dirname }, true);
-  let asmEmpty = await produceAsm({ data, state, stackAlloc, dirname }, false);
-  let blankTable = await produceBlankTable({
-    data,
-    state,
-    stackAlloc,
-    dirname
-  });
-  let source = data.functionData.crefcontent;
+  let asmFull = renderAsm(call, body);
+  let asmEmpty = renderAsm(call, "");
+  let blankTable = produceBlankTable(call);
   // Packages mirror pac/exam-sheets/20260218/q-2.3/makefile.
   let diagPkgs = ["tikz"];
   let diagLibs = ["matrix", "chains", "calc"];
@@ -451,14 +448,27 @@ ${source}
       )
     ]
   };
-  if (options.save) {
-    return writeArtifacts(result.latex, options);
-  } else {
-    console.log(JSON.stringify(result));
-  }
+  return {
+    state, stackAlloc, latex: result.latex,
+    values: {
+      source, body: renderAsm(call, body, "body"), full: asmFull, empty: asmEmpty,
+      prologue: renderAsm(call, body, "prologue"),
+      epilogue: renderAsm(call, body, "epilogue")
+    }
+  };
+};
+
+let produceAndSaveArtifacts = async (args, options) => {
+  const { data } = await developCall(args);
+  const dirname = path.dirname(path.resolve(args.json));
+  const { body, source } = await readSources(data, dirname);
+  const result = render(data, body, source);
+  if (options.save) return writeArtifacts(result.latex, options);
+  console.log(JSON.stringify({ latex: result.latex }));
 };
 
 let register = prog => {
+  require("./lib/vz-rv-fcall/exercises").register(prog);
   prog
     .command(`${SUBNAME} diagram`, "generates stack and register usage for a call")
     .argument("[json]", `File describing the call sequence`)
@@ -553,7 +563,7 @@ let register = prog => {
   ).action(produceAndSaveArtifacts);
 };
 
-module.exports = { register };
+module.exports = { register, render };
 
 if (require.main === module) {
   const prog = require("caporal");

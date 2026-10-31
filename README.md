@@ -850,3 +850,89 @@ exact 64-bit arrays, helper calls/register capture, literal data/stdout,
 complete `main` handling, observation type errors, timeout and
 publication only after native comparison. No simulator or Markdown template is
 introduced.
+
+## Native function-call exercise collections
+
+`vzpac rv-fcall exercises instances.yml -o chapter.md --manifest assets.yml`
+uses the same inline collection pipeline and the current `rv-fcall` renderer,
+not a second stack-layout implementation. Canonical inputs are the native
+layout, an inline assembly body, and the displayed C source. Complete assembly,
+prologue, epilogue, and the blank skeleton are derived from those inputs.
+Legacy `rv-fcall diagram`, `asm`, `artifact`, and `test` commands retain their
+interfaces.
+
+```yaml
+mode: inline
+chapter: notes.md
+tag: calls
+passthrough: [isa-example] # IDs resolved by a subsequent ISA collection
+models:
+  increment: &increment
+    layout:
+      stackgrows: down
+      omitFramePointer: true
+      functionData:
+        name: f
+        isLeaf: true
+        parameters: [x/$a0]
+        localvars: []
+    body: "addi a0,a0,7"
+    source: "uint64_t fRef(uint64_t x) { return x+7; }"
+    referenceSymbol: fRef
+    verify:
+      - name: wrap
+        declarations: "uint64_t input=UINT64_MAX, result=0;"
+        reference: "result=fRef(input);"
+        before: "ld a0,input"
+        after: "la t6,result\nsd a0,0(t6)"
+        observe: [{ name: result, type: uint64_t }]
+sections:
+  - title: Function calls
+    exercises:
+      - { id: increment, generate: *increment }
+```
+
+The chapter owns prose and figure markers, with placeholders such as
+`${increment.c}`, `${increment.body}`, `${increment.full}`,
+`${increment.prologue}`, `${increment.epilogue}`, `${increment.empty}`,
+`${increment.value_result}` (here `6`), and `${increment.verification}`.
+`${increment.source}` links to the collection YAML, not the C listing.
+`${increment.nativeAssets}-complete-diagram.svg` refers to the preserved
+`increment/assets/rv-fun-complete-diagram.svg` artifact path relative to the
+generated chapter. The six native suffixes are `complete-diagram`,
+`blank-diagram`, `asm-source-full`, `asm-source-empty`, `blank-table`, and
+`c-source`; the manifest runs the existing artifact command to generate them.
+The manifest retains derived full/section assembly, verification evidence, and
+reproducible native case sources. It never takes a manual full listing or an old
+test harness as a canonical input.
+
+`layout` accepts the existing native JSON structure except the path/output
+fields `functionData.body`, `cref`, `suffix`, `bodycontent`, and `crefcontent`.
+Supply `body` and `source` as strings instead. `referenceSymbol` explicitly
+identifies the C function (`fRef`, `f`, or another valid identifier); case
+`reference` statements invoke that symbol. The displayed C is compiled verbatim
+only in the reference process, after shared `declarations` and `helpers`.
+The actual process receives the generated complete assembly with its entry
+and recursive references privately isolated. Case `asm`, `asmSource`, `entry`,
+and `referenceSource` overrides are rejected. The other ISA verification fields
+and typed result placeholders described above apply unchanged.
+
+Helper functions are explicit fixtures, not canonical definitions of unspecified
+external functions. To check helper call order, record arguments in fixed-width
+global arrays and observe those arrays and their count alongside the result.
+Stdout, including spaces, is compared exactly. Optional `stages` classifies
+partial teaching fragments without claiming they were executed separately.
+Evidence describes deterministic cases only, never universal equivalence.
+
+The renderer deliberately retains its eight-byte educational frame layout,
+including caller-owned aggregate-copy diagrams, saved frame-pointer slots and
+dynamic stack bodies. Direct register bindings for a by-value aggregate do not
+prove a compiler-generated caller-copy layout or standard ABI stack alignment.
+Do not infer parameter passing from the illustrative caller cells.
+
+Library clients can call `require("./bin/vz-rv-fcall").render(layout, body, source)`
+to obtain `{state, stackAlloc, latex, values}` without filesystem inputs.
+CLI assembly, CLI artifacts and collection generation use that same renderer.
+`make -C bin test-domains` includes the pure frame/collection boundary tests.
+`make -C bin test-fcall-native` enables Docker-backed boundary, recursive-entry,
+typed helper-trace, stdout-mismatch and actual CLI-composition regressions.
