@@ -1,6 +1,6 @@
 # ADR-0002 — CLI vzpac gerarchica con compatibilità legacy
 
-Status: Accepted — mappa approvata dall'utente (2026-11-01); doppio OK FINALE opus (iniziale e delta).
+Status: Accepted e implementato — mappa approvata dall'utente (2026-11-01); epic `netlistsvg-sp2` chiuso dopo verifica end-to-end (`.5`) con OK FINALE opus su ogni bead.
 Epic: `netlistsvg-sp2`; inventario: `netlistsvg-sp2.1`.
 
 ## Contratto

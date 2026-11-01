@@ -6,8 +6,7 @@ Updated: 2026-11-01
 
 Active (children + detail in bd; run `bd show <id>`):
 
-- `netlistsvg-1sf` — generic bugs epic. Open: `.2` restores existing lint/stale CLI import; `.3` agrees prediction semantics; `.4` reviews initial CFS arrival deadline offset; `.5` reviews quantum expiration when slices are not timer-aligned. CFS timing changes require separate scientific agreement.
-- `netlistsvg-sp2` — CLI vzpac strutturata per dominio/oggetto/verbo, con alias legacy silenziosi e permanenti. Mappa approvata (ADR-0002 Accepted); registro e migrazione chiamanti completati. Open: `.5` verifica end-to-end di tutte le righe/bin/wrapper e pubblicazione finale. Revisione opus o fable con OK esplicito obbligatoria prima della chiusura.
+- `netlistsvg-1sf` — generic bugs epic. Open: `.2` restores existing lint/stale CLI import; `.3` agrees prediction semantics; `.4` reviews initial CFS arrival deadline offset; `.5` reviews quantum expiration when slices are not timer-aligned; `.6` `memmap generate` needs python2 (absent). CFS timing changes require separate scientific agreement.
 
 Parked: legacy `bin/TODO.md` items need triage · unrelated local work must remain untouched.
 
@@ -15,11 +14,11 @@ Parked: legacy `bin/TODO.md` items need triage · unrelated local work must rema
 
 Written: 2026-11-01 · Main
 
-Done: `netlistsvg-sp2.4` chiuso: emitter `bin/lib/*/exercises.js`, README e pm/readme sui percorsi canonici; in materiale-corsi makefile asset (21 ricette, fallback, 4 build), cinque manifest mantenuti, `cache.yml` con `kind: cache` e slot `%% memory-exercises %%`, esame `20260910`, doc PAC e ADR-001/002; skill `polimi-pac-exam` (tabella canonica, `20260910` come sorgente, fonti Markdown/YAML) e `polimi-pac-rv-asm`. Gate opus: BLOCKED su doc/skill, corretti, poi OK FINALE.
+Done: epic `netlistsvg-sp2` completato. `.5` ha verificato tutte le 32 righe di ADR-0002 (64 casi, 16 raccolte reali incluse GCC/QEMU), 18 bin e 5 wrapper, help e `help legacy`, ciclo build/cache/clean/fallimento, l'esame storico `20260724` con soli alias (identico al codice pre-riordino) e, a cura del reviewer, fallback del makefile e pipe wave→compile-artifacts. Gate opus OK FINALE su ogni bead.
 
-State: test-domains 415 passing; esame 20260910 ricostruito da zero, 12 pagine pixel-identiche; build PAC completa (37 min) con 87 PDF pubblicati identici in testo e pagine e capitoli generati identici salvo slot intermedio; un hash di testo FSM differisce per non-determinismo LuaLaTeX riprodotto anche con il comando legacy.
+State: CLI canonica `vzpac <dominio> <oggetto> <verbo>` in produzione; alias permanenti. Suite: test-domains 415, isa-native 13, fcall-native 10. Uniche differenze osservate: preesistenti (`memmap generate`, `.1sf.6`; `rv-fcall test` senza immagine `riscenv-latest`) o non deterministiche (ordine log con `VZPAC_JOBS=2`, testo estratto di un PDF LuaLaTeX).
 
-Next: `.5` confronto old/new per ogni riga della mappa, 18 bin e 5 wrapper, stream (stdin sched/wave, redirect asm), un esame storico con alias (es. 20260724), build/cache-hit/clean/fallimento di un manifest. Documentare la differenza preesistente exit 1 (`fsm exercises` senza YAML) vs 2 (`sched exercises`).
+Next: nessun lavoro residuo sull'epic. Operativo: `npm link` in questo repo per installare `vz-cache-new`, `vz-gen-assets`, `vz-rv-exec`, assenti dal link globale del 22/5. Nuovi esami PAC: skill `polimi-pac-exam`, partendo da `20260910`.
 
-Gotchas: parser Caporal 0.8.0, non 1.x. L'handler memory non accetta cache.yml così com'è: slot `%% memory-exercises %%` e `kind` obbligatorio; prefissi d'errore distinti ammessi. Cache classic/new foglie separate; pipe/pipe-new byte-identici. Standalone conservano la diagnostica attuale. Bug scientifici CFS/branchpred e guasto generale npm test restano separati.
+Gotchas: parser Caporal 0.8.0. `cache.yml` richiede `kind` per istanza e slot `%% memory-exercises %%`. Cache classic/new foglie separate. Help di foglia sugli alias mostra l'intestazione legacy (limite accettato). Un flag globale prima del percorso impedisce l'esecuzione anche sulle forme legacy. `exit` diverso per `fsm exercises` (1) e `sched exercises` (2) senza YAML: preesistente. `20260724/q-1.2/exe` è versionato e la build lo riscrive. Bug scientifici CFS/branchpred e guasto generale `npm test` restano separati.
 
