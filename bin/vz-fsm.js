@@ -9,13 +9,8 @@ const { generate: generateExercises } = require("./lib/vz-fsm/exercises");
 
 const SUBNAME = "fsm";
 
-let register = prog => {
-  let cmd = prog
-    .command(SUBNAME, "FSM synthesis, or fsm exercises <yaml> -o <markdown> --manifest <yaml>")
-    .argument("[json]", "JSON file, stdin if omitted, or 'exercises' for a YAML collection")
-    .argument("[yaml]", "Collection YAML after 'exercises'")
-    .option("-o, --output <markdown>", "Generated collection chapter")
-    .option("--manifest <yaml>", "Generated collection asset manifest")
+let addSynthesizeOptions = (cmd, prog) =>
+  cmd
     .option(
       "-s, --save <string>",
       "save data with in files with prefix <string>"
@@ -31,6 +26,28 @@ let register = prog => {
       "dump example for <string> = (moore|mealy)"
     )
     .option("-w, --draw", "produce only latex code for drawing");
+
+let synthesizeAction = (args, options) => {
+  if (options.example) {
+    dumpEx(options.example);
+    return undefined;
+  }
+  let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
+  return datap.then(JSON.parse).then(fsm => {
+    return elaborateFSM(fsm, options);
+  });
+};
+
+let register = prog => {
+  let cmd = addSynthesizeOptions(
+    prog
+      .command(SUBNAME, "FSM synthesis, or fsm exercises <yaml> -o <markdown> --manifest <yaml>")
+      .argument("[json]", "JSON file, stdin if omitted, or 'exercises' for a YAML collection")
+      .argument("[yaml]", "Collection YAML after 'exercises'")
+      .option("-o, --output <markdown>", "Generated collection chapter")
+      .option("--manifest <yaml>", "Generated collection asset manifest"),
+    prog
+  );
   addCompileOptions(cmd).action((args, options) => {
       // Caporal 1 selects a parent before nested command names.
       if (args.json === "exercises") {
@@ -38,18 +55,11 @@ let register = prog => {
         return generateExercises(args.yaml, options.output, options.manifest);
       }
       if (args.yaml || options.output || options.manifest) throw new Error("Use fsm exercises <yaml> -o <markdown> --manifest <yaml> for collections");
-      if (options.example) {
-        dumpEx(options.example);
-      } else {
-        let datap = args.json ? $fs.readFile(args.json, "utf8") : $gstd();
-        return datap.then(JSON.parse).then(fsm => {
-          return elaborateFSM(fsm, options);
-        });
-      }
+      return synthesizeAction(args, options);
     });
 };
 
-module.exports = { register };
+module.exports = { register, addSynthesizeOptions, synthesizeAction };
 
 if (require.main === module) {
   const prog = require("caporal");

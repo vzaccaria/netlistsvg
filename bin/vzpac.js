@@ -39,6 +39,9 @@ modules.forEach(m => {
 });
 
 if (require.main === module) {
+  const cliMap = require("./lib/cli-map");
+  cliMap.registerCanonical(prog);
+  cliMap.guard(process.argv.slice(2), "vzpac");
   prog.parse(process.argv);
 }
 

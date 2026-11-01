@@ -46,14 +46,16 @@ let register = prog => {
 
   prog
     .command(`${SUBNAME} preamble`, "Print latex preamble")
-    .action(() => {
-      exec(`cat ${__dirname}/preambles/memmap.tex`).then(output => {
-        console.log(output[0]);
-      });
-    });
+    .action(printPreamble);
 };
 
-module.exports = { register };
+function printPreamble() {
+  return exec(`cat ${__dirname}/preambles/memmap.tex`).then(output => {
+    console.log(output[0]);
+  });
+}
+
+module.exports = { register, printPreamble };
 
 if (require.main === module) {
   const prog = require("caporal");

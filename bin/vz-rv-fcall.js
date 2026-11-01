@@ -493,17 +493,7 @@ let register = prog => {
       prog.STRING,
       "full"
     )
-    .action(async (args, options) => {
-      let dirname = path.dirname(path.resolve(args.json));
-      let { state, data, stackAlloc } = await developCall(args, options);
-      console.log(
-        await produceAsm(
-          { data, state, stackAlloc, dirname },
-          true,
-          options.section
-        )
-      );
-    });
+    .action(asmAction);
 
   prog
     .command(`${SUBNAME} test`, "invokes function with tests")
@@ -563,7 +553,15 @@ let register = prog => {
   ).action(produceAndSaveArtifacts);
 };
 
-module.exports = { register, render };
+async function asmAction(args, options) {
+  let dirname = path.dirname(path.resolve(args.json));
+  let { state, data, stackAlloc } = await developCall(args, options);
+  console.log(
+    await produceAsm({ data, state, stackAlloc, dirname }, true, options.section)
+  );
+}
+
+module.exports = { register, render, asmAction };
 
 if (require.main === module) {
   const prog = require("caporal");

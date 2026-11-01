@@ -42,12 +42,14 @@ let register = prog => {
 
   prog
     .command(`${SUBNAME} preamble`, "Print latex preamble")
-    .action(() => {
-      $fs.readFile(`${__dirname}/preambles/pipe.tex`, "utf8").then(console.log);
-    });
+    .action(printPreamble);
 };
 
-module.exports = { register };
+function printPreamble() {
+  return $fs.readFile(`${__dirname}/preambles/pipe.tex`, "utf8").then(console.log);
+}
+
+module.exports = { register, printPreamble };
 
 if (require.main === module) {
   const prog = require("caporal");
