@@ -31,8 +31,8 @@ Prefisso `vzpac` omesso. Il resto di argv resta invariato salvo i selettori espl
 | `pipe exercises` | `cpu pipeline generate` |
 | `pipe pipesim` | `cpu pipeline simulate` |
 | `pipe preamble` | `cpu pipeline emit --format latex-preamble` |
-| `memory exercises` | `memory problems generate` |
-| `cache exercises` | `memory cache generate` |
+| `memory exercises` | `memory cache generate` |
+| `cache exercises` | `memory cache generate` (schema ridotto) |
 | `cache-new config` | `memory cache configure` |
 | `cache-new sim` | `memory cache simulate` |
 | `cache sim` | `memory cache-classic simulate` |
@@ -48,7 +48,9 @@ Prefisso `vzpac` omesso. Il resto di argv resta invariato salvo i selettori espl
 | `gen-assets` | `build assets generate` |
 | `compile-artifacts` | `build artifacts compile` |
 
-Cache: due foglie distinte, una registrazione/opzioni/default per motore. `memory cache simulate` usa esattamente cache-new; `memory cache-classic simulate` usa il vecchio cache sim. Nessun selettore `--engine`; gli emitter usano esplicitamente la foglia cache corrente. `-w` resta numero di vie nel nuovo motore ed esponente in quello classico.
+Cache: due foglie di simulazione distinte, una registrazione/opzioni/default per motore. `memory cache simulate` usa esattamente cache-new; `memory cache-classic simulate` usa il vecchio cache sim. Nessun selettore `--engine`; gli emitter usano esplicitamente la foglia cache corrente. `-w` resta numero di vie nel nuovo motore ed esponente in quello classico.
+
+Raccolte cache unificate: verificato nel codice, `memory exercises` è un sovrainsieme di `cache exercises` — i kind sono `latency`, `address` e `cache`, tutti sulle cache, e il kind `cache` delega allo stesso generatore della raccolta cache. La foglia canonica `memory cache generate` usa l'handler memory (kind obbligatorio per istanza). L'alias `cache exercises` conserva il proprio schema ridotto senza `kind:`; non diventa un errore né viene riscritto. `memory problems` è abbandonato: nessuna raccolta eterogenea da nascondere dietro un nome vago.
 
 `cpu functions emit` emette solo assembly, con JSON obbligatorio e `--section` default full; valori sconosciuti della section ricadono attualmente su full e restano così. `cpu functions render` usa esattamente artifact, incluse compilazione e dichiarazione JSON opzionale: il percorso stdin attuale fallisce su `path.resolve(args.json)` e non viene corretto qui. `cpu stack render` conserva il diverso handler diagram, inclusi output ispezionato con `-j` e il suffisso testuale `true` del ramo nonblank.
 
