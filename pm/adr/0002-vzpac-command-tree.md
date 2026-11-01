@@ -1,13 +1,13 @@
 # ADR-0002 — CLI vzpac gerarchica con compatibilità legacy
 
-Status: Proposed — richiede approvazione utente della mappa e revisione opus/fable.
+Status: Accepted — mappa approvata dall'utente (2026-11-01); doppio OK FINALE opus (iniziale e delta).
 Epic: `netlistsvg-sp2`; inventario: `netlistsvg-sp2.1`.
 
 ## Contratto
 
 Grammatica canonica: `vzpac <dominio> <oggetto> <verbo>`. I gruppi sono `logic`, `isa`, `cpu`, `memory`, `os`, `graphics`, `build`. `isa` raccoglie programmi, funzioni e stack (livello architetturale/convenzioni di chiamata); `cpu` la microarchitettura (pipeline). `graphics` sostituisce il provvisorio gruppo `render`: il dominio è un nome, l'ultima parola è un verbo. `generate` materializza una raccolta dichiarativa YAML; simulazioni singole, rendering e emissione di sorgenti hanno verbi distinti. Help/version sono metacomandi, non operazioni didattiche.
 
-Nessuna modifica ai motori, ai dati o alla semantica scientifica. Handler condivisi da percorsi canonici e alias; nessun subprocess di inoltro e nessuna copia della logica. Alias legacy silenziosi e senza scadenza, inclusi i nomi standalone e le invocazioni dirette dei wrapper correnti. Le opzioni esistenti, i default, gli argomenti, stdin/stdout/stderr, directory relative, nomi dei file e codici d'uscita delle invocazioni legacy valide restano invariati. Non uniformare flag brevi fra comandi: `-c` può significare compile oppure clean.
+Nessuna modifica ai motori, ai dati o alla semantica scientifica (unica eccezione delimitata: la conversione dell'input cache in «Raccolte cache unificate»). Handler condivisi da percorsi canonici e alias; nessun subprocess di inoltro e nessuna copia della logica. Alias legacy silenziosi e senza scadenza, inclusi i nomi standalone e le invocazioni dirette dei wrapper correnti. Le opzioni esistenti, i default, gli argomenti, stdin/stdout/stderr, directory relative, nomi dei file e codici d'uscita delle invocazioni legacy valide restano invariati. Non uniformare flag brevi fra comandi: `-c` può significare compile oppure clean.
 
 ## Mappa completa proposta
 
@@ -50,7 +50,7 @@ Prefisso `vzpac` omesso. Il resto di argv resta invariato salvo i selettori espl
 
 Cache: due foglie di simulazione distinte, una registrazione/opzioni/default per motore. `memory cache simulate` usa esattamente cache-new; `memory cache-classic simulate` usa il vecchio cache sim. Nessun selettore `--engine`; gli emitter usano esplicitamente la foglia cache corrente. `-w` resta numero di vie nel nuovo motore ed esponente in quello classico.
 
-Raccolte cache unificate: verificato nel codice, `memory exercises` è un sovrainsieme di `cache exercises` — i kind sono `latency`, `address` e `cache`, tutti sulle cache, e il kind `cache` delega allo stesso generatore della raccolta cache. La foglia canonica `memory cache generate` usa l'handler memory (kind obbligatorio per istanza). L'alias `cache exercises` conserva il proprio schema ridotto senza `kind:`; non diventa un errore né viene riscritto. `memory problems` è abbandonato: nessuna raccolta eterogenea da nascondere dietro un nome vago.
+Raccolte cache unificate: i kind dell'handler memory sono `latency`, `address` e `cache`, tutti sulle cache, e il kind `cache` delega allo stesso generatore della raccolta cache: a parità di istanza, valori e entry del manifest sono identici. Il sovrainsieme vale per il generatore, NON per il contratto di raccolta: l'handler memory cerca lo slot `%% memory-exercises %%`, richiede `kind` per istanza e prefissa gli errori con `memory exercises:` (il ramo delegato conserva il prefisso `cache exercises:`). La foglia canonica `memory cache generate` usa l'handler memory. L'alias `cache exercises` conserva il proprio schema ridotto senza `kind:` e il proprio slot; non diventa un errore né viene riscritto. La riga `cache exercises` → `memory cache generate` è quindi una migrazione con conversione dell'input, non un rename: aggiungere `kind: cache` alle istanze e rinominare lo slot. Decisione per il chiamante di corso: in `.4` migrare `pac/courses/common/exercises/cache.yml` (dieci istanze) e lo slot in `notes/notes.6_arch_mem_exe.md`, rigenerando il capitolo dal proprietario; è l'unica eccezione, delimitata e dichiarata, al principio «nessuna modifica ai dati», già implicita nella migrazione della relativa ricetta. `memory problems` è abbandonato: nessuna raccolta eterogenea da nascondere dietro un nome vago.
 
 `isa functions emit` emette solo assembly, con JSON obbligatorio e `--section` default full; valori sconosciuti della section ricadono attualmente su full e restano così. `isa functions render` usa esattamente artifact, incluse compilazione e dichiarazione JSON opzionale: il percorso stdin attuale fallisce su `path.resolve(args.json)` e non viene corretto qui. `isa stack render` conserva il diverso handler diagram, inclusi output ispezionato con `-j` e il suffisso testuale `true` del ramo nonblank.
 
@@ -77,14 +77,14 @@ Diagnostica proposta per il solo ingresso `vzpac`: nessun argomento, gruppo vali
 ## Confini della migrazione dei chiamanti
 
 - `netlistsvg`: registrazioni e wrapper; emitter in `bin/lib/vz-{cache,mmu,pipe,sched,memory,logic,seq,fsm,rv-fcall}/exercises.js`; test che eseguono gli emitter; README e documentazione operativa. ISA verifica durante generate: non inventare un job differito rv-exec.
-- `materiale-corsi`: 21 ricette di raccolta e relativi fallback in `pac/courses/common/assets/makefile`, quattro invocazioni gen-assets; cinque manifest mantenuti `1_rl_seq/base-assets.yml`, `3_arch_mem/base-assets.yml`, `2_isa_intro/assets.yml`, `3_arch_pipe/assets.yml`, `3_arch_os/assets.yml`; documentazione corrente; SSOT/makefile dell'esame `20260910` come consumatore corrente rappresentativo.
+- `materiale-corsi`: 21 ricette di raccolta e relativi fallback in `pac/courses/common/assets/makefile`, quattro invocazioni gen-assets; cinque manifest mantenuti `1_rl_seq/base-assets.yml`, `3_arch_mem/base-assets.yml`, `2_isa_intro/assets.yml`, `3_arch_pipe/assets.yml`, `3_arch_os/assets.yml`; la conversione cache `common/exercises/cache.yml` e lo slot in `common/notes/notes.6_arch_mem_exe.md`; documentazione corrente; SSOT/makefile dell'esame `20260910` come consumatore corrente rappresentativo.
 - Rigenerare manifest/capitoli ignorati da Git dai rispettivi proprietari. Non modificare i derivati a mano. Shake orchestra il makefile e preserva MMU→cache/CFS, FSM→seq, fcall→ISA; non introdurre un secondo dispatch in Haskell.
 - Esami precedenti (fra cui `20260724`, `20260723`, `20260629`) e Org delle vecchie edizioni restano invariati come consumatori legacy. Non riscrivere gli archivi. `sootty`, `cairosvg`, Icarus, `vz` e tool Polimi esterni non fanno parte di questa CLI.
 - Preservare quoting, pipe, redirect assembly e `$selfdir`, cwd e prefissi. I manifest statici hanno limiti di quoting preesistenti: nessuna promessa nuova di sicurezza generale dei path. Il cambio di comando negli emitter invalida naturalmente gli hash degli asset.
 
 ## Verifiche richieste prima della chiusura dell'epic
 
-1. Ogni riga della mappa: invocazioni old/new sul medesimo input deterministico, confronto dati/file/stream/exit e diagnostica prevista; niente soli test di wiring o snapshot dell'help.
+1. Ogni riga della mappa: invocazioni old/new sul medesimo input deterministico, confronto dati/file/stream/exit e diagnostica prevista; niente soli test di wiring o snapshot dell'help. Per `cache exercises`: alias sull'input originale contro foglia canonica sull'input convertito (kind aggiunto, slot rinominato); differenze ammesse solo slot e prefisso diagnostico.
 2. Tutti i bin installati e wrapper diretti correnti; sched/FSM file/stdin/collection; opzioni prima/dopo argomenti, `--`, globali e selettori.
 3. Cache classic e bounded distinte; pipeline standard e alias pipe-new sullo stesso motore.
 4. Eseguire i comandi emessi da ogni famiglia e la composizione fcall→ISA; smoke di un fallback con output mancante.
@@ -108,3 +108,5 @@ Diagnostica proposta per il solo ingresso `vzpac`: nessun argomento, gruppo vali
 Ruolo opus: primo esame BLOCKED per quattro ambiguità (dispatch sched/FSM, foglie con handler diversi, diagnostica dei percorsi, default dei preamble). Risolte separando le foglie e precisando i contratti sopra. Riesame: **OK FINALE**, inventario/proposta pronti per approvazione utente; nessuna approvazione dell'implementazione futura.
 
 Chiarimenti non bloccanti del riesame: anche i prefissi legacy senza azione (`vzpac pipe`, `vzpac cache`, `vzpac rv-fcall`, `vzpac help pipe`) diventano percorsi ignoti con exit 2; esplicitarlo nell'approvazione e nell'help legacy. Help dei gruppi canonici esclude gli alias, elencati in help legacy. Il bead .2 deve provare l'intercettazione dei metacomandi prima di Caporal per help legacy e help di percorsi inesistenti.
+
+Dopo l'approvazione utente della mappa (commit 80f557a), delta review opus sulle due revisioni successive: un rilievo bloccante sul claim di sovrainsieme cache, risolto precisando generatore vs contratto di raccolta e dichiarando la conversione dell'input come unica eccezione ai dati; secondo OK FINALE ottenuto. Status: Accepted.
