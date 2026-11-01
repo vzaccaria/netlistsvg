@@ -65,7 +65,7 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
     },
     entry: {
       vars,
-      steps: [`vzpac cache-new sim ${flags.join(" ")} -c -x {prefix}`]
+      steps: [`vzpac memory cache simulate ${flags.join(" ")} -c -x {prefix}`]
     }
   };
 }

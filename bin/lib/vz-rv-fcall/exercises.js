@@ -33,7 +33,7 @@ function generatedEntry(id, raw, manifestRoot) {
     entry: {
       vars: { qdir: collection.shellQuote(directory) },
       inputs,
-      steps: ["vzpac rv-fcall artifact {qdir}/input.json -c -s {qdir}/assets/rv-fun"]
+      steps: ["vzpac isa functions render {qdir}/input.json -c -s {qdir}/assets/rv-fun"]
     },
     assetPaths: { nativeAssets: path.join(directory, "assets", "rv-fun") }
   };

@@ -86,7 +86,7 @@ describe("FSM inline collection", () => {
     fs.mkdirSync(path.join(jobDirectory, "assets"), { recursive: true });
     fs.writeFileSync(path.join(jobDirectory, "fsm.json"), job.inputs["fsm.json"]);
     const quote = value => "'" + value.replace(/'/g, "'\\''") + "'";
-    const command = job.steps[0].replace("vzpac fsm", `${quote(process.execPath)} ${quote(path.resolve(__dirname, "../../vz-fsm.js"))}`)
+    const command = job.steps[0].replace(/^vzpac/, `${quote(process.execPath)} ${quote(path.resolve(__dirname, "../../vzpac.js"))}`)
       .replace(" -c ", " ").replace(/\{qdir\}/g, () => job.vars.qdir);
     execFileSync("/bin/sh", ["-c", command], { cwd: directory });
     const diagram = fs.readFileSync(path.join(jobDirectory, "assets", "fsm-diagram.tex"), "utf8");

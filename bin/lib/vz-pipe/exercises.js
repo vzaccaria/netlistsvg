@@ -24,7 +24,7 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
       flags.push(`${flag} {${field}}`);
     }
   }
-  return { values: model.values, entry: { vars, steps: [`vzpac pipe pipesim {program} ${flags.join(" ")} -c -s {prefix}`] } };
+  return { values: model.values, entry: { vars, steps: [`vzpac cpu pipeline simulate {program} ${flags.join(" ")} -c -s {prefix}`] } };
 }
 
 function generate(input, output, manifest) {

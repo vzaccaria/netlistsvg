@@ -22,7 +22,7 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
     entry: {
       vars: { qdir: collection.shellQuote(path.join(manifestRoot, id)) },
       inputs: { "wave.json": model.wave },
-      steps: [`vzpac wave {qdir}/wave.json -r -d {qdir}/assets/${assetName}.pdf`]
+      steps: [`vzpac graphics waveform render {qdir}/wave.json -r -d {qdir}/assets/${assetName}.pdf`]
     }
   };
 }

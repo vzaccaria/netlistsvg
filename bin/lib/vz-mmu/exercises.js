@@ -33,7 +33,7 @@ function generatedEntry(id, options, manifestRoot, assetName) {
         wsbits: options.wsbits,
         upto: options.upto
       },
-      steps: ["vzpac mmu sim {alist} --processes={processes} --npvbits {npvbits} --npfbits {npfbits} --wsbits {wsbits} --upto={upto} -c -x {prefix}"]
+      steps: ["vzpac memory paging simulate {alist} --processes={processes} --npvbits {npvbits} --npfbits {npfbits} --wsbits {wsbits} --upto={upto} -c -x {prefix}"]
     }
   };
 }

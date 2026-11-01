@@ -18,7 +18,7 @@ function generatedEntry(id, schedule, manifestRoot, assetName) {
         input: shellQuote(path.join(manifestRoot, id, filename)),
         prefix: shellQuote(path.join(manifestRoot, id, "assets", assetName))
       },
-      steps: ["vzpac sched {input} -c -s {prefix}"]
+      steps: ["vzpac os scheduling simulate {input} -c -s {prefix}"]
     }
   };
 }

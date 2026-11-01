@@ -13,7 +13,7 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
   const values = Object.assign({}, model.values);
   const assetPaths = Object.create(null);
   if (model.minimization) {
-    entry = { steps: [`vzpac quine ${model.minimization.table} -r ${model.variables.join(",")} -c -s {qdir}/assets/${assetName}`] };
+    entry = { steps: [`vzpac logic combinational minimize ${model.minimization.table} -r ${model.variables.join(",")} -c -s {qdir}/assets/${assetName}`] };
   }
   for (const [index, netlist] of model.netlists.entries()) {
     const name = netlist.id === id ? assetName : netlist.id;
@@ -21,7 +21,7 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
     const generated = {
       vars: { qdir: collection.shellQuote(directory) },
       inputs: { "netlist.v": netlist.rtl },
-      steps: [`cd {qdir} && vzpac netlist netlist.v --${netlist.mode} -o assets/${name}.pdf`]
+      steps: [`cd {qdir} && vzpac logic netlist render netlist.v --${netlist.mode} -o assets/${name}.pdf`]
     };
     if (netlist.id === id) entry = generated;
     else entries[netlist.id] = generated;

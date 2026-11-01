@@ -491,9 +491,20 @@ It is also frequently common that you want to create a diagram only using AND an
 yosys -p "prep -top my_top_module; aigmap; write_json output.json" input.v
 ```
 
+## `vzpac` command structure
+
+`vzpac <domain> <object> <verb>` is the canonical form (ADR
+`pm/adr/0002-vzpac-command-tree.md`). Domains: `logic`, `isa`, `cpu`,
+`memory`, `os`, `graphics`, `build`. `vzpac` lists them, `vzpac <domain>`
+lists objects and verbs, `vzpac <domain> <object> <verb> --help` shows a leaf.
+Every previous spelling (`vzpac quine`, `vzpac pipe pipesim`, `vz-sched`, …)
+is a permanent silent alias running the same handler; `vzpac help legacy`
+prints the full old → new table. Generators emit canonical commands; unknown
+`vzpac` paths fail with exit 2.
+
 ## Declarative Quine/Karnaugh exercises
 
-`vzpac logic exercises instances.yml -o chapter.md --manifest assets.yml`
+`vzpac logic combinational generate instances.yml -o chapter.md --manifest assets.yml`
 accepts `generate.kind: minimize` alongside the existing Boolean and prose
 models. Each instance supplies ordered `variables` (MSB first, 1–6 identifiers)
 and a quoted native `table` containing exactly `2^variables.length` characters
@@ -509,7 +520,7 @@ generate:
 
 The model calls the existing `quine.synthesize`, verifies its chosen cover on
 every care row, and emits the native asset command
-`vzpac quine TABLE -r VARS -c -s {qdir}/assets/ID`. Optional `expression`
+`vzpac logic combinational minimize TABLE -r VARS -c -s {qdir}/assets/ID`. Optional `expression`
 uses the existing scalar Boolean grammar and must agree on every care row.
 `expressionLatex` is rendered from that checked expression.
 
@@ -541,9 +552,9 @@ declared delays. For the example above the critical path is
 
 ## Native sequential exercises
 
-`vzpac seq exercises instances.yml -o chapter.md --manifest assets.yml`
+`vzpac logic sequential generate instances.yml -o chapter.md --manifest assets.yml`
 uses the shared exercise collection, including `mode: inline`, canonical
-chapter placeholders and `base_assets`. Then run `vzpac gen-assets assets.yml`.
+chapter placeholders and `base_assets`. Then run `vzpac build assets generate assets.yml`.
 One simulation supplies both the answer and masked waveform; illustrations
 that are not exercises can remain in the base manifest.
 
@@ -633,7 +644,7 @@ wave:
 ```
 
 This emits native vector aliases, runs `sootty`, masks the non-whitelisted
-rows with `vzpac sootty mask`, then converts both SVGs with `cairosvg`.
+rows with `vzpac graphics waveform mask`, then converts both SVGs with `cairosvg`.
 Sootty chooses row order; input order is not promised. Selection and whitelist
 names are case-sensitive **basenames only**. Each selected basename must be
 unique across every VCD declaration, including unselected primitive aliases.
@@ -652,9 +663,9 @@ semantics, mux X behavior, aliases, explicit timing and shell-safe paths.
 
 ## Native FSM exercises
 
-`vzpac fsm exercises instances.yml -o chapter.md --manifest assets.yml`
+`vzpac logic fsm generate instances.yml -o chapter.md --manifest assets.yml`
 uses the shared inline collection; `vz-fsm exercises` is the standalone
-equivalent. Run `vzpac gen-assets assets.yml` to execute its native FSM jobs.
+legacy equivalent. Run `vzpac build assets generate assets.yml` to execute its native FSM jobs.
 There are no new Markdown templates or alternate synthesis algorithms.
 
 ```yaml
@@ -754,11 +765,11 @@ draw-only models, selected-FF blocks, shell-safe paths and two-stage composition
 
 ## Native ISA exercise collections
 
-`vzpac isa exercises instances.yml -o chapter.md --manifest isa-assets.yml`
+`vzpac isa programs generate instances.yml -o chapter.md --manifest isa-assets.yml`
 uses the shared inline collection adapter. Unlike diagram domains, it executes
 verification **during generation**: two independent statically linked RV64
 programs run through GCC/QEMU in `vzpac-rv-exec:latest`, the same native lifecycle
-used by `vzpac rv-exec program.s init.c`. The legacy CLI and its before/after
+used by `vzpac isa programs run program.s init.c`. The legacy CLI and its before/after
 stdout format are unchanged. The existing image inspection/build lifecycle is
 shared; image archive management remains an operator responsibility.
 
@@ -853,7 +864,7 @@ introduced.
 
 ## Native function-call exercise collections
 
-`vzpac rv-fcall exercises instances.yml -o chapter.md --manifest assets.yml`
+`vzpac isa functions generate instances.yml -o chapter.md --manifest assets.yml`
 uses the same inline collection pipeline and the current `rv-fcall` renderer,
 not a second stack-layout implementation. Canonical inputs are the native
 layout, an inline assembly body, and the displayed C source. Complete assembly,

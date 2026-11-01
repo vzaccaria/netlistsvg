@@ -29,7 +29,7 @@ function generatedEntry(id, raw, manifestRoot, assetName) {
     entry: {
       vars: { qdir: collection.shellQuote(directory) },
       inputs: { "fsm.json": JSON.stringify(model.fsm, null, 2) + "\n" },
-      steps: [`vzpac fsm {qdir}/fsm.json${draw}${seed} -c -s {qdir}/assets/${assetName}`]
+      steps: [`vzpac logic fsm synthesize {qdir}/fsm.json${draw}${seed} -c -s {qdir}/assets/${assetName}`]
     },
     assetPaths: Object.fromEntries(Object.entries(model.suffixes).map(([name, suffix]) => [name, `${prefix}-${suffix}`]))
   };

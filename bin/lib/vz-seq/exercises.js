@@ -19,13 +19,13 @@ function generatedEntry(id, raw, manifestRoot, assetName, inputRoot) {
   const steps = ["cd {qdir} && iverilog -o exe test_cb.v", "cd {qdir} && vvp exe"];
   if (wave.renderer === "wave") {
     const signals = wave.signals ? ` -s ${shellQuote(wave.signals.join(","))}` : "";
-    steps.push(`vzpac wave {qdir}/test.vcd -n --is-vcd${signals} --end ${wave.end} -w ${shellQuote(wave.whitelist.join(","))} -c -a {qdir}/assets/test`);
+    steps.push(`vzpac graphics waveform render {qdir}/test.vcd -n --is-vcd${signals} --end ${wave.end} -w ${shellQuote(wave.whitelist.join(","))} -c -a {qdir}/assets/test`);
   } else {
     const hidden = wave.signals.filter(signal => !wave.whitelist.includes(signal));
     const radix = wave.radix === undefined ? "" : ` -r ${wave.radix}`;
     steps.push(`sootty {qdir}/test.vcd -w ${shellQuote(wave.signals.join(","))} -e ${shellQuote(`time ${wave.end}`)}${radix} -o > {qdir}/assets/test-wave.svg`);
     steps.push(hidden.length ?
-      `vzpac sootty mask {qdir}/assets/test-wave.svg {qdir}/assets/test-wave-whitelisted.svg ${shellQuote(hidden.join(","))}` :
+      `vzpac graphics waveform mask {qdir}/assets/test-wave.svg {qdir}/assets/test-wave-whitelisted.svg ${shellQuote(hidden.join(","))}` :
       "cp {qdir}/assets/test-wave.svg {qdir}/assets/test-wave-whitelisted.svg");
     for (const basename of ["test-wave", "test-wave-whitelisted"]) steps.push(`cairosvg {qdir}/assets/${basename}.svg -f pdf -o {qdir}/assets/${basename}.pdf`);
   }
@@ -33,7 +33,7 @@ function generatedEntry(id, raw, manifestRoot, assetName, inputRoot) {
     ` -v -k --script ${shellQuote("prep -auto-top; techmap; opt;")}` : ` --${netlist.mode}`;
   if (netlist.ffIndices !== undefined) netlistOptions += ` --ff-indices ${shellQuote(netlist.ffIndices.join(","))}`;
   if (netlist.skin !== undefined) netlistOptions += ` --skin ${shellQuote(collection.relativeInput(inputRoot, netlist.skin, `${id}.netlist.skin`))}`;
-  steps.push(`vzpac netlist {qdir}/test.v${netlistOptions} -o {qdir}/assets/test-diag.pdf`);
+  steps.push(`vzpac logic netlist render {qdir}/test.v${netlistOptions} -o {qdir}/assets/test-diag.pdf`);
   const directory = path.join(manifestRoot, id);
   return {
     values: model.values,
