@@ -5,7 +5,7 @@ Epic: `netlistsvg-sp2`; inventario: `netlistsvg-sp2.1`.
 
 ## Contratto
 
-Grammatica canonica: `vzpac <dominio> <oggetto> <verbo>`. I gruppi sono `logic`, `cpu`, `memory`, `os`, `graphics`, `build`. `graphics` sostituisce il provvisorio gruppo `render`: il dominio è un nome, l'ultima parola è un verbo. `generate` materializza una raccolta dichiarativa YAML; simulazioni singole, rendering e emissione di sorgenti hanno verbi distinti. Help/version sono metacomandi, non operazioni didattiche.
+Grammatica canonica: `vzpac <dominio> <oggetto> <verbo>`. I gruppi sono `logic`, `isa`, `cpu`, `memory`, `os`, `graphics`, `build`. `isa` raccoglie programmi, funzioni e stack (livello architetturale/convenzioni di chiamata); `cpu` la microarchitettura (pipeline). `graphics` sostituisce il provvisorio gruppo `render`: il dominio è un nome, l'ultima parola è un verbo. `generate` materializza una raccolta dichiarativa YAML; simulazioni singole, rendering e emissione di sorgenti hanno verbi distinti. Help/version sono metacomandi, non operazioni didattiche.
 
 Nessuna modifica ai motori, ai dati o alla semantica scientifica. Handler condivisi da percorsi canonici e alias; nessun subprocess di inoltro e nessuna copia della logica. Alias legacy silenziosi e senza scadenza, inclusi i nomi standalone e le invocazioni dirette dei wrapper correnti. Le opzioni esistenti, i default, gli argomenti, stdin/stdout/stderr, directory relative, nomi dei file e codici d'uscita delle invocazioni legacy valide restano invariati. Non uniformare flag brevi fra comandi: `-c` può significare compile oppure clean.
 
@@ -21,13 +21,13 @@ Prefisso `vzpac` omesso. Il resto di argv resta invariato salvo i selettori espl
 | `seq exercises` | `logic sequential generate` |
 | `fsm` (file oppure stdin) | `logic fsm synthesize` |
 | `fsm exercises` | `logic fsm generate` |
-| `isa exercises` | `cpu isa generate` |
-| `rv-exec` | `cpu isa run` |
-| `rv-fcall exercises` | `cpu functions generate` |
-| `rv-fcall asm` | `cpu functions emit --format asm` |
-| `rv-fcall artifact` | `cpu functions render` |
-| `rv-fcall diagram` | `cpu stack render` |
-| `rv-fcall test` | `cpu functions test` |
+| `isa exercises` | `isa programs generate` |
+| `rv-exec` | `isa programs run` |
+| `rv-fcall exercises` | `isa functions generate` |
+| `rv-fcall asm` | `isa functions emit --format asm` |
+| `rv-fcall artifact` | `isa functions render` |
+| `rv-fcall diagram` | `isa stack render` |
+| `rv-fcall test` | `isa functions test` |
 | `pipe exercises` | `cpu pipeline generate` |
 | `pipe pipesim` | `cpu pipeline simulate` |
 | `pipe preamble` | `cpu pipeline emit --format latex-preamble` |
@@ -52,7 +52,7 @@ Cache: due foglie di simulazione distinte, una registrazione/opzioni/default per
 
 Raccolte cache unificate: verificato nel codice, `memory exercises` è un sovrainsieme di `cache exercises` — i kind sono `latency`, `address` e `cache`, tutti sulle cache, e il kind `cache` delega allo stesso generatore della raccolta cache. La foglia canonica `memory cache generate` usa l'handler memory (kind obbligatorio per istanza). L'alias `cache exercises` conserva il proprio schema ridotto senza `kind:`; non diventa un errore né viene riscritto. `memory problems` è abbandonato: nessuna raccolta eterogenea da nascondere dietro un nome vago.
 
-`cpu functions emit` emette solo assembly, con JSON obbligatorio e `--section` default full; valori sconosciuti della section ricadono attualmente su full e restano così. `cpu functions render` usa esattamente artifact, incluse compilazione e dichiarazione JSON opzionale: il percorso stdin attuale fallisce su `path.resolve(args.json)` e non viene corretto qui. `cpu stack render` conserva il diverso handler diagram, inclusi output ispezionato con `-j` e il suffisso testuale `true` del ramo nonblank.
+`isa functions emit` emette solo assembly, con JSON obbligatorio e `--section` default full; valori sconosciuti della section ricadono attualmente su full e restano così. `isa functions render` usa esattamente artifact, incluse compilazione e dichiarazione JSON opzionale: il percorso stdin attuale fallisce su `path.resolve(args.json)` e non viene corretto qui. `isa stack render` conserva il diverso handler diagram, inclusi output ispezionato con `-j` e il suffisso testuale `true` del ramo nonblank.
 
 I tre comandi emit hanno un solo formato ciascuno: asm per functions, latex-preamble per pipeline/map. `--format` è opzionale, default al solo formato supportato; un valore diverso o ripetuto fallisce exit 2. Non è un dispatch fra handler. È riconosciuto dalla normale registrazione Caporal, anche in forma `--format=...`, e segue le regole esistenti per posizione e `--`; non viene estratto né riordinato da argv. Gli alias non acquisiscono questa opzione nuova. I due preamble non richiedono input. `memory map render` legge CSV; configure genera un esercizio cache, non modifica configurazioni globali.
 
