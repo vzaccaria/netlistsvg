@@ -15,11 +15,11 @@ Parked: legacy `bin/TODO.md` items need triage · unrelated local work must rema
 
 Written: 2026-11-01 · Main
 
-Done: creata epic `netlistsvg-sp2` con cinque figli, criteri di accettazione, dipendenze e gate opus/fable su ciascun bead. Nessun bead chiuso e nessuna modifica alla CLI.
+Done: inventario e proposta `netlistsvg-sp2.1` in ADR-0002 con contratti e chiamanti allegati. Revisione opus: quattro rilievi risolti, poi OK FINALE. Nessuna modifica alla CLI e nessun bead chiuso.
 
-State: pianificazione registrata; la tassonomia discussa resta proposta. La precedente migrazione dichiarativa PAC `mc-ewm0` è completata, inclusi ISA e rv-fcall.
+State: 32 operazioni, 18 bin e cinque wrapper diretti censiti. Eseguiti gli help delle 32 forme e dei 18 bin; verificato Caporal 0.8.0. Mappa ancora Proposed, in attesa dell'approvazione utente.
 
-Next: iniziare `netlistsvg-sp2.1`, censire tutta la superficie pubblica e sottoporre la mappa completa all'utente. L'approvazione della mappa precede l'implementazione; il gate opus/fable non la sostituisce. Registrare piano revisionato, rilievi risolti ed evidenze prima di ogni chiusura.
+Next: ottenere approvazione della mappa completa e della diagnostica exit 2 per percorsi vzpac ignoti; solo dopo chiudere .1 e iniziare la prova routing .2. Gate opus/fable resta obbligatorio su ogni bead.
 
-Gotchas: Caporal 1 presenta shadowing fra comandi parent e annidati; verificare prima il routing. `cache sim` e `cache-new sim` hanno motori distinti: nessun alias che cambi semantica. Preservare standalone, stdin/stream, default, exit code e artefatti legacy. Bug scientifici CFS/branchpred e guasto generale `npm test` restano separati.
+Gotchas: parser Caporal 0.8.0, non 1.x. Cache classic/new hanno contratti diversi e foglie separate; pipe/pipe-new sono byte-identici. Preservare anche particolarità/errori legacy, non correggerli implicitamente. Standalone conservano la diagnostica attuale. Bug scientifici CFS/branchpred e guasto generale npm test restano separati.
 
